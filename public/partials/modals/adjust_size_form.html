@@ -1,0 +1,32 @@
+<div class="modal-body">
+    <form class="form-horizontal">
+        <fieldset>
+            <legend> Adjust Scale Group Size</legend>
+            <div class="form-group">
+                <label for="input" class="col-lg-2 control-label"> min size</label>
+                <div class="col-lg-10">
+                    <input type="number" name="input" ng-model="adjust.min_size" min="0" max="15" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="input" class="col-lg-2 control-label"> desired size</label>
+                <div class="col-lg-10">
+                    <input type="number" name="input" ng-model="adjust.desired" min="0" max="15" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="input" class="col-lg-2 control-label"> max size</label>
+                <div class="col-lg-10">
+                    <input type="number" name="input" ng-model="adjust.max_size" min="0" max="15" required>
+                </div>
+            </div>
+            <alertsmodal></alertsmodal>
+            <div class="form-group">
+                <div class="col-lg-10 col-lg-offset-2">
+                    <button ng-click="cancel()" type="reset" class="btn btn-default">Cancel</button>
+                    <button ng-click="adjustSize()" type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>

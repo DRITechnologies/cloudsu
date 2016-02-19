@@ -1,0 +1,87 @@
+{
+    "name": "concord",
+    "version": "1.0.0",
+    "description": "",
+    "main": "server.js",
+    "dependencies": {
+        "aws-sdk": "latest",
+        "angular-moment": "0.10.2",
+        "angular-route": "1.4.4",
+        "aws": "0.0.3-2",
+        "bluebird": "2.9.30",
+        "body-parser": "1.13.1",
+        "brace": "latest",
+        "bluebird-retry": "0.5.0",
+        "chef": "0.3.1",
+        "express": "4.13.0",
+        "moment": "2.10.6",
+        "morgan": "1.6.1",
+        "nconf": "latest",
+        "method-override": "2.3.3",
+        "winston": "1.0.0",
+        "underscore": "1.8.3",
+        "request": "2.60.0",
+        "pg": "4.4.1",
+        "http-auth": "2.2.8",
+        "pass": "0.2.0",
+        "simple-ssh": "0.8.6",
+        "mkdirp-then": "1.1.0",
+        "repeat": "0.0.6",
+        "dynasty": "latest",
+        "bcrypt": "latest",
+        "node-cache": "latest",
+        "async": "latest",
+        "jsonwebtoken": "latest"
+    },
+    "devDependencies": {
+        "ngstorage": "latest",
+        "grunt-aws-s3": "latest",
+        "grunt-contrib-uglify": "latest",
+        "grunt-contrib-compress": "latest",
+        "grunt-contrib-less": "latest",
+        "grunt-contrib-watch": "latest",
+        "grunt-contrib-jshint": "latest",
+        "grunt-concurrent": "latest",
+        "grunt-nodemon": "latest",
+        "jquery-browserify": "1.8.1",
+        "grunt-browserify": "4.0.0",
+        "grunt": "0.4.5",
+        "grunt-contrib-cssmin": "0.13.0",
+        "jquery": "2.1.4",
+        "jshint": "2.8.0",
+        "jshint-stylish": "2.0.1",
+        "bootstrap": "3.3.5",
+        "angular-ui-bootstrap": "0.13.3",
+        "angular-bootstrap-npm": "0.13.3",
+        "angular": "1.4.4",
+        "browserify": "11.0.1",
+        "browserify-shim": "3.8.10",
+        "bootbox": "4.4.0",
+        "grunt-contrib-concat": "latest"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node server.js"
+    },
+    "browser": {
+        "angular": "./node_modules/angular/angular.js",
+        "angular-local-storage": "./node_modules/angular-local-storage/dist/angular-local-storage.js"
+    },
+    "browserify-shim": {
+        "angular": {
+            "depends": "jquery:jQuery",
+            "exports": "angular"
+        },
+        "angular-local-storage": {
+            "depends": "angular",
+            "exports": "angular.module('LocalStorageModule').name"
+        }
+    },
+    "browserify": {
+        "transform": [
+            "browserify-shim"
+        ]
+    },
+    "author": "David Richards",
+    "license": "ISC"
+}

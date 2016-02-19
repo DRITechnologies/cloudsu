@@ -1,0 +1,263 @@
+<div class="row">
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h5><i class="fa fa-server"></i> {{ stack_name }}</h5>
+            </div>
+            <div class="panel-body" id="stack-info-left">
+                <div class="col-md-4">
+                    <div class="row">
+                        <table>
+                            <tr ng-show="chef_status">
+                                <td><strong>Status:&nbsp;</strong></td>
+                                <td>
+                                    <span ng-class="status_label(chef_status)"><i ng-class="status_fa_label(chef_status)"></i> {{ chef_status }}</span>
+                                </td>
+                            </tr>
+                            <tr ng-show="stack_status">
+                                <td><strong>CF Status:&nbsp;</strong></td>
+                                <td ng-show="stack_status">
+                                    <span ng-class="stack_status_label(stack_status)"><i ng-class="stack_status_fa_label(stack_status)"></i> {{ stack_status }}</span>
+                                </td>
+                            </tr>
+                            <tr ng-show="chef.build_size">
+                                <td><strong>Build Size:&nbsp;</strong></td>
+                                <td>
+                                    {{ chef.build_size }}
+                                </td>
+                            </tr>
+                            <tr ng-show="rollback_available">
+                                <td><strong>Rollback Available:&nbsp;</strong></td>
+                                <td>
+                                    {{ rollback_available }}
+                                </td>
+                            </tr>
+                            <tr ng-show="chef.ebs_volume">
+                                <td><strong>EBS Volume:&nbsp;</strong></td>
+                                <td>
+                                    {{ chef.ebs_volume }}
+                                </td>
+                            </tr>
+                            <tr ng-show="chef.ebs_size">
+                                <td><strong>EBS Volume Size:&nbsp;</strong></td>
+                                <td>
+                                    {{ chef.ebs_size }}
+                                </td>
+                            </tr>
+                            <tr ng-show="chef.instance_store">
+                                <td><strong>Instance Store:&nbsp;</strong></td>
+                                <td>
+                                    {{ chef.instance_store }}
+                                </td>
+                            </tr>
+                            <tr ng-show="chef.key">
+                                <td><strong>AWS Key:&nbsp;</strong></td>
+                                <td>
+                                    {{ chef.key }}
+                                </td>
+                            </tr>
+                            <tr ng-show="chef.domain">
+                                <td><strong>Domain:&nbsp;</strong></td>
+                                <td>
+                                    {{ chef.domain }}
+                                </td>
+                            </tr>
+                            <tr ng-show="chef.app_name">
+                                <td><strong>App:&nbsp;</strong></td>
+                                <td>
+                                    {{ chef.app_name }}
+                                </td>
+                            </tr>
+                            <tr ng-show="chef.app_version">
+                                <td><strong>Version:&nbsp;</strong></td>
+                                <td>
+                                    {{ chef.app_version }}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h5><i class="fa fa-terminal"></i> stack log
+                </h5>
+            </div>
+            <div class="panel-body" id="stack-info-middle">
+                <table class="table table-striped">
+                    <tr ng-class="logColor(log.ResourceStatus)" ng-repeat="log in stack_logs | orderBy:'$index':false">
+                        <td>{{ log.Timestamp }}</td>
+                        <td>{{ log.LogicalResourceId }}</td>
+                        <td> {{ log.ResourceStatus }}</td>
+                        <td> {{ log.ResourceStatusReason }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div ng-show="scaleGroups.length" class="panel panel-default" ng-repeat="scaleGroup in scaleGroups | orderBy:'-CreatedTime'">
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-md-8">
+                <h5><i class="fa fa-cubes"></i>  {{ scaleGroup.AutoScalingGroupName }} </h5>
+            </div>
+            <div class="col-md-4">
+                <h5>
+                <div class="btn-group pull-right" dropdown is-open="status.isopen">
+                    <button id="single-button" type="button" class="btn btn-default" dropdown-toggle ng-disabled="disabled">
+                        <i class="fa  fa-ellipsis-h"></i>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="single-button">
+                        <li role="menuitem"><a ng-click="adjustSize(scaleGroup.app_name, scaleGroup.version)"><i class="fa fa-arrows-h"></i> Adjust Size</a></li>
+                        <li role="menuitem"><a ng-click="availableElbs(scaleGroup.AutoScalingGroupName)"><i class="fa fa-sitemap"></i> Connect ELB</a></li>
+                        <li role="menuitem"><a ng-click="removeAsg(scaleGroup.app_name, scaleGroup.version)"><i class="fa fa-trash-o"></i> Remove</a></li>
+                    </ul>
+                </div>
+                </h5>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-4">
+                <table>
+                    <tr>
+                        <td><strong>Status:</strong></td>
+                        <td>
+                            <span ng-show="scaleGroup.LoadBalancerNames.length" class="label label-success"><i class="fa fa-check-circle"></i> CONNECTED</span>
+                            <span ng-show="!scaleGroup.LoadBalancerNames.length" class="label label-danger"><i class="fa fa-times-circle"></i> DISCONNECTED</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Desired:&nbsp;</strong></td>
+                        <td>{{ scaleGroup.DesiredCapacity }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Min:&nbsp;</strong></td>
+                        <td>{{ scaleGroup.MinSize }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Max:&nbsp;</strong></td>
+                        <td>{{ scaleGroup.MaxSize }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>App Name:&nbsp;</strong></td>
+                        <td>{{ scaleGroup.app_name }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>App Version:&nbsp;</strong></td>
+                        <td>{{ scaleGroup.version }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Created:&nbsp;</strong></td>
+                        <td><span am-time-ago="scaleGroup.CreatedTime"></span></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-8">
+                <table ng-repeat="elb in scaleGroup.LoadBalancerNames">
+                    <caption><i class="fa fa-sitemap"></i> ELB
+                    </caption>
+                    <tr>
+                        <td><strong>Name:&nbsp;</strong></td>
+                        <td><small>{{ elb.LoadBalancerName }}</small></td>
+                    </tr>
+                    <tr>
+                        <td><strong>DNS:&nbsp;</strong></td>
+                        <td><small> <a ng-href="https://{{ elb.DNSName }}">{{ elb.DNSName }} </a> </small> </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table">
+                    <caption><i class="fa fa-server"></i> Instances</caption>
+                    <thead>
+                        <tr>
+                            <td>
+                            </td>
+                            <td>
+                                ID
+                            </td>
+                            <td>
+                                IP
+                            </td>
+                            <td>
+                                Status
+                            </td>
+                            <td>
+                                State
+                            </td>
+                            <td>
+                                Launched
+                            </td>
+                            <td>
+                                AMI
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="instance in scaleGroup.Instances" ng-class="rowColor(instance.HealthStatus, instance.LifecycleState)">
+                            <td class="fa fa-cube"></td>
+                            <td> {{ instance.InstanceId }} </td>
+                            <td> {{ instance.PublicIpAddress }} </td>
+                            <td><i ng-class="isHappy(instance.HealthStatus)"></i> {{ instance.HealthStatus }} </td>
+                            <td><i ng-class="inService(instance.LifecycleState)"></i> {{ instance.LifecycleState }} </td>
+                            <td> <span am-time-ago="instance.LaunchTime"></span> </td>
+                            <td> {{ instance.ImageId }} </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div ng-show="instances.length">
+    <div class="panel panel-default" ng-repeat="instance in instances">
+        <div class="panel-heading">
+            <h5> <i class="fa fa-hdd-o"></i> {{ instance.InstanceId }} </h5>
+        </div>
+        <div class="panel-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <td>
+                            ID
+                        </td>
+                        <td>
+                            IP
+                        </td>
+                        <td>
+                            Launched
+                        </td>
+                        <td>
+                            AMI
+                        </td>
+                        <td>
+                            Node Name
+                        </td>
+                        <td>
+                            Run List
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td> {{ instance.InstanceId }} </td>
+                        <td> {{ instance.PrivateIpAddress }} </td>
+                        <td> <span am-time-ago="instance.LaunchTime"></span> </td>
+                        <td> {{ instance.ImageId }} </td>
+                        <td> {{ instance.node_name }} </td>
+                        <td> {{ instance.run_list }} </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

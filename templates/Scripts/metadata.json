@@ -1,0 +1,63 @@
+ {
+     "AWS::CloudFormation::Init": {
+         "configSets": {
+             "default": [
+                 "chef_install",
+                 "chef_register"
+             ]
+         },
+         "chef_install": {
+             "files": {
+                 "/tmp/chef-installer-script.sh": {
+                     "content": "curl -L https://www.opscode.com/chef/install.sh | bash\n\n mkdir -p /etc/chef/ohai/hints\ntouch /etc/chef/ohai/hints/ec2.json\nexit 0\n",
+                     "mode": "000755",
+                     "owner": "root",
+                     "group": "root"
+                 }
+             },
+             "commands": {
+                 "01-install-chef": {
+                     "command": "/tmp/chef-installer-script.sh"
+                 }
+             }
+         },
+         "chef_register": {
+             "files": {
+                 "/etc/chef/client.rb": {
+                     "content": {
+                         "Fn::Join": [
+                             "", [
+                                 "environment \"<%= stack_name %>\"\n",
+                                 "chef_server_url \"<%= cms_url %>\"\n",
+                                 "validation_client_name \"richards-homeus-validator\"\n"
+                             ]
+                         ]
+                     },
+                     "mode": "000644",
+                     "owner": "root",
+                     "group": "root"
+                 },
+                 "/etc/chef/validation.pem": {
+                     "content": "",
+                     "mode": "000644",
+                     "owner": "root",
+                     "group": "root"
+                 },
+                 "/etc/chef/first-boot.json": {
+                     "content": {},
+                     "mode": "000644",
+                     "owner": "root",
+                     "group": "root"
+                 }
+             },
+             "commands": {
+                 "01-node-name": {
+                     "command": "echo node_name \\\"<%= node_name %>-`/opt/aws/bin/ec2-metadata -i | awk '{print $2}'`\\\" >> /etc/chef/client.rb"
+                 },
+                 "02-run-chef-client": {
+                     "command": "chef-client -r \"<%= recipes %>\" -j \"/etc/chef/first-boot.json\" -l info -L  /var/log/chef-cfn.log"
+                 }
+             }
+         }
+     }
+ }

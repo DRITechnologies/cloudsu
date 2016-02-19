@@ -1,0 +1,29 @@
+<table class="table table-hover" ng-show="stacks.length">
+    <tbody>
+        <tr ng-repeat="stack in stacks" ng-click="openStack(stack.StackName)" ng-class="rowColor(stack.StackStatus)">
+            <td>
+                <h5> <i class="fa fa-server"></i>  {{ stack.StackName }} </h5>
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <td>
+                            <span ng-class="stack_status(stack.StackStatus)"></span> Status: {{ stack.StackStatus }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="fa fa-clock-o"></span> Created: <span am-time-ago="stack.CreationTime"></span>
+                        </td>
+                    </tr>
+                </table>
+                <td>
+                    <i ng-show="stack.StackStatus.includes('PROGRESS')" class="fa fa-circle-o-notch fa-spin fa-2x"></i>
+                </td>
+            </td>
+            <td>
+                <button type="button" class="btn btn-link" ng-click="deleteStack($event, stack.StackName)"><i class="fa fa-trash-o fa-2x"></i></button>
+            </td>
+        </tr>
+    </tbody>
+</table>

@@ -1,0 +1,20 @@
+<div class="modal-body">
+    <fieldset>
+        <legend> Rollback Stack</legend>
+        <div ng-show="rollback_available">
+            <p>Are you sure you want to rollback: {{ stack_name }}</p>
+        </div>
+        <div ng-show="!rollback_available">
+            <p>Rollback is not available for this stack</p>
+        </div>
+        <br>
+        <br>
+        <div class="form-group">
+            <div class="col-lg-10 col-lg-offset-2">
+                <button ng-click="cancel()" class="btn btn-default">Cancel</button>
+                <button ng-show="rollback_available" ng-click="rollback()" type="connect" class="btn btn-primary"><i ng-show="showSpinner" class="fa fa-circle-o-notch fa-spin">Rollback</button>
+            </div>
+        </div>
+        <alertsmodal></alertsmodal>
+    </fieldset>
+</div>

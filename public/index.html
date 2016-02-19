@@ -1,0 +1,23 @@
+<html ng-app="stacks">
+
+<head>
+    <title>Concord</title>
+    <link href='https://fonts.googleapis.com/css?family=Raleway:400,600' rel='stylesheet' type='text/css'>
+    <link href="vendor/font-awesome/css/font-awesome.css" rel="stylesheet" type='text/css'>
+    <link href="vendor/bootswatch/paper/bootstrap.min.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="img/favicon.ico">
+</head>
+
+<body ng-controller="main_controller">
+    <navbar ng-if="isLogin()"></navbar>
+    <div class="container">
+        <alerts ng-if="isLogin()"></alerts>
+        <spinner ng-if="isLogin()"></spinner>
+        <div ng-view></div>
+    </div>
+    <documentation ng-if="isLogin()"></documentation>
+</body>
+<script src="bundle.js"></script>
+
+</html>

@@ -1,0 +1,22 @@
+<div class="container">
+    <div class="card card-container">
+        <h5 class="text-center">Welcome to Concord</h5>
+        <br>
+        <alerts></alerts>
+        <form>
+            <input type="email" class="form-control" placeholder="Email address" ng-model="user.email" required autofocus>
+            <br>
+            <input type="password" class="form-control" placeholder="Password" ng-model="user.password" required>
+            <br>
+            <button class="btn btn-lg btn-primary btn-block btn-signin" ng-click="attemptLogin()" type="submit"><i ng-show="showSpinner" class="fa fa-circle-o-notch fa-spin"></i> SIGN IN</button>
+        </form>
+        <div class="text-center text-muted">
+            <p>share</p>
+            <h3>
+            <i class="fa fa-linkedin-square"></i>
+            <i class="fa fa-twitter-square"></i>
+            <i class="fa fa-facebook-square"></i>
+        </h3>
+        </div>
+    </div>
+</div>
