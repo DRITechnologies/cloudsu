@@ -1,28 +1,31 @@
+/*jshint esversion: 6 */
+'use strict';
+
 // clients
-var ec2 = require('./routes/ec2.js');
-var users = require('./routes/users.js');
-var main = require('./routes/main.js');
-var stacks = require('./routes/stacks.js');
-var autoscale = require('./routes/autoscale.js');
-var sqs = require('./routes/sqs.js');
-var sns = require('./routes/sns.js');
-var chef = require('./routes/chef.js');
-var elb = require('./routes/elb.js');
-var setup = require('./routes/setup.js');
-var upgrade = require('./routes/upgrade.js');
+const ec2 = require('./routes/ec2.js');
+const accounts = require('./routes/accounts.js');
+const main = require('./routes/main.js');
+const stacks = require('./routes/stacks.js');
+const autoscale = require('./routes/autoscale.js');
+const sqs = require('./routes/sqs.js');
+const sns = require('./routes/sns.js');
+const chef = require('./routes/chef.js');
+const elb = require('./routes/elb.js');
+const setup = require('./routes/setup.js');
+const upgrade = require('./routes/upgrade.js');
 
 //middleware
-var attach_aws_auth = require('../middleware/attach_aws_auth.js');
-var attach_cms_auth = require('../middleware/attach_cms_auth.js');
-var check_token = require('../middleware/check_token.js');
+const attach_aws_auth = require('../middleware/attach_aws_auth.js');
+const attach_cms_auth = require('../middleware/attach_cms_auth.js');
+const check_token = require('../middleware/check_token.js');
 
 
 module.exports = function (app) {
 
     //unauthenticated requests
     app.post('/api/v1/setup/:name', setup.run);
-    app.post('/api/v1/users/login', users.attemptLogin);
-    app.get('/api/v1/ping/:token', users.checkToken);
+    app.post('/api/v1/users/login', accounts.attemptLogin);
+    app.get('/api/v1/ping/:token', accounts.checkToken);
     app.get('/api/v1/region', main.region);
     app.get('/api/v1/regions', main.regions);
     app.get('/api/v1/bucket_regions', main.bucketRegions);
@@ -62,7 +65,7 @@ module.exports = function (app) {
     app.get('/api/v1/asg/describe/:groups', autoscale.describeAutoScalingGroups);
 
     //accounts
-    app.put('/api/v1/users/updateUser', users.updateUser);
+    app.put('/api/v1/users/updateUser', accounts.updateUser);
 
     //iam
     app.get('/api/v1/iam/ssl', main.listServerCertificates);
@@ -112,6 +115,7 @@ module.exports = function (app) {
     //service account
     app.post('/api/v1/services/save_account', main.saveServiceAccount);
     app.get('/api/v1/services/get_accounts/:type', main.getServiceAccounts);
+    app.get('/api/v1/services/get_account/:type/:name', main.getServiceAccount);
 
     //elb
     app.patch('/api/v1/elb/disconnect', elb.disconnectElb);

@@ -6,36 +6,27 @@
                 <h5> Add AWS account to setup components </h5>
                 <small class="text-muted">
         <ul class="list-unstyled">    
-            <li>concord will create the following components
-              <ul>
-             <li>DynamoDB Table - accounts and settings data</li>
-             <li>SQS Queue - used for communication between autoscaled instances and concord</li>
-             <li>SNS Topic - needed for caputuring scale group events</li>
-             <li>
-               S3 Bucket - storage of large Cloud Formation templates
-             </li>
-             <li>
-               IAM User - DynanoDB access only 
-             </li>   
-             </ul>
-            </li>
+                <li>Concord will create the following components
+                  <ul>
+                 <li>DynamoDB Table - Accounts and settings data</li>
+                 <li>SQS Queue - Used for communication between autoscaled instances and concord</li>
+                 <li>SNS Topic - Needed for caputuring scale group events</li>
+                 <li>IAM User - DynanoDB access only</li>   
+                 </ul>
+                </li>
               </ul> 
-                AWS accounts and sensitive data will be encrypted and stored in dynamodb    
+                All sensitive data will be encrypted in DynamoDB   
               </small>
                 <br>
                 <br>
                 <fieldset>
                     <div class="form-group">
-                        <label for="input">Friendly Name</label>
-                        <input class="form-control" type="text" name="name" placeholder="Prod" ng-model="account.aws.name" required>
-                    </div>
-                    <div class="form-group">
                         <label for="input">Access Key ID</label>
-                        <input class="form-control" type="password" name="key" ng-model="account.aws.accessKeyId" required>
+                        <input class="form-control" type="password" name="key" ng-model="account.aws.key" required>
                     </div>
                     <div class="form-group">
                         <label for="input">Secret Access Key</label>
-                        <input class="form-control" type="password" name="secret" ng-model="account.aws.secretAccessKey" required>
+                        <input class="form-control" type="password" name="secret" ng-model="account.aws.secret" required>
                     </div>
                     <div class="form-group">
                         <label for="select">Region</label>
@@ -45,22 +36,25 @@
                     </div>
                 </fieldset>
                 <br>
-                <h5> S3 Bucket</h5>
-                <small class="text-muted">
-                  Make sure to choose a unique name
-                </small>
-                <br>
-                <br>
                 <fieldset>
+                    <h5> Chef server setup</h5>
+                    <small class="text-muted">
+                    Chef is used for all configurations management in concord.
+                    </small>
+                    <br>
+                    <br>
                     <div class="form-group">
-                        <label for="input">S3 Bucket Name</label>
-                        <input class="form-control" type="text" name="name" ng-model="account.bucket.name" required>
+                        <label for="input">Username</label>
+                        <input class="form-control" type="text" name="username" placeholder="admin" ng-model="account.cms.username" required>
                     </div>
                     <div class="form-group">
-                        <label for="select">S3 Bucket Region</label>
-                        <select class="form-control" ng-model="account.bucket.region">
-                            <option ng-repeat="region in bucket_regions">{{ region }}</option>
-                        </select>
+                        <label for="input">Server URL</label>
+                        <input class="form-control" type="text" name="url" placeholder="https://api.chef.io/organizations/dev" ng-model="account.cms.url" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="input">Key</label>
+                        <textarea class="form-control" style="height=200" type="text" name="key" ng-model="account.cms.key" row="5" required>
+                        </textarea>
                     </div>
                 </fieldset>
                 <br>
@@ -68,7 +62,7 @@
                 <fieldset>
                     <h5> Create Account (Admin)</h5>
                     <small class="text-muted">
-                     Each account is given an auth token for api access <br>Admin accounts can create bearer tokens for service accounts
+                        Admin accounts can create service accounts for API access
                     </small>
                     <br>
                     <br>

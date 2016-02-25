@@ -1,28 +1,24 @@
-var config = require('../config/config.js');
+/*jshint esversion: 6 */
+'use strict';
 
-function attach_cms_auth() {}
+const config = require('../config/config.js');
 
+class AttachCmsAuth {
+    constructor () {}
 
-attach_cms_auth.prototype.run = function (req, res, next) {
+    run (req, res, next) {
 
-    var cms_name = req.headers.cms_name || req.body.cms_name;
+        return config.getServiceAccount({
+                name: 'CHEF',
+                type: 'CMS'
+            })
+            .then(response => {
+                req.cms = response;
+                return next();
+            });
 
-    if (!cms_name || cms_name === 'empty') {
-        return next();
     }
-
-    var cms_obj = {};
-
-    return config.getServiceAccount({
-            name: cms_name,
-            type: 'cms'
-        })
-        .then(function (response) {
-            req.cms = response;
-            return next();
-        });
-
-};
+}
 
 
-module.exports = new attach_cms_auth();
+module.exports = new AttachCmsAuth();

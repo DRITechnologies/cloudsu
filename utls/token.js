@@ -1,38 +1,40 @@
-var Promise = require('bluebird');
-var logger = require('./logger.js');
+'use strict'
 
-var jwt = require('jsonwebtoken');
-var key = 'gbXQ2y+8cpl63n&';
+const Promise = require('bluebird');
+const jwt = require('jsonwebtoken');
 
-var logger = require('./logger.js');
+const key = 'gbXQ2y+8cpl63n&';
+const logger = require('./logger.js');
 
 
 
-function token() {}
+class token {
+    constructor() {}
 
-token.prototype.sign = function (name) {
-    logger.info('singing token for:', name);
-    return jwt.sign({ name: name }, key, { expiresIn: '24h' });
-};
+    sign(name) {
+        logger.info('singing token for:', name);
+        return jwt.sign({ name: name }, key, { expiresIn: '24h' });
+    }
 
-token.prototype.verify = function (token) {
+    verify(token) {
 
-    return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve, reject) {
 
-            jwt.verify(token, key, function (err, decoded) {
-                if (err) {
-                    logger.error(err);
-                    return reject(err);
-                }
-                return resolve(decoded);
+                jwt.verify(token, key, (err, decoded) => {
+                    if (err) {
+                        logger.error(err);
+                        return reject(err);
+                    }
+                    return resolve(decoded);
+                });
+
+            })
+            .catch(err => {
+                throw new Error('error verifying token');
             });
 
-        })
-        .catch(function (err) {
-            throw new Error('error verifying token');
-        });
-
-};
+    }
+}
 
 
 module.exports = new token();

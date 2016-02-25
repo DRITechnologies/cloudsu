@@ -1,6 +1,6 @@
 {
-    "name": "global",
-    "type": "settings",
+    "name": "GLOBAL",
+    "type": "SETTINGS",
     "aws_dynamodb_name": "concord",
     "aws_dynamodb_region": "us-west-2",
     "aws_s3_region": "us-west-2",
@@ -30,6 +30,7 @@
     ],
     "aws_default_size_available": [
         "t1.micro",
+        "t2.nano",
         "t2.micro",
         "t2.small",
         "t2.medium",
@@ -370,19 +371,5 @@
             "ephemeral0",
             "ephemeral1"
         ]
-    }],
-    "db_account": {
-        "UserName": "concord_db_access",
-        "AccessKeyId": "AKIAIEUBVUWIENBXXGUQ",
-        "Status": "Active",
-        "SecretAccessKey": "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",
-        "region": "us-west-2"
-    },
-    "db": {
-        "UserName": "concord_db_access",
-        "AccessKeyId": "AKIAICWDWMG4BFGAFBQA",
-        "Status": "Active",
-        "SecretAccessKey": "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",
-        "region": "us-west-2"
-    }
+    }]
 }

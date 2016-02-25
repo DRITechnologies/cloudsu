@@ -1,33 +1,38 @@
-function sqs() {}
+/*jshint esversion: 6 */
+'use strict';
 
-sqs.prototype.createQueue = function (req, res) {
+class Sqs {
+    constructor () {}
 
-    var aws_account = req.params.aws_account;
-    var sqs_client = require('../clients/sqs_client.js');
-    sqs_client.init(aws_account);
+    createQueue (req, res) {
 
-    return sqs_client.createQueue(req.params.QueueName)
-        .then(function (response) {
-            res.status(200).json(response);
-        })
-        .catch(function (err) {
-            res.status(500).json(err);
-        });
-};
+        const aws_account = req.params.aws_account;
+        const sqs_client = require('../clients/sqs_client.js');
+        sqs_client.init(aws_account);
 
-sqs.prototype.initialSetup = function (req, res) {
+        return sqs_client.createQueue(req.params.QueueName)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+    }
 
-    var aws_account = req.aws_account;
-    var sqs_client = require('../clients/sqs_client.js');
-    sqs_client.init(aws_account);
+    initialSetup (req, res) {
 
-    return sqs_client.initialSetup()
-        .then(function () {
-            res.status(200).json('successful creation');
-        })
-        .catch(function (err) {
-            res.status(500).json(err);
-        });
-};
+        const aws_account = req.aws_account;
+        const sqs_client = require('../clients/sqs_client.js');
+        sqs_client.init(aws_account);
 
-module.exports = new sqs();
+        return sqs_client.initialSetup()
+            .then(() => {
+                res.status(200).json('successful creation');
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+    }
+}
+
+module.exports = new Sqs();

@@ -1,50 +1,53 @@
-function sns() {}
+/*jshint esversion: 6 */
+'use strict';
 
+class Sns {
+    constructor () {}
 
-sns.prototype.createTopic = function (req, res) {
+    createTopic (req, res) {
 
-    var aws_account = req.params.aws_account;
-    var sns_client = require('../clients/sns_client.js');
-    sns_client.init(aws_account);
+        const aws_account = req.params.aws_account;
+        const sns_client = require('../clients/sns_client.js');
+        sns_client.init(aws_account);
 
-    return sns_client.createTopic(req.params.topic_name)
-        .then(function (response) {
-            res.status(200).json(response);
-        })
-        .catch(function (err) {
-            res.status(500).json(err);
-        });
-};
+        return sns_client.createTopic(req.params.topic_name)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+    }
 
-sns.prototype.confirmSubscription = function (req, res) {
+    confirmSubscription (req, res) {
 
-    var aws_account = req.aws_account;
-    var sns_client = require('../clients/sns_client.js');
-    sns_client.init(aws_account);
+        const aws_account = req.aws_account;
+        const sns_client = require('../clients/sns_client.js');
+        sns_client.init(aws_account);
 
-    return sns_client.confirmSubscription(req.body)
-        .then(function (response) {
-            res.status(200).json(response);
-        })
-        .catch(function (err) {
-            res.status(500).json(err);
-        });
-};
+        return sns_client.confirmSubscription(req.body)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+    }
 
+    subscribe (req, res) {
 
-sns.prototype.subscribe = function (req, res) {
+        const aws_account = req.aws_account;
+        const sns_client = require('../clients/sns_client.js');
+        sns_client.init(aws_account);
 
-    var aws_account = req.aws_account;
-    var sns_client = require('../clients/sns_client.js');
-    sns_client.init(aws_account);
+        return sns_client.subscribe(req.body)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+    }
+}
 
-    return sns_client.subscribe(req.body)
-        .then(function (response) {
-            res.status(200).json(response);
-        })
-        .catch(function (err) {
-            res.status(500).json(err);
-        });
-};
-
-module.exports = new sns();
+module.exports = new Sns();

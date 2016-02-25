@@ -1,11 +1,8 @@
 stacks.controller('main_controller', function ($scope, $http, $location, $modal, dataStore) {
-    dataStore.initAlerts();
 
     $scope.alerts = dataStore.getAlerts();
 
-    var token = dataStore.getToken();
-
-    $http.get('/api/v1/ping/' + token)
+    $http.get('/api/v1/ping/' + dataStore.getToken())
         .success(function (res) {
             if (!res.setup) {
                 dataStore.setIsLogin(false);
@@ -31,6 +28,7 @@ stacks.controller('main_controller', function ($scope, $http, $location, $modal,
 
     $scope.close_alert = function (index) {
         $scope.alerts.splice(index, 1);
+        dataStore.setAlerts($scope.alerts);
     };
 
 });

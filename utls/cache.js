@@ -1,22 +1,27 @@
-var NodeCache = require("node-cache");
-var Cache = new NodeCache({
+/*jshint esversion: 6 */
+'use strict'
+
+const NodeCache = require("node-cache");
+const Cache = new NodeCache({
     stdTTL: 300,
     checkperiod: 150
 });
 
-function cache() {}
+class cache {
+    constructor() {}
 
-cache.prototype.get = function (key) {
-    return Cache.get(key);
-};
+    get(key) {
+        return Cache.get(key);
+    }
 
-cache.prototype.set = function (key, obj) {
-    return Cache.set(key, obj);
-};
+    set(key, obj) {
+        return Cache.set(key, obj);
+    }
 
-cache.prototype.flush = function () {
-    return Cache.flushAll();
-};
+    flush() {
+        return Cache.flushAll();
+    }
+}
 
 
 module.exports = new cache();

@@ -1,122 +1,139 @@
+/*jshint esversion: 6 */
+'use strict';
+
 //config service
-var config = require('../../config/config.js');
+const config = require('../../config/config.js');
 
 
 // logger
-var logger = require('../../utls/logger.js');
+const logger = require('../../utls/logger.js');
 
 
-function main() {}
+class Main {
+    constructor () {}
 
-
-main.prototype.region = function (req, res) {
-    //return default region from global configs
-    var region = 'us-west-2';
-    res.status(200).json(region);
-};
-
-main.prototype.regions = function (req, res) {
-    var region = [
-        'us-east-1',
-        'us-west-2',
-        'us-west-1',
-        'eu-west-1',
-        'eu-central-1',
-        'ap-southeast-1',
-        'ap-northeast-1',
-        'ap-southeast-2',
-        'ap-northeast-2'
-    ];
-
-    if (region) {
+    region (req, res) {
+        //return default region from global configs
+        const region = 'us-west-2';
         res.status(200).json(region);
-    } else {
-        res.status(500).json('not found');
     }
-};
 
-main.prototype.regionMap = function (req, res) {
+    regions (req, res) {
+        const region = [
+            'us-east-1',
+            'us-west-2',
+            'us-west-1',
+            'eu-west-1',
+            'eu-central-1',
+            'ap-southeast-1',
+            'ap-northeast-1',
+            'ap-southeast-2',
+            'ap-northeast-2'
+        ];
 
-    var region = req.headers.aws_region;
+        if (region) {
+            res.status(200).json(region);
+        } else {
+            res.status(500).json('not found');
+        }
+    }
 
-    return config.get('region_map')
-        .then(function (map) {
-            res.status(200).json(map[region]);
-        });
+    regionMap (req, res) {
 
-};
+        const region = req.headers.aws_region;
 
-main.prototype.bucketRegions = function (req, res) {
-    var bucket_region = [
-        'us-east-1',
-        'us-west-1',
-        'us-west-2',
-        'eu-west-1',
-        'ap-southeast-1',
-        'ap-southeast-2',
-        'ap-northeast-1',
-        'sa-east-1'
-    ];
+        return config.get('region_map')
+            .then(map => {
+                res.status(200).json(map[region]);
+            });
 
-    res.status(200).json(bucket_region);
+    }
 
-};
+    bucketRegions (req, res) {
+        const bucket_region = [
+            'us-east-1',
+            'us-west-1',
+            'us-west-2',
+            'eu-west-1',
+            'ap-southeast-1',
+            'ap-southeast-2',
+            'ap-northeast-1',
+            'sa-east-1'
+        ];
 
-main.prototype.listServerCertificates = function (req, res) {
+        res.status(200).json(bucket_region);
 
-    var aws_account = req.aws_account;
-    var iam_client = require('../clients/iam_client.js');
-    iam_client.init(aws_account);
+    }
 
-    return iam_client.listServerCertificates()
-        .then(function (certs) {
-            res.status(200).json(certs);
-        })
-        .catch(function (err) {
-            res.status(500).json(err);
-        });
-};
+    listServerCertificates (req, res) {
 
-main.prototype.listInstanceProfiles = function (req, res) {
+        const aws_account = req.aws_account;
+        const iam_client = require('../clients/iam_client.js');
+        iam_client.init(aws_account);
 
-    var aws_account = req.aws_account;
-    var iam_client = require('../clients/iam_client.js');
-    iam_client.init(aws_account);
+        return iam_client.listServerCertificates()
+            .then(certs => {
+                res.status(200).json(certs);
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+    }
 
-    return iam_client.listInstanceProfiles()
-        .then(function (roles) {
-            res.status(200).json(roles);
-        })
-        .catch(function (err) {
-            logger.error(err);
-            res.status(500).json(err);
-        });
-};
+    listInstanceProfiles (req, res) {
 
-main.prototype.saveServiceAccount = function (req, res) {
+        const aws_account = req.aws_account;
+        const iam_client = require('../clients/iam_client.js');
+        iam_client.init(aws_account);
 
-    return config.saveServiceAccount(req.body)
-        .then(function (response) {
-            res.status(200).json(response);
-        })
-        .catch(function (err) {
-            logger.error(err);
-            res.status(500).json(err);
-        });
-};
+        return iam_client.listInstanceProfiles()
+            .then(roles => {
+                res.status(200).json(roles);
+            })
+            .catch(err => {
+                logger.error(err);
+                res.status(500).json(err);
+            });
+    }
 
-main.prototype.getServiceAccounts = function (req, res) {
+    saveServiceAccount (req, res) {
 
-    return config.getServiceAccounts(req.params.type)
-        .then(function (response) {
-            res.status(200).json(response);
-        })
-        .catch(function (err) {
-            logger.error(err);
-            res.status(500).json(err);
-        });
-};
+        return config.saveServiceAccount(req.body)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                logger.error(err);
+                res.status(500).json(err);
+            });
+    }
+
+    getServiceAccount (req, res) {
+
+        return config.getServiceAccount(req.params)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+    }
+
+    getServiceAccounts (req, res) {
+
+        console.log('gettings accounts 14213421');
+
+        return config.getServiceAccounts(req.params.type)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                logger.error(err);
+                res.status(500).json(err);
+            });
+    }
+}
 
 
 
-module.exports = new main();
+module.exports = new Main();

@@ -1,30 +1,35 @@
-var config = require('../config/config.js');
-var token_client = require('../utls/token.js');
+/*jshint esversion: 6 */
+'use strict';
 
-var logger = require('../utls/logger.js');
+const config = require('../config/config.js');
+const token_client = require('../utls/token.js');
 
-function attach_aws_auth() {}
+const logger = require('../utls/logger.js');
 
-attach_aws_auth.prototype.run = function (req, res, next) {
+class AttachAwsAuth {
+    constructor () {}
 
-    var token = req.headers.token || req.body.token;
+    run (req, res, next) {
 
-    logger.debug('authenticating with token:', token);
+        const token = req.headers.token || req.body.token;
 
-    return token_client.verify(token)
-        .then(function (response) {
-            logger.debug('verified token:', token);
-            return config.getUser(response.name)
-                .then(function (user) {
-                    logger.debug('Got user:', user);
-                    req.user = user;
-                    return next();
-                });
-        })
-        .catch(function (err) {
-            logger.error(err);
-            res.status(401).json('not authorized');
-        });
-};
+        logger.debug('authenticating with token:', token);
 
-module.exports = new attach_aws_auth();
+        return token_client.verify(token)
+            .then(response => {
+                logger.debug('verified token:', token);
+                return config.getUser(response.name)
+                    .then(user => {
+                        logger.debug('Got user:', user);
+                        req.user = user;
+                        return next();
+                    });
+            })
+            .catch(err => {
+                logger.error(err);
+                res.status(401).json('not authorized');
+            });
+    }
+}
+
+module.exports = new AttachAwsAuth();

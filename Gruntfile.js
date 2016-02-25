@@ -1,9 +1,12 @@
+/*jshint esversion: 6 */
+'use strict';
+
 module.exports = function (grunt) {
     // ===========================================================================
     // CONFIGURE GRUNT ===========================================================
     // ===========================================================================
     function distFiles() {
-        var files = [{
+        const files = [{
             expand: true,
             src: 'server.js'
         }, {
@@ -82,7 +85,6 @@ module.exports = function (grunt) {
             }
         },
 
-
         jshint: {
             options: {
                 jshintrc: 'jshintrc',
@@ -132,8 +134,8 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-nodemon');
 
-    grunt.registerTask('version_file', 'create artifact version file', function () {
-        var version = grunt.config.get('service.version') || grunt.option('build-version') || null;
+    grunt.registerTask('version_file', 'create artifact version file', () => {
+        const version = grunt.config.get('service.version') || grunt.option('build-version') || null;
         if (!version) {
             grunt.log.write('NO version --  setting to null');
         }
@@ -143,10 +145,10 @@ module.exports = function (grunt) {
     });
 
     // publish service artifact
-    grunt.registerTask('publish', 'publish artifacts to s3', function () {
-        var version = grunt.option('build-version');
+    grunt.registerTask('publish', 'publish artifacts to s3', () => {
+        let version = grunt.option('build-version');
 
-        var now = new Date().getTime();
+        const now = new Date().getTime();
         if (!version) {
             // use timestamp
             version = ['local', now].join('-');
@@ -163,6 +165,10 @@ module.exports = function (grunt) {
         ]);
     });
 
+    grunt.registerTask('eslint', [
+        'eslint'
+    ]);
+
     grunt.registerTask('lint', [
         'jshint'
     ]);
@@ -174,8 +180,8 @@ module.exports = function (grunt) {
 
     grunt.registerTask('run', ['nodemon:main']);
 
-    grunt.registerTask('server', function () {
-        var taskList = [
+    grunt.registerTask('server', () => {
+        const taskList = [
             'concurrent:main'
         ];
         grunt.task.run(taskList);

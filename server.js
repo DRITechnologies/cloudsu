@@ -1,3 +1,4 @@
+/*jshint esversion: 6 */
 'use strict'
 
 const cluster = require('cluster');
@@ -10,7 +11,7 @@ const methodOverride = require('method-override');
 const numCPUs = require('os').cpus().length;
 
 
-// configuration =================
+// express configuration
 app.use(express.static(`${__dirname}/public`));
 app.use(bodyParser.urlencoded({
     'extended': 'true'
@@ -21,24 +22,29 @@ app.use(bodyParser.json({
 }));
 app.use(methodOverride());
 app.use(morgan('combined', {
-    "stream": logger.stream
+    'stream': logger.stream
 }));
 
 
-//setup router
+//setup api router
 require('./api/router.js')(app)
 
-//start cleanup tool
-//require('./utls/cleanup_tool.js');
 
 
 if (cluster.isMaster) {
     for (let i = 0; i < numCPUs; i++) {
         cluster.fork();
     }
+
+    //init functions that only run on master
+    //queue rider (looks for new server messages in sqs)
+    require('./utls/queue_rider.js');
+
+    //start cleanup tool (cleans up expired resources)
+    //require('./utls/cleanup_tool.js');
 } else {
 
-    // listen (start app with node server.js) ======================================
+    // listen
     app.listen(8080, (err, response) => {
         if (err) {
             logger.info(err);

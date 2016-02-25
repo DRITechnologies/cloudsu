@@ -1,36 +1,38 @@
-var crypto_client = require('../utls/crypto_client.js');
-var config = require('../config/config.js');
-var logger = require('../utls/logger.js');
+/*jshint esversion: 6 */
+'use strict';
 
-function attach_aws_auth() {}
+const crypto_client = require('../utls/crypto_client.js');
+const config = require('../config/config.js');
+const logger = require('../utls/logger.js');
 
-attach_aws_auth.prototype.run = function (req, res, next) {
+class AttachAwsAuth {
+    constructor () {}
 
+    run (req, res, next) {
 
-    var aws_account = req.headers.aws_account || req.body.aws_account;
+        let aws_account = req.headers.aws_account || req.body.aws_account;
 
-    if (!aws_account || aws_account === 'empty') {
-        logger.info('did not recieve a header for aws account:', req.url);
-        return;
+        if (!aws_account || aws_account === 'empty') {
+            logger.info('did not recieve a header for aws account:', req.url);
+            return;
+        }
+
+        let aws_object = {}
+
+        return config.getServiceAccount({
+                name: aws_account,
+                type: 'AWS'
+            })
+            .then(response => {
+                req.aws = response;
+                req.aws_account = {
+                    region: req.headers.aws_region,
+                    accessKeyId: response.accessKeyId,
+                    secretAccessKey: response.secretAccessKey
+                };
+                return next();
+            });
     }
+}
 
-    var account_obj = {};
-
-    return config.getServiceAccount({
-            name: aws_account,
-            type: 'aws'
-        })
-        .then(function (response) {
-            req.aws = response;
-            account_obj.region = req.headers.aws_region;
-            account_obj.accessKeyId = response.accessKeyId;
-            return crypto_client.decrypt_string(response.secretAccessKey);
-        })
-        .then(function (secretAccessKey) {
-            account_obj.secretAccessKey = secretAccessKey
-            req.aws_account = account_obj;
-            return next();
-        });
-};
-
-module.exports = new attach_aws_auth();
+module.exports = new AttachAwsAuth();

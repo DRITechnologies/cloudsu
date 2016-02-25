@@ -1,36 +1,41 @@
-var bcrypt = require('bcrypt');
-var crypto = require('crypto');
-var algorithm = 'aes256';
-var key = 'gbXQ2y+8cpl63n&';
+/*jshint esversion: 6 */
+'use strict'
 
-function crypto_client() {}
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const algorithm = 'aes256';
+const key = 'gbXQ2y+8cpl63n&';
 
-crypto_client.prototype.encrypt = function (password) {
+class crypto_client {
+    constructor() {}
 
-    var salt = bcrypt.genSaltSync(10);
-    var hash = bcrypt.hashSync(password, salt);
-    return hash;
+    encrypt(password) {
 
-};
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(password, salt);
+        return hash;
 
-crypto_client.prototype.check_password = function (hash, password) {
+    }
 
-    //check password against hash from DB
-    return bcrypt.compareSync(password, hash);
+    check_password(hash, password) {
 
-};
+        //check password against hash from DB
+        return bcrypt.compareSync(password, hash);
 
-crypto_client.prototype.encrypt_string = function (string) {
-    var cipher = crypto.createCipher(algorithm, key);
-    return cipher.update(string, 'utf8', 'hex') + cipher.final('hex');
-};
+    }
 
-crypto_client.prototype.decrypt_string = function (string) {
-    return new Promise(function (resolve, reject) {
-        var decipher = crypto.createDecipher(algorithm, key);
-        var result = decipher.update(string, 'hex', 'utf8') + decipher.final('utf8');
-        return resolve(result);
-    });
-};
+    encrypt_string(string) {
+        const cipher = crypto.createCipher(algorithm, key);
+        return cipher.update(string, 'utf8', 'hex') + cipher.final('hex');
+    }
+
+    decrypt_string(string) {
+        return new Promise(function (resolve, reject) {
+            const decipher = crypto.createDecipher(algorithm, key);
+            const result = decipher.update(string, 'hex', 'utf8') + decipher.final('utf8');
+            return resolve(result);
+        });
+    }
+}
 
 module.exports = new crypto_client();

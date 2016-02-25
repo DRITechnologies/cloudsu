@@ -1,27 +1,32 @@
-var AWS = require('aws-sdk');
-var Promise = require('bluebird');
+/*jshint esversion: 6 */
+'use strict';
+
+const AWS = require('aws-sdk');
+const Promise = require('bluebird');
 
 
-function iam_client() {}
+class IamClient {
+    constructor () {}
 
-iam_client.prototype.init = function (account) {
+    init (account) {
 
-    this.iam = Promise.promisifyAll(new AWS.IAM(account));
+        this.iam = Promise.promisifyAll(new AWS.IAM(account));
 
-};
+    }
 
-iam_client.prototype.listServerCertificates = function () {
-    return this.iam.listServerCertificatesAsync()
-        .then(function (certs) {
-            return certs.ServerCertificateMetadataList;
-        });
-};
+    listServerCertificates () {
+        return this.iam.listServerCertificatesAsync()
+            .then(certs => {
+                return certs.ServerCertificateMetadataList;
+            });
+    }
 
-iam_client.prototype.listInstanceProfiles = function () {
-    return this.iam.listInstanceProfilesAsync()
-        .then(function (response) {
-            return response.InstanceProfiles;
-        });
-};
+    listInstanceProfiles () {
+        return this.iam.listInstanceProfilesAsync()
+            .then(response => {
+                return response.InstanceProfiles;
+            });
+    }
+}
 
-module.exports = new iam_client();
+module.exports = new IamClient();

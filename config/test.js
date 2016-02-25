@@ -1,25 +1,14 @@
-var config = require('./config.js');
-var chef_client = require('../api/clients/chef_client.js');
+  var config = require('./config.js');
 
+  const chef = {
+      name: 'CHEF',
+      type: 'CMS'
+  };
 
-
-
-return config.getServiceAccount({
-        name: 'Dev',
-        type: 'cms'
-    })
-    .then(function (response) {
-        chef_client.init(response);
-
-        var params = {
-            stack_name: 'testing',
-            app_name: 'api',
-            version: '4552'
-        };
-
-
-        return chef_client.getEnvironmentNodes('prodnode')
-            .then(function (response) {
-                console.log('testing', response);
-            });
-    });
+  return config.getServiceAccount(chef)
+      .then(response => {
+          console.log(response);
+      })
+      .catch(err => {
+          console.log('err', err);
+      });

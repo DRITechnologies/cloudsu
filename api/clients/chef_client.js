@@ -1,218 +1,216 @@
-var Promise = require('bluebird');
-var _ = require('underscore');
-var chef = require('chef');
+/*jshint esversion: 6 */
+'use strict';
 
-//logger
-var logger = require('../../utls/logger.js');
+const Promise = require('bluebird');
+const _ = require('underscore');
+const chef = require('chef');
 
-
-function chef_client() {}
-
-chef_client.prototype.init = function (account) {
-
-    var _client = chef.createClient(account.username, account.key, account.url);
-    this.client = Promise.promisifyAll(_client);
-
-};
+const logger = require('../../utls/logger.js');
 
 
-chef_client.prototype.createEnvironment = function (params) {
+class ChefClient {
+    constructor () {}
 
-    logger.info('creating chef environment', params);
+    init (account) {
 
-    var concord_params = _.clone(params);
+        const _client = chef.createClient(account.username, account.key, account.url);
+        this.client = Promise.promisifyAll(_client);
 
-    concord_params = _.omit(concord_params, [
-        'elb_groups_string',
-        'instance_groups_string',
-        'cms_validator',
-        'recipes_string',
-        'cms_validator',
-        'cms_url',
-        'cms_key',
-        'cms',
-        'aws'
-    ]);
+    }
 
-    var default_attributes = {};
-    default_attributes.status = 'READY';
-    default_attributes.rollback_available = false;
-    default_attributes.concord_params = concord_params;
+    createEnvironment (params) {
 
-    var environment = {
-        name: params.stack_name,
-        description: 'Managed by Concord',
-        json_class: 'Chef::Environment',
-        chef_type: 'environment',
-        cookbook_versions: {},
-        default_attributes: default_attributes,
-        override_attributes: {}
-    };
+        logger.info('creating chef environment', params);
 
-    return this.client.postAsync('/environments', environment)
-        .spread(function (result, body) {
-            return body;
-        });
+        let concord_params = _.clone(params);
 
-};
+        concord_params = _.omit(concord_params, [
+            'elb_groups_string',
+            'instance_groups_string',
+            'cms_validator',
+            'recipes_string',
+            'cms_validator',
+            'cms_url',
+            'cms_key',
+            'cms',
+            'aws'
+        ]);
 
+        const default_attributes = {};
+        default_attributes.status = 'READY';
+        default_attributes.rollback_available = false;
+        default_attributes.concord_params = concord_params;
 
+        const environment = {
+            name: params.stack_name,
+            description: 'Managed by Concord',
+            json_class: 'Chef::Environment',
+            chef_type: 'environment',
+            cookbook_versions: {},
+            default_attributes: default_attributes,
+            override_attributes: {}
+        };
 
-chef_client.prototype.getEnvironment = function (environment) {
-
-    return this.client.getAsync('/environments/' + environment)
-        .spread(function (result, body) {
-            return body;
-        });
-
-};
-
-chef_client.prototype.getEnvironments = function () {
-
-    return this.client.getAsync('/environments')
-        .spread(function (result, body) {
-            return body;
-        });
-
-};
-
-chef_client.prototype.getEnvironmentNodes = function (environment) {
-
-    return this.client.getAsync('/environments/' + environment + '/nodes')
-        .spread(function (result, body) {
-            return _.keys(body);
-        });
-
-};
-
-chef_client.prototype.updateEnvironment = function (params) {
-
-    return this.client.putAsync('/environments/' + params.name, params)
-        .spread(function (result, body) {
-            return body;
-        });
-};
-
-chef_client.prototype.deleteEnvironment = function (environment) {
-    logger.info('deleting chef environment:', environment);
-    return this.client.deleteAsync('/environments/' + environment)
-        .spread(function (result, body) {
-            return body;
-        });
-};
-
-chef_client.prototype.deleteEnvironmentNodes = function (environment) {
-    logger.info('removing all chef nodes in environment:', environment);
-
-    var self = this;
-
-    return this.getEnvironmentNodes(environment)
-        .then(function (nodes) {
-            return Promise.map(nodes, function (node) {
-                return self.deleteNode(node);
+        return this.client.postAsync('/environments', environment)
+            .spread((result, body) => {
+                return body;
             });
-        });
-};
 
-chef_client.prototype.rollbackCheck = function (environment) {
+    }
 
-    return this.getEnvironment(environment)
-        .then(function (response) {
-            return response.default_attributes.rollback_available;
-        });
-};
+    getEnvironment (environment) {
 
-chef_client.prototype.createNode = function (params) {
+        return this.client.getAsync(`/environments/${environment}`)
+            .spread((result, body) => {
+                return body;
+            });
 
-    return this.client.deleteAsync('/nodes/' + params.name, params)
-        .spread(function (result, body) {
-            return body;
-        });
-};
+    }
 
+    getEnvironments () {
 
-chef_client.prototype.getNode = function (node) {
+        return this.client.getAsync('/environments')
+            .spread((result, body) => {
+                return body;
+            });
 
-    return this.client.getAsync('/nodes/' + node)
-        .spread(function (result, body) {
-            return body;
-        });
+    }
 
-};
+    getEnvironmentNodes (environment) {
 
-chef_client.prototype.updateNode = function (node) {
+        return this.client.getAsync(`/environments/${environment}/nodes`)
+            .spread((result, body) => {
+                return _.keys(body);
+            });
 
-    return this.client.putAsync('/nodes/' + node.name, node)
-        .spread(function (result, body) {
-            return body;
-        });
+    }
 
-};
+    updateEnvironment (params) {
 
-chef_client.prototype.deleteNode = function (node) {
-    var self = this;
-    logger.info('deleted:', node);
-    return this.client.deleteAsync('/nodes/' + node)
-        .spread(function (result, body) {
-            return self.deleteClient(node);
-        })
-        .spread(function (result, body) {
-            return body;
-        });
-};
+        return this.client.putAsync(`/environments/${params.name}`, params)
+            .spread((result, body) => {
+                return body;
+            });
+    }
 
-chef_client.prototype.createClient = function (params) {
+    deleteEnvironment (environment) {
+        logger.info('deleting chef environment:', environment);
+        return this.client.deleteAsync(`/environments/${environment}`)
+            .spread((result, body) => {
+                return body;
+            });
+    }
 
-    return this.client.putAsync('/clients/', params)
-        .spread(function (result, body) {
-            return body;
-        });
-};
+    deleteEnvironmentNodes (environment) {
+        logger.info('removing all chef nodes in environment:', environment);
 
-chef_client.prototype.getClient = function (client) {
+        const self = this;
 
-    return this.client.getAsync('/clients/' + client)
-        .spread(function (result, body) {
-            return body;
-        });
-};
+        return this.getEnvironmentNodes(environment)
+            .then(nodes => {
+                return Promise.map(nodes, node => {
+                    return self.deleteNode(node);
+                });
+            });
+    }
 
-chef_client.prototype.deleteClient = function (client) {
+    rollbackCheck (environment) {
 
-    return this.client.deleteAsync('/clients/' + client)
-        .spread(function (result, body) {
-            return body;
-        });
-};
+        return this.getEnvironment(environment)
+            .then(response => {
+                return response.default_attributes.rollback_available;
+            });
+    }
 
-chef_client.prototype.createDataBag = function (params) {
-    return this.client.postAsync('/data/', params)
-        .spread(function (response, body) {
-            return body;
-        });
-};
+    createNode (params) {
 
-chef_client.prototype.getDataBag = function (data_bag) {
-    return this.client.getAsync('/data/' + data_bag)
-        .spread(function (response, body) {
-            return _.keys(body);
-        });
-};
+        return this.client.deleteAsync(`/nodes/${params.name}`, params)
+            .spread((result, body) => {
+                return body;
+            });
+    }
 
-chef_client.prototype.getDataBagItem = function (data_bag, item) {
-    return this.client.getAsync('/data/' + data_bag + '/' + item)
-        .spread(function (response, body) {
-            return body;
-        });
-};
+    getNode (node) {
 
-chef_client.prototype.saveDataBagItem = function (data_bag, item) {
-    return this.client.putAsync('/data/' + data_bag + '/' + item)
-        .spread(function (response, body) {
-            return body;
-        });
-};
+        return this.client.getAsync(`/nodes/${node}`)
+            .spread((result, body) => {
+                return body;
+            });
 
+    }
 
+    updateNode (node) {
 
-module.exports = new chef_client();
+        return this.client.putAsync(`/nodes/${node.name}`, node)
+            .spread((result, body) => {
+                return body;
+            });
+
+    }
+
+    deleteNode (node) {
+        const self = this;
+        logger.info('deleted:', node);
+        return this.client.deleteAsync(`/nodes/${node}`)
+            .spread((result, body) => {
+                return self.deleteClient(node);
+            })
+            .spread((result, body) => {
+                return body;
+            });
+    }
+
+    createClient (params) {
+
+        return this.client.putAsync('/clients/', params)
+            .spread((result, body) => {
+                return body;
+            });
+    }
+
+    getClient (client) {
+
+        return this.client.getAsync(`/clients/${client}`)
+            .spread((result, body) => {
+                return body;
+            });
+    }
+
+    deleteClient (client) {
+
+        return this.client.deleteAsync(`/clients/${client}`)
+            .spread((result, body) => {
+                return body;
+            });
+    }
+
+    createDataBag (params) {
+        return this.client.postAsync('/data/', params)
+            .spread((response, body) => {
+                return body;
+            });
+    }
+
+    getDataBag (data_bag) {
+        return this.client.getAsync(`/data/${data_bag}`)
+            .spread((response, body) => {
+                return _.keys(body);
+            });
+    }
+
+    getDataBagItem (data_bag, item) {
+        return this.client.getAsync(`/data/${data_bag}/${item}`)
+            .spread((response, body) => {
+                return body;
+            });
+    }
+
+    saveDataBagItem (data_bag, item) {
+        return this.client.putAsync(`/data/${data_bag}/${item}`)
+            .spread((response, body) => {
+                return body;
+            });
+    }
+}
+
+module.exports = new ChefClient();

@@ -1,11 +1,16 @@
-var secure = require('../config/secure_config');
-var logger = require('./logger.js');
-var db_cred = secure.get('db');
-var dynasty = require('dynasty')(db_cred);
+/*jshint esversion: 6 */
+'use strict'
+
+const secure = require('../config/secure_config');
+
+//get database creds from config
+const db_cred = secure.get('db');
+const dynasty = require('dynasty')(db_cred);
+const logger = require('./logger.js');
 
 
 //setup table connection
-var db = dynasty.table('concord');
+const db = dynasty.table('concord');
 logger.info('setup DynamoDB connection:', db_cred.region);
 
 module.exports = db;

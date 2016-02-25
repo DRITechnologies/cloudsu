@@ -21,9 +21,9 @@
 </table>
 <br>
 <table class="table table-hover" ng-show="chef_accounts.length">
-    <caption class="text-center">Chef Accounts</caption>
+    <caption class="text-center">Chef Account</caption>
     <tbody>
-        <tr ng-click="chefModal()" ng-repeat="chef in chef_accounts">
+        <tr ng-click="getChefModal(chef.name)" ng-repeat="chef in chef_accounts">
             <td>
                 <img src="../../img/chef_logo.png" class="img-responsive" height="50" width="50" alt="chef logo">
             </td>
@@ -36,7 +36,7 @@
 <table class="table table-hover" ng-show="aws_accounts.length">
     <caption class="text-center">AWS Accounts</caption>
     <tbody>
-        <tr ng-click="chefModal()" ng-repeat="aws in aws_accounts">
+        <tr ng-click="getAwsModal(aws.name)" ng-repeat="aws in aws_accounts">
             <td>
                 <img src="../../img/aws_logo.png" class="img-responsive" height="35" width="60" alt="aws logo">
             </td>

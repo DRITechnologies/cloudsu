@@ -1,3 +1,5 @@
+'use strict';
+
 var angular = require('angular');
 require('jquery');
 
@@ -19,6 +21,7 @@ require('angular-moment');
 
 
 var stacks = angular.module('stacks', ['ngRoute', 'ngStorage', 'angularMoment', 'ui.bootstrap']);
+
 stacks.controller('adjust_size_modal', function ($scope, $http, $modalInstance, stack_name,
     app_name, version, dataStore) {
     $scope.alerts_modal = [];
@@ -54,88 +57,6 @@ stacks.controller('adjust_size_modal', function ($scope, $http, $modalInstance, 
 
 
 
-});
-stacks.controller('chef_controller', function ($scope, $http, dataStore, $modal) {
-
-    dataStore.setShowBurger(false);
-    dataStore.setShowPlus(false);
-    dataStore.setShowSpinner(true);
-
-    $http.get('/api/v1/environments')
-        .success(function (response) {
-            var keys = _.keys(response);
-            $scope.environments = _.sortBy(keys);
-            dataStore.setShowSpinner(false);
-        })
-        .error(function (err) {
-            dataStore.setShowSpinner(false);
-            dataStore.addAlert('danger', err.message);
-        });
-
-    $scope.openEnvironment = function (environment) {
-        $http.get('/api/v1/' + environment + '/nodes')
-            .success(function (response) {
-                $modal.open({
-                    animation: $scope.animationsEnabled,
-                    templateUrl: 'partials/chef_nodes.html',
-                    controller: 'chef_nodes_controller',
-                    size: 'lg',
-                    resolve: {
-                        nodes: function () {
-                            return _.keys(response);
-                        },
-                        environment: function () {
-                            return environment;
-                        }
-                    }
-                });
-
-            })
-            .error(function (err) {
-                dataStore.addAlert('danger', err.message);
-            });
-    };
-
-    $scope.editEnvironment = function ($event, environment) {
-        $event.stopImmediatePropagation();
-        $http.get('/api/environment/' + environment)
-            .success(function (environmentBody) {
-                $modal.open({
-                    animation: $scope.animationsEnabled,
-                    templateUrl: 'partials/env_editor.html',
-                    controller: 'env_editor_modal',
-                    size: 'lg',
-                    resolve: {
-                        environment: function () {
-                            return environmentBody;
-                        }
-                    }
-                });
-            })
-            .error(function (res) {
-                $scope.alerts_modal.push({
-                    type: 'danger',
-                    msg: res.message
-                });
-            });
-    };
-
-    $scope.deleteEnvironment = function ($event, environment) {
-        $event.stopImmediatePropagation();
-        bootbox.confirm('Are you sure you want delete chef environment: ' + environment + '?', function (result) {
-            if (result) {
-
-                $http.delete('/api/v1/environment/' + environment)
-                    .success(function (response) {
-                        dataStore.addAlert('success', 'successfully deleted: ' + environment);
-                    })
-                    .error(function (err) {
-                        dataStore.addAlert('danger', err.message);
-                    });
-
-            }
-        });
-    };
 });
 stacks.controller('create_stack_modal', function ($scope, $http, $modalInstance, dataStore, $location) {
 
@@ -390,17 +311,19 @@ stacks.controller('login_controller', function ($scope, $http, $location, $modal
 
     };
 
+    $scope.close_alert = function (index) {
+        $scope.alerts.splice(index, 1);
+    };
+
 
 
 });
+
 stacks.controller('main_controller', function ($scope, $http, $location, $modal, dataStore) {
-    dataStore.initAlerts();
 
     $scope.alerts = dataStore.getAlerts();
 
-    var token = dataStore.getToken();
-
-    $http.get('/api/v1/ping/' + token)
+    $http.get('/api/v1/ping/' + dataStore.getToken())
         .success(function (res) {
             if (!res.setup) {
                 dataStore.setIsLogin(false);
@@ -426,9 +349,11 @@ stacks.controller('main_controller', function ($scope, $http, $location, $modal,
 
     $scope.close_alert = function (index) {
         $scope.alerts.splice(index, 1);
+        dataStore.setAlerts($scope.alerts);
     };
 
 });
+
 stacks.controller('nav_bar', function ($scope, $http, $location, $modal, dataStore) {
     $scope.alerts_modal = [];
 
@@ -584,6 +509,7 @@ stacks.controller('nav_bar', function ($scope, $http, $location, $modal, dataSto
 
 
 });
+
 stacks.controller('rollback_modal', function ($scope, $http, $modalInstance, stack_name, dataStore) {
     $scope.alerts_modal = [];
     $scope.stack_name = stack_name;
@@ -629,26 +555,26 @@ stacks.controller('rollback_modal', function ($scope, $http, $modalInstance, sta
 
 
 });
-stacks.controller('service_account_modal', function ($scope, $http, $location, $modal, $modalInstance, dataStore, type, server) {
+stacks.controller('service_account_modal', function ($scope, $http, $location, $modal, $modalInstance, dataStore, type, server, account) {
     $scope.alerts_modal = [];
+
+    $scope.account = account;
 
     $scope.saveServiceAccount = function () {
 
-        if (type === 'cms') {
-            $scope.account.server = server;
-        }
 
         $scope.account.type = type;
 
+        if (type === 'CMS') {
+            $scope.account.name = 'CHEF';
+        }
+
         $http.post('/api/v1/services/save_account', $scope.account)
             .success(function (res) {
-                if (!dataStore.getActiveAWS() && type === 'aws') {
-                    console.log('setting active account:', $scope.account.name);
+                if (!dataStore.getActiveAWS() && type === 'AWS') {
                     dataStore.setActiveAWS($scope.account.name);
-                } else if (type === 'cms') {
-                    dataStore.setCmsName($scope.account.name);
-                    dataStore.setCmsType('cms');
                 }
+
                 $modalInstance.dismiss('cancel');
             })
             .error(function (err) {
@@ -668,6 +594,7 @@ stacks.controller('service_account_modal', function ($scope, $http, $location, $
     };
 
 });
+
 stacks.controller('setup', function ($scope, $http, $location, $modal, dataStore) {
     $scope.showSpinner = false;
     $scope.alerts = [];
@@ -677,14 +604,11 @@ stacks.controller('setup', function ($scope, $http, $location, $modal, dataStore
             $scope.regions = regions;
         });
 
-    $http.get('/api/v1/bucket_regions')
-        .success(function (bucket_regions) {
-            $scope.bucket_regions = bucket_regions;
-        });
-
     $scope.create = function () {
-        $scope.account.aws.type = 'aws';
-        $scope.account.user.type = 'user';
+        $scope.account.aws.type = 'AWS';
+        $scope.account.aws.name = 'DEFAULT';
+        $scope.account.cms.name = 'DEFAULT';
+        $scope.account.user.type = 'USER';
         if ($scope.account.user.password !== $scope.account.user.confirm) {
             $scope.alerts.push({
                 type: 'danger',
@@ -714,8 +638,8 @@ stacks.controller('setup', function ($scope, $http, $location, $modal, dataStore
         $scope.alerts.splice(index, 1);
     };
 
-
 });
+
 stacks.controller('stack_controller', function ($scope, $routeParams, $http, $modal, $location, $cacheFactory, dataStore) {
 
     dataStore.setShowBurger(true);
@@ -728,6 +652,100 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
     if (!$scope.stack_name) {
         return;
     }
+
+    function mergeEc2Objects(group1, group2) {
+        return _.each(group1, function (y) {
+            var obj = _.find(group2, function (x) {
+                return (x.InstanceId === y.InstanceId);
+            });
+            y.PrivateIpAddress = obj.PrivateIpAddress;
+            y.PublicIpAddress = obj.PublicIpAddress;
+            y.KeyName = obj.KeyName;
+            y.InstanceType = obj.InstanceType;
+            y.LaunchTime = obj.LaunchTime;
+            y.ImageId = obj.ImageId;
+            return y;
+        });
+    }
+
+    function updateEc2(groups) {
+
+        return _.each(groups, function (group) {
+            if (group.Instances.length < 1) {
+                return group;
+            }
+            var instances = _.pluck(group.Instances, 'InstanceId');
+            $http.get('/api/v1/ec2/' + instances)
+                .success(function (data) {
+                    group.Instances = mergeEc2Objects(group.Instances, data);
+                    return group;
+                })
+                .error(function (res) {
+                    dataStore.addAlert('danger', res.message);
+                });
+        });
+    }
+
+    function getEc2(instances) {
+        var instance_ids = _.pluck(instances, 'PhysicalResourceId');
+        $http.get('/api/ec2/' + instance_ids)
+            .success(function (data) {
+                $scope.instances = data;
+                dataStore.setShowSpinner(false);
+            })
+            .error(function (err) {
+                dataStore.addAlert('danger', err.message);
+                dataStore.setShowSpinner(false);
+            });
+
+    }
+
+
+    function addTags(groups) {
+        return _.each(groups, function (group) {
+            group.version = _.find(group.Tags, function (tag) {
+                return tag.Key === 'version';
+            }).Value;
+            group.app_name = _.find(group.Tags, function (tag) {
+                return tag.Key === 'app_name';
+            }).Value;
+        });
+    }
+
+    function updateElb(groups) {
+
+        return _.each(groups, function (group) {
+            if (group.LoadBalancerNames.length < 1) {
+                return group;
+            }
+            $http.get('/api/v1/elb/' + group.LoadBalancerNames)
+                .success(function (data) {
+                    group.LoadBalancerNames = data.LoadBalancerDescriptions;
+                    return group;
+                })
+                .error(function (res) {
+                    dataStore.addAlert('danger', res.message);
+                });
+        });
+    }
+
+    //setup functions
+    function updateScaleGroups(scaleGroups) {
+        var groups = _.pluck(scaleGroups, 'PhysicalResourceId');
+        $http.get('/api/v1/asg/describe/' + groups)
+            .success(function (data) {
+                console.log('asg', data);
+                var groups = data.AutoScalingGroups;
+                $scope.scaleGroups = updateEc2(groups);
+                $scope.scaleGroups = updateElb(groups);
+                $scope.scaleGroups = addTags(groups);
+                dataStore.setShowSpinner(false);
+            })
+            .error(function (res) {
+                dataStore.addAlert('danger', res.message);
+            });
+    }
+
 
 
     $scope.adjustSize = function (app_name, version) {
@@ -920,100 +938,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
             dataStore.addAlert('danger', res.message);
         });
 
-    function updateScaleGroups(scaleGroups) {
-        var groups = _.pluck(scaleGroups, 'PhysicalResourceId');
-        $http.get('/api/v1/asg/describe/' + groups)
-            .success(function (data) {
-                console.log('asg', data);
-                var groups = data.AutoScalingGroups;
-                $scope.scaleGroups = updateEc2(groups);
-                $scope.scaleGroups = updateElb(groups);
-                $scope.scaleGroups = addTags(groups);
-                dataStore.setShowSpinner(false);
-            })
-            .error(function (res) {
-                dataStore.addAlert('danger', res.message);
-            });
-    }
-
-    function updateEc2(groups) {
-
-        return _.each(groups, function (group) {
-            if (group.Instances.length < 1) {
-                return group;
-            }
-            var instances = _.pluck(group.Instances, 'InstanceId');
-            $http.get('/api/v1/ec2/' + instances)
-                .success(function (data) {
-                    group.Instances = mergeEc2Objects(group.Instances, data);
-                    return group;
-                })
-                .error(function (res) {
-                    dataStore.addAlert('danger', res.message);
-                });
-        });
-    }
-
-    function getEc2(instances) {
-        var instance_ids = _.pluck(instances, 'PhysicalResourceId');
-        $http.get('/api/ec2/' + instance_ids)
-            .success(function (data) {
-                $scope.instances = data;
-                dataStore.setShowSpinner(false);
-            })
-            .error(function (err) {
-                dataStore.addAlert('danger', err.message);
-                dataStore.setShowSpinner(false);
-            });
-
-    }
-
-
-    function addTags(groups) {
-        return _.each(groups, function (group) {
-            group.version = _.find(group.Tags, function (tag) {
-                return tag.Key === 'version';
-            }).Value;
-            group.app_name = _.find(group.Tags, function (tag) {
-                return tag.Key === 'app_name';
-            }).Value;
-        });
-    }
-
-
-    function updateElb(groups) {
-
-        return _.each(groups, function (group) {
-            if (group.LoadBalancerNames.length < 1) {
-                return group;
-            }
-            $http.get('/api/v1/elb/' + group.LoadBalancerNames)
-                .success(function (data) {
-                    group.LoadBalancerNames = data.LoadBalancerDescriptions;
-                    return group;
-                })
-                .error(function (res) {
-                    dataStore.addAlert('danger', res.message);
-                });
-        });
-    }
-
-    function mergeEc2Objects(group1, group2) {
-        return _.each(group1, function (y) {
-            var obj = _.find(group2, function (x) {
-                return (x.InstanceId === y.InstanceId);
-            });
-            y.PrivateIpAddress = obj.PrivateIpAddress;
-            y.PublicIpAddress = obj.PublicIpAddress;
-            y.KeyName = obj.KeyName;
-            y.InstanceType = obj.InstanceType;
-            y.LaunchTime = obj.LaunchTime;
-            y.ImageId = obj.ImageId;
-            return y;
-        });
-    }
-
 });
+
 // model editor view
 stacks.controller('stack_editor_modal', function ($scope, $http, $modalInstance, template, stack_name,
     dataStore) {
@@ -1141,12 +1067,12 @@ stacks.controller('system', function ($scope, $http, $location, $modal, dataStor
     dataStore.setShowPlus(false);
 
 
-    $http.get('/api/v1/services/get_accounts/chef')
+    $http.get('/api/v1/services/get_accounts/CMS')
         .success(function (response) {
             $scope.chef_accounts = response;
         });
 
-    $http.get('/api/v1/services/get_accounts/aws')
+    $http.get('/api/v1/services/get_accounts/AWS')
         .success(function (response) {
             $scope.aws_accounts = response;
         });
@@ -1160,13 +1086,41 @@ stacks.controller('system', function ($scope, $http, $location, $modal, dataStor
             size: 'lg',
             resolve: {
                 type: function () {
-                    return 'cms';
+                    return 'CMS';
                 },
                 server: function () {
-                    return 'chef';
+                    return 'CHEF';
+                },
+                account: function () {
+                    return false;
                 }
             }
         });
+    };
+
+    $scope.getChefModal = function (name) {
+
+        $http.get('/api/v1/services/get_account/CMS/' + name)
+            .success(function (response) {
+                $modal.open({
+                    animation: $scope.animationsEnabled,
+                    templateUrl: 'partials/modals/chef.html',
+                    controller: 'service_account_modal',
+                    size: 'lg',
+                    resolve: {
+                        type: function () {
+                            return 'CMS';
+                        },
+                        server: function () {
+                            return 'CHEF';
+                        },
+                        account: function () {
+                            return response;
+                        }
+                    }
+                });
+
+            });
     };
 
     $scope.awsModal = function () {
@@ -1177,14 +1131,44 @@ stacks.controller('system', function ($scope, $http, $location, $modal, dataStor
             size: 'lg',
             resolve: {
                 type: function () {
-                    return 'aws';
+                    return 'AWS';
+                },
+                server: function () {
+                    return '';
+                },
+                account: function () {
+                    return false;
                 }
             }
         });
     };
 
+    $scope.getAwsModal = function (name) {
+        $http.get('/api/v1/services/get_account/CMS/' + name)
+            .success(function (response) {
+                $modal.open({
+                    animation: $scope.animationsEnabled,
+                    templateUrl: 'partials/modals/aws.html',
+                    controller: 'service_account_modal',
+                    size: 'lg',
+                    resolve: {
+                        type: function () {
+                            return 'AWS';
+                        },
+                        server: function () {
+                            return '';
+                        },
+                        account: function () {
+                            return response;
+                        }
+                    }
+                });
+            });
+    };
+
 
 });
+
 stacks.controller('upgrade_modal', function($scope, $http, $modalInstance, stack_name, dataStore) {
 
     $scope.alerts_modal = [];
@@ -1377,6 +1361,9 @@ stacks.factory('dataStore', function ($localStorage, $window) {
                 msg: msg
             });
         },
+        setAlerts: function (alerts) {
+            $localStorage.alerts = alerts;
+        },
         setIsLogin: function (bool) {
             $localStorage.isLogin = bool;
         },
@@ -1397,6 +1384,7 @@ stacks.factory('dataStore', function ($localStorage, $window) {
     };
 
 });
+
 stacks.factory('httpRequestInterceptor', function (dataStore) {
 
     return {
@@ -1415,6 +1403,7 @@ stacks.factory('httpRequestInterceptor', function (dataStore) {
 stacks.config(function ($httpProvider) {
     $httpProvider.interceptors.push('httpRequestInterceptor');
 });
+
 // configure our routes
 stacks.config(function ($routeProvider) {
     $routeProvider

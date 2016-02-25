@@ -1,9 +1,12 @@
-var _ = require('underscore');
-var nconf = require('nconf');
-var path = require('path');
-var cache = require('../utls/cache.js');
-var SECURE_SETTINGS_FILE = 'secrets.json';
-var secrets_file = path.resolve(__dirname, SECURE_SETTINGS_FILE);
+/*jshint esversion: 6 */
+'use strict';
+
+const _ = require('underscore');
+const nconf = require('nconf');
+const path = require('path');
+const cache = require('../utls/cache.js');
+const SECURE_SETTINGS_FILE = '../secrets.json';
+const secrets_file = path.resolve(__dirname, SECURE_SETTINGS_FILE);
 
 
 nconf.file(SECURE_SETTINGS_FILE, {
@@ -14,37 +17,39 @@ nconf.file(SECURE_SETTINGS_FILE, {
     }
 });
 
-function secure_config() {}
+class SecureConfig {
+    constructor () {}
 
-secure_config.get = function get(key) {
+    get (key) {
 
-    var value = cache.get(key);
+        let value = cache.get(key);
 
-    if (!value) {
-        value = nconf.get(key);
-        if (_.isUndefined(value)) {
-            return false;
-        }
-        cache.set(key, value);
-    }
-    return value;
-};
-
-secure_config.save = function save(key, value) {
-
-    return new Promise(function (resolve, reject) {
-
-        nconf.set(key, value);
-        nconf.save(function (err) {
-            if (err) {
-                console.error(err.message);
-                return reject(err);
+        if (!value) {
+            value = nconf.get(key);
+            if (_.isUndefined(value)) {
+                return false;
             }
-            return resolve();
+            cache.set(key, value);
+        }
+        return value;
+    }
+
+    save (key, value) {
+
+        return new Promise(function (resolve, reject) {
+
+            nconf.set(key, value);
+            nconf.save(err => {
+                if (err) {
+                    console.error(err.message);
+                    return reject(err);
+                }
+                return resolve();
+            });
+
         });
+    }
+}
 
-    });
-};
 
-
-module.exports = secure_config;
+module.exports = new SecureConfig();

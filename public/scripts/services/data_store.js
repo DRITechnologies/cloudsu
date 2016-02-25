@@ -87,6 +87,9 @@ stacks.factory('dataStore', function ($localStorage, $window) {
                 msg: msg
             });
         },
+        setAlerts: function (alerts) {
+            $localStorage.alerts = alerts;
+        },
         setIsLogin: function (bool) {
             $localStorage.isLogin = bool;
         },

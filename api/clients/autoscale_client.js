@@ -1,35 +1,40 @@
-var AWS = require('aws-sdk');
-var Promise = require('bluebird');
+/*jshint esversion: 6 */
+'use strict';
+
+const AWS = require('aws-sdk');
+const Promise = require('bluebird');
 
 
-function autoscale_client() {}
+class AutoscaleClient {
+    constructor () {}
 
-autoscale_client.prototype.init = function (account) {
+    init (account) {
 
-    this.autoscaling = Promise.promisifyAll(new AWS.AutoScaling(
-        account
-    ));
+        this.autoscaling = Promise.promisifyAll(new AWS.AutoScaling(
+            account
+        ));
 
-};
+    }
 
-autoscale_client.prototype.describeAutoScalingGroups = function (groups) {
+    describeAutoScalingGroups (groups) {
 
-    return this.autoscaling.describeAutoScalingGroupsAsync({
-        AutoScalingGroupNames: groups
-    });
-};
+        return this.autoscaling.describeAutoScalingGroupsAsync({
+            AutoScalingGroupNames: groups
+        });
+    }
 
-autoscale_client.prototype.addTags = function (as_group, terminate_date) {
+    addTags (as_group, terminate_date) {
 
-	return this.autoscaling.createOrUpdateTagsAsync({
-                Tags: [{
-                    ResourceId: as_group.PhysicalResourceId,
-                    Key: 'terminate_date',
-                    Value: terminate_date,
-                    PropagateAtLaunch: true,
-                    ResourceType: 'auto-scaling-group'
-                }]
-            });
-};
+        return this.autoscaling.createOrUpdateTagsAsync({
+            Tags: [{
+                ResourceId: as_group.PhysicalResourceId,
+                Key: 'terminate_date',
+                Value: terminate_date,
+                PropagateAtLaunch: true,
+                ResourceType: 'auto-scaling-group'
+            }]
+        });
+    }
+}
 
-module.exports = new autoscale_client();
+module.exports = new AutoscaleClient();

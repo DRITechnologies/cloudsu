@@ -1,75 +1,79 @@
-var _ = require('underscore');
-var AWS = require('aws-sdk');
-var Promise = require('bluebird');
+/*jshint esversion: 6 */
+'use strict';
+
+const _ = require('underscore');
+const AWS = require('aws-sdk');
+const Promise = require('bluebird');
 
 // load default configs
-var config = require('../../config/config.js');
+const config = require('../../config/config.js');
 
 
-function ec2_client() {}
+class Ec2Client {
+    constructor () {}
 
-ec2_client.prototype.init = function (account) {
-    this.ec2 = Promise.promisifyAll(new AWS.EC2(account));
-};
+    init (account) {
+        this.ec2 = Promise.promisifyAll(new AWS.EC2(account));
+    }
 
-ec2_client.prototype.instances = function (instance_array) {
+    instances (instance_array) {
 
-    return this.ec2.describeInstancesAsync({
-            InstanceIds: instance_array
-        })
-        .then(function (result) {
-            return _.chain(result.Reservations).pluck('Instances').flatten();
+        return this.ec2.describeInstancesAsync({
+                InstanceIds: instance_array
+            })
+            .then(result => {
+                return _.chain(result.Reservations).pluck('Instances').flatten();
+            });
+
+    }
+
+    instancesByStack (stack_name) {
+
+        return this.ec2.describeInstancesAsync({
+            Filters: [{
+
+                Name: 'tag:aws:cloudformation:stack-name',
+                Values: [stack_name]
+            }]
         });
 
-};
+    }
 
+    describeKeyPairs () {
 
-ec2_client.prototype.instancesByStack = function (stack_name) {
+        return this.ec2.describeKeyPairsAsync()
+            .then(keys => {
+                return keys.KeyPairs;
+            });
 
-    return this.ec2.describeInstancesAsync({
-        Filters: [{
+    }
 
-            Name: 'tag:aws:cloudformation:stack-name',
-            Values: [stack_name]
-        }]
-    });
+    describeImages () {
 
-};
+        return this.ec2.describeImagesAsync({
+                Owners: ['self', 'amazon']
+            })
+            .then(response => {
+                console.log(response);
+                return response.Images;
+            });
+    }
 
-ec2_client.prototype.describeKeyPairs = function () {
+    sampleImages () {
 
-    return this.ec2.describeKeyPairsAsync()
-        .then(function (keys) {
-            return keys.KeyPairs;
-        });
+        return config.get('aws_default_images')
+            .then(images => {
+                return images;
+            });
+    }
 
-};
+    instanceStoreMap () {
 
-ec2_client.prototype.describeImages = function () {
+        return config.get('aws_instancestore_map')
+            .then(stores => {
+                return stores;
+            });
+    }
+}
 
-    return this.ec2.describeImagesAsync({
-            Owners: ['self', 'amazon']
-        })
-        .then(function (response) {
-            console.log(response);
-            return response.Images;
-        });
-};
-
-ec2_client.prototype.sampleImages = function () {
-
-    return config.get('aws_default_images')
-        .then(function (images) {
-            return images;
-        });
-};
-
-ec2_client.prototype.instanceStoreMap = function () {
-
-    return config.get('aws_instancestore_map')
-        .then(function (stores) {
-            return stores;
-        });
-};
-
-module.exports = new ec2_client();
+module.exports = new Ec2Client();

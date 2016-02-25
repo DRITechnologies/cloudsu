@@ -11,6 +11,100 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
         return;
     }
 
+    function mergeEc2Objects(group1, group2) {
+        return _.each(group1, function (y) {
+            var obj = _.find(group2, function (x) {
+                return (x.InstanceId === y.InstanceId);
+            });
+            y.PrivateIpAddress = obj.PrivateIpAddress;
+            y.PublicIpAddress = obj.PublicIpAddress;
+            y.KeyName = obj.KeyName;
+            y.InstanceType = obj.InstanceType;
+            y.LaunchTime = obj.LaunchTime;
+            y.ImageId = obj.ImageId;
+            return y;
+        });
+    }
+
+    function updateEc2(groups) {
+
+        return _.each(groups, function (group) {
+            if (group.Instances.length < 1) {
+                return group;
+            }
+            var instances = _.pluck(group.Instances, 'InstanceId');
+            $http.get('/api/v1/ec2/' + instances)
+                .success(function (data) {
+                    group.Instances = mergeEc2Objects(group.Instances, data);
+                    return group;
+                })
+                .error(function (res) {
+                    dataStore.addAlert('danger', res.message);
+                });
+        });
+    }
+
+    function getEc2(instances) {
+        var instance_ids = _.pluck(instances, 'PhysicalResourceId');
+        $http.get('/api/ec2/' + instance_ids)
+            .success(function (data) {
+                $scope.instances = data;
+                dataStore.setShowSpinner(false);
+            })
+            .error(function (err) {
+                dataStore.addAlert('danger', err.message);
+                dataStore.setShowSpinner(false);
+            });
+
+    }
+
+
+    function addTags(groups) {
+        return _.each(groups, function (group) {
+            group.version = _.find(group.Tags, function (tag) {
+                return tag.Key === 'version';
+            }).Value;
+            group.app_name = _.find(group.Tags, function (tag) {
+                return tag.Key === 'app_name';
+            }).Value;
+        });
+    }
+
+    function updateElb(groups) {
+
+        return _.each(groups, function (group) {
+            if (group.LoadBalancerNames.length < 1) {
+                return group;
+            }
+            $http.get('/api/v1/elb/' + group.LoadBalancerNames)
+                .success(function (data) {
+                    group.LoadBalancerNames = data.LoadBalancerDescriptions;
+                    return group;
+                })
+                .error(function (res) {
+                    dataStore.addAlert('danger', res.message);
+                });
+        });
+    }
+
+    //setup functions
+    function updateScaleGroups(scaleGroups) {
+        var groups = _.pluck(scaleGroups, 'PhysicalResourceId');
+        $http.get('/api/v1/asg/describe/' + groups)
+            .success(function (data) {
+                console.log('asg', data);
+                var groups = data.AutoScalingGroups;
+                $scope.scaleGroups = updateEc2(groups);
+                $scope.scaleGroups = updateElb(groups);
+                $scope.scaleGroups = addTags(groups);
+                dataStore.setShowSpinner(false);
+            })
+            .error(function (res) {
+                dataStore.addAlert('danger', res.message);
+            });
+    }
+
+
 
     $scope.adjustSize = function (app_name, version) {
         $modal.open({
@@ -201,98 +295,5 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
         .error(function (res) {
             dataStore.addAlert('danger', res.message);
         });
-
-    function updateScaleGroups(scaleGroups) {
-        var groups = _.pluck(scaleGroups, 'PhysicalResourceId');
-        $http.get('/api/v1/asg/describe/' + groups)
-            .success(function (data) {
-                console.log('asg', data);
-                var groups = data.AutoScalingGroups;
-                $scope.scaleGroups = updateEc2(groups);
-                $scope.scaleGroups = updateElb(groups);
-                $scope.scaleGroups = addTags(groups);
-                dataStore.setShowSpinner(false);
-            })
-            .error(function (res) {
-                dataStore.addAlert('danger', res.message);
-            });
-    }
-
-    function updateEc2(groups) {
-
-        return _.each(groups, function (group) {
-            if (group.Instances.length < 1) {
-                return group;
-            }
-            var instances = _.pluck(group.Instances, 'InstanceId');
-            $http.get('/api/v1/ec2/' + instances)
-                .success(function (data) {
-                    group.Instances = mergeEc2Objects(group.Instances, data);
-                    return group;
-                })
-                .error(function (res) {
-                    dataStore.addAlert('danger', res.message);
-                });
-        });
-    }
-
-    function getEc2(instances) {
-        var instance_ids = _.pluck(instances, 'PhysicalResourceId');
-        $http.get('/api/ec2/' + instance_ids)
-            .success(function (data) {
-                $scope.instances = data;
-                dataStore.setShowSpinner(false);
-            })
-            .error(function (err) {
-                dataStore.addAlert('danger', err.message);
-                dataStore.setShowSpinner(false);
-            });
-
-    }
-
-
-    function addTags(groups) {
-        return _.each(groups, function (group) {
-            group.version = _.find(group.Tags, function (tag) {
-                return tag.Key === 'version';
-            }).Value;
-            group.app_name = _.find(group.Tags, function (tag) {
-                return tag.Key === 'app_name';
-            }).Value;
-        });
-    }
-
-
-    function updateElb(groups) {
-
-        return _.each(groups, function (group) {
-            if (group.LoadBalancerNames.length < 1) {
-                return group;
-            }
-            $http.get('/api/v1/elb/' + group.LoadBalancerNames)
-                .success(function (data) {
-                    group.LoadBalancerNames = data.LoadBalancerDescriptions;
-                    return group;
-                })
-                .error(function (res) {
-                    dataStore.addAlert('danger', res.message);
-                });
-        });
-    }
-
-    function mergeEc2Objects(group1, group2) {
-        return _.each(group1, function (y) {
-            var obj = _.find(group2, function (x) {
-                return (x.InstanceId === y.InstanceId);
-            });
-            y.PrivateIpAddress = obj.PrivateIpAddress;
-            y.PublicIpAddress = obj.PublicIpAddress;
-            y.KeyName = obj.KeyName;
-            y.InstanceType = obj.InstanceType;
-            y.LaunchTime = obj.LaunchTime;
-            y.ImageId = obj.ImageId;
-            return y;
-        });
-    }
 
 });

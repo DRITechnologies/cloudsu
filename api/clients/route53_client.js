@@ -1,17 +1,18 @@
-var AWS = require('aws-sdk');
-var Promise = require('bluebird');
+/*jshint esversion: 6 */
+'use strict';
+
+const AWS = require('aws-sdk');
+const Promise = require('bluebird');
 
 
-function route53_client() {}
+class Route53Client {
+    constructor () {}
 
+    init (account) {
 
-route53_client.prototype.init = function (account) {
+        this.route53_client = Promise.promisifyAll(new AWS.Route53(account));
 
-    this.route53_client = Promise.promisifyAll(new AWS.Route53(account));
+    }
+}
 
-};
-
-
-
-
-module.exports = new route53_client();
+module.exports = new Route53Client();

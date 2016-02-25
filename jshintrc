@@ -14,7 +14,6 @@
     "quotmark": "single",
     "maxlen": 150,
     "indent": 4,
-    "latedef" : false,
     "laxbreak": true,
     "loopfunc" : true,
     "newcap" : false,
@@ -25,5 +24,11 @@
     "smarttabs": true,
     "sub": true,
     "undef" : true,
-    "unused": "vars"
+    "unused": "vars",
+    "browser": true,
+    "jquery": true,
+    "node": true,
+    "latedef": true,
+    "undef": true,
+    "eqnull": true
 }

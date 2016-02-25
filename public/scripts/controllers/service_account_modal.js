@@ -1,23 +1,23 @@
-stacks.controller('service_account_modal', function ($scope, $http, $location, $modal, $modalInstance, dataStore, type, server) {
+stacks.controller('service_account_modal', function ($scope, $http, $location, $modal, $modalInstance, dataStore, type, server, account) {
     $scope.alerts_modal = [];
+
+    $scope.account = account;
 
     $scope.saveServiceAccount = function () {
 
-        if (type === 'cms') {
-            $scope.account.server = server;
-        }
 
         $scope.account.type = type;
 
+        if (type === 'CMS') {
+            $scope.account.name = 'CHEF';
+        }
+
         $http.post('/api/v1/services/save_account', $scope.account)
             .success(function (res) {
-                if (!dataStore.getActiveAWS() && type === 'aws') {
-                    console.log('setting active account:', $scope.account.name);
+                if (!dataStore.getActiveAWS() && type === 'AWS') {
                     dataStore.setActiveAWS($scope.account.name);
-                } else if (type === 'cms') {
-                    dataStore.setCmsName($scope.account.name);
-                    dataStore.setCmsType('cms');
                 }
+
                 $modalInstance.dismiss('cancel');
             })
             .error(function (err) {

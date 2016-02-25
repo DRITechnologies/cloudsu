@@ -1,13 +1,16 @@
-var winston = require('winston');
-var path = require('path');
+/*jshint esversion: 6 */
+'use strict'
+
+const winston = require('winston');
+const path = require('path');
 
 //get root of application folder
-var app_root = path.resolve(__dirname, '../');
+const app_root = path.resolve(__dirname, '../');
 
 winston.emitErrs = true;
 
 
-var logger = new winston.Logger({
+const logger = new winston.Logger({
     transports: [
         new winston.transports.Console({
             level: 'debug',
@@ -22,7 +25,7 @@ var logger = new winston.Logger({
 
 module.exports = logger;
 module.exports.stream = {
-    write: function (message, encoding) {
+    write(message, encoding) {
         logger.info(message);
     }
 };

@@ -1,108 +1,110 @@
-// logger
-var logger = require('../../utls/logger.js');
+/*jshint esversion: 6 */
+'use strict';
+
+const logger = require('../../utls/logger.js');
 
 
-function elb() {}
+class Elb {
+    constructor () {}
+
+    connectElbs (req, res) {
+
+        const aws_account = req.aws_account;
+        const elb_client = require('../clients/elb_client.js');
+        elb_client.init(aws_account);
+
+        return elb_client.connectElb(req.body)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                logger.error(err);
+                res.status(500).json(err);
+            });
+    }
+
+    disconnectElbs (req, res) {
+
+        const aws_account = req.aws_account;
+        const elb_client = require('../clients/elb_client.js');
+        elb_client.init(aws_account);
+
+        return elb_client.disconnectElb(req.body)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                logger.error(err);
+                res.status(500).json(err);
+            });
+
+    }
+
+    connectElb (req, res) {
+
+        const aws_account = req.aws_account;
+        const elb_client = require('../clients/elb_client.js');
+        elb_client.init(aws_account);
+
+        return elb_client.connectElb(req.body)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+
+    }
+
+    disconnectElb (req, res) {
+
+        const aws_account = req.aws_account;
+        const elb_client = require('../clients/elb_client.js');
+        elb_client.init(aws_account);
+
+        return elb_client.disconnectElb(req.body)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+    }
+
+    getAvailableElbs (req, res) {
+
+        const aws_account = req.aws_account;
+        const elb_client = require('../clients/elb_client.js');
+        elb_client.init(aws_account);
+
+        return elb_client.getAvailableElbs(req.params.stack_name)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+
+    }
+
+    getElbs (req, res) {
+
+        const aws_account = req.aws_account;
+        const elb_client = require('../clients/elb_client.js');
+        elb_client.init(aws_account);
+
+        const elb_array = req.params.elbs.split(',');
+
+        return elb_client.getElbs(elb_array)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                logger.error(err);
+                res.status(500).json(err);
+            });
+    }
+}
 
 
-elb.prototype.connectElbs = function (req, res) {
-
-    var aws_account = req.aws_account;
-    var elb_client = require('../clients/elb_client.js');
-    elb_client.init(aws_account);
-
-    return elb_client.connectElb(req.body)
-        .then(function (response) {
-            res.status(200).json(response);
-        })
-        .catch(function (err) {
-            logger.error(err);
-            res.status(500).json(err);
-        });
-};
-
-elb.prototype.disconnectElbs = function (req, res) {
-
-    var aws_account = req.aws_account;
-    var elb_client = require('../clients/elb_client.js');
-    elb_client.init(aws_account);
-
-    return elb_client.disconnectElb(req.body)
-        .then(function (response) {
-            res.status(200).json(response);
-        })
-        .catch(function (err) {
-            logger.error(err);
-            res.status(500).json(err);
-        });
-
-};
-
-elb.prototype.connectElb = function (req, res) {
-
-    var aws_account = req.aws_account;
-    var elb_client = require('../clients/elb_client.js');
-    elb_client.init(aws_account);
-
-    return elb_client.connectElb(req.body)
-        .then(function (response) {
-            res.status(200).json(response);
-        })
-        .catch(function (err) {
-            res.status(500).json(err);
-        });
-
-};
-
-elb.prototype.disconnectElb = function (req, res) {
-
-    var aws_account = req.aws_account;
-    var elb_client = require('../clients/elb_client.js');
-    elb_client.init(aws_account);
-
-    return elb_client.disconnectElb(req.body)
-        .then(function (response) {
-            res.status(200).json(response);
-        })
-        .catch(function (err) {
-            res.status(500).json(err);
-        });
-};
-
-elb.prototype.getAvailableElbs = function (req, res) {
-
-    var aws_account = req.aws_account;
-    var elb_client = require('../clients/elb_client.js');
-    elb_client.init(aws_account);
-
-    return elb_client.getAvailableElbs(req.params.stack_name)
-        .then(function (response) {
-            res.status(200).json(response);
-        })
-        .catch(function (err) {
-            res.status(500).json(err);
-        });
-
-};
-
-elb.prototype.getElbs = function (req, res) {
-
-    var aws_account = req.aws_account;
-    var elb_client = require('../clients/elb_client.js');
-    elb_client.init(aws_account);
-
-    var elb_array = req.params.elbs.split(',');
-
-    return elb_client.getElbs(elb_array)
-        .then(function (response) {
-            res.status(200).json(response);
-        })
-        .catch(function (err) {
-            logger.error(err);
-            res.status(500).json(err);
-        });
-};
-
-
-
-module.exports = new elb();
+module.exports = new Elb();

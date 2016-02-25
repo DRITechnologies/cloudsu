@@ -1,47 +1,60 @@
-var Promise = require('bluebird');
-var AWS = require('aws-sdk');
+/*jshint esversion: 6 */
+'use strict';
 
-//logger
-var logger = require('../../utls/logger.js');
+const Promise = require('bluebird');
+const AWS = require('aws-sdk');
 
+const logger = require('../../utls/logger.js');
 
-function sqs_client() {}
+class SqsClient {
+    constructor () {}
 
-sqs_client.prototype.init = function (account) {
+    init (account) {
+        this.sqs = Promise.promisifyAll(new AWS.SQS(account));
+    }
 
-    this.sqs = Promise.promisifyAll(new AWS.SQS(account));
+    createQueue (QueueName) {
 
-};
+        logger.info('Creating new queue', QueueName);
 
-sqs_client.prototype.createQueue = function (QueueName) {
+        return this.sqs.createQueueAsync({
+                QueueName: QueueName
+            })
+            .then(queue => {
+                return queue.QueueUrl;
+            });
+    }
 
-    logger.info('Creating new queue', QueueName);
+    getQueueUrl (QueueName) {
 
-    return this.sqs.createQueueAsync({
+        return this.sqs.getQueueUrlAsync({
             QueueName: QueueName
-        })
-        .then(function (queue) {
-            return queue.QueueUrl;
         });
-};
+    }
 
-sqs_client.prototype.getQueueUrl = function (QueueName) {
+    getQueueArn (queue_url) {
 
-    return this.sqs.getQueueUrlAsync({
-        QueueName: QueueName
-    });
-};
+        return this.sqs.getQueueAttributesAsync({
+                QueueUrl: queue_url,
+                AttributeNames: ['QueueArn']
+            })
+            .then(response => {
+                return response.Attributes.QueueArn;
+            });
+    }
 
-sqs_client.prototype.getQueueArn = function (queue_url) {
+    getMessage (queue_url) {
+        return this.sqs.receiveMessageAsync({
+                QueueUrl: queue_url,
+                WaitTimeSeconds: 20,
+                MaxNumberOfMessages: 10,
+                VisibilityTimeout: 5,
+                MessageAttributeNames: ['.']
+            })
+            .then(response => {
+                return response.Messages;
+            });
+    }
+}
 
-    return this.sqs.getQueueAttributesAsync({
-            QueueUrl: queue_url,
-            AttributeNames: ['QueueArn']
-        })
-        .then(function (response) {
-            return response.Attributes.QueueArn;
-        });
-};
-
-
-module.exports = new sqs_client();
+module.exports = new SqsClient();

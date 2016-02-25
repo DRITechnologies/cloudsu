@@ -39,6 +39,10 @@ stacks.controller('login_controller', function ($scope, $http, $location, $modal
 
     };
 
+    $scope.close_alert = function (index) {
+        $scope.alerts.splice(index, 1);
+    };
+
 
 
 });
