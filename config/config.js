@@ -97,7 +97,7 @@ class Config {
             key = 'secret';
         }
 
-        var secret = crypto_client.encrypt_string(params[key])
+        let secret = crypto_client.encrypt_string(params[key])
         params[key] = secret;
 
         return db.insert(params);
@@ -130,7 +130,7 @@ class Config {
 
         return new Promise(function (resolve, reject) {
             //check cache
-            const val = cache.get(params.name);
+            const val = cache.get(`${params.name}_${params.type}`);
 
             //return value if not undef
             if (val) {
@@ -139,7 +139,7 @@ class Config {
             }
 
             const db = require('../utls/db.js');
-            let account = {};
+            let account;
             logger.info('Getting service account:', params.type, params.name);
 
             return db.find({
@@ -166,7 +166,7 @@ class Config {
                     } else {
                         account.key = x;
                     }
-                    cache.set(params.name, account);
+                    cache.set(`${params.name}_${params.type}`, account);
                     return resolve(account);
                 });
         });

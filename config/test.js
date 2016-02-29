@@ -1,14 +1,5 @@
-  var config = require('./config.js');
+const secure = require('../config/secure_config');
 
-  const chef = {
-      name: 'CHEF',
-      type: 'CMS'
-  };
+const client_db = secure.get('db_client');
 
-  return config.getServiceAccount(chef)
-      .then(response => {
-          console.log(response);
-      })
-      .catch(err => {
-          console.log('err', err);
-      });
+console.log(client_db);

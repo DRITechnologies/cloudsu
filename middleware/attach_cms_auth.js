@@ -9,7 +9,7 @@ class AttachCmsAuth {
     run (req, res, next) {
 
         return config.getServiceAccount({
-                name: 'CHEF',
+                name: 'DEFAULT',
                 type: 'CMS'
             })
             .then(response => {

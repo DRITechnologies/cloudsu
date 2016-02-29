@@ -55,6 +55,10 @@ class SqsClient {
                 return response.Messages;
             });
     }
+
+    deleteMessage (params) {
+        return this.sqs.deleteMessageAsync(params);
+    }
 }
 
 module.exports = new SqsClient();

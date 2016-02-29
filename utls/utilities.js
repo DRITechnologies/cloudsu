@@ -2,7 +2,7 @@
 
 const Promise = require('bluebird');
 const exec = require('child_process').exec;
-const path = require('path');
+const logger = require('./logger.js');
 
 class utls_client {
     constructor () {}

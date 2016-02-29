@@ -1,5 +1,5 @@
 /*jshint esversion: 6 */
-'use strict'
+'use strict';
 
 const secure = require('../config/secure_config');
 
@@ -10,7 +10,7 @@ const logger = require('./logger.js');
 
 
 //setup table connection
-const db = dynasty.table('concord_config');
-logger.info('setup DynamoDB config connection:', db_cred.region);
+const db = dynasty.table('concord_servers');
+logger.info('setup DynamoDB servers connection:', db_cred.region);
 
 module.exports = db;

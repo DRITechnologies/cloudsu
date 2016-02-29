@@ -73416,8 +73416,11 @@ stacks.controller('setup', function ($scope, $http, $location, $modal, dataStore
     $scope.create = function () {
         $scope.account.aws.type = 'AWS';
         $scope.account.aws.name = 'DEFAULT';
+        $scope.account.cms.type = 'CMS';
         $scope.account.cms.name = 'DEFAULT';
+        $scope.account.cms.server = 'CHEF';
         $scope.account.user.type = 'USER';
+
         if ($scope.account.user.password !== $scope.account.user.confirm) {
             $scope.alerts.push({
                 type: 'danger',
@@ -73425,6 +73428,9 @@ stacks.controller('setup', function ($scope, $http, $location, $modal, dataStore
             });
             return;
         }
+
+        console.log($scope.account);
+
         $scope.showSpinner = true;
         $http.post('/api/v1/setup/' + $scope.account.aws.name, $scope.account)
             .success(function (response) {
@@ -73443,7 +73449,7 @@ stacks.controller('setup', function ($scope, $http, $location, $modal, dataStore
             });
     };
 
-    $scope.close_alert_modal = function (index) {
+    $scope.close_alert = function (index) {
         $scope.alerts.splice(index, 1);
     };
 

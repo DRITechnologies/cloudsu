@@ -91,7 +91,7 @@ class StacksClient {
             })
             .then(() => {
                 logger.info('waiting for stack');
-                return self.waitForStack(params.stack_name, 15, 2);
+                return self.waitForStack(params.stack_name, 15, 1);
             })
             .then(() => {
                 if (params.build_size === 'HA') {

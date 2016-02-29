@@ -150,7 +150,7 @@ class ChefClient {
 
     deleteNode (node) {
         const self = this;
-        logger.info('deleted:', node);
+        logger.info('deleting node:', node);
         return this.client.deleteAsync(`/nodes/${node}`)
             .spread((result, body) => {
                 return self.deleteClient(node);
@@ -162,7 +162,7 @@ class ChefClient {
 
     createClient (params) {
 
-        return this.client.putAsync('/clients/', params)
+        return this.client.postAsync('/clients', params)
             .spread((result, body) => {
                 return body;
             });
@@ -177,10 +177,13 @@ class ChefClient {
     }
 
     deleteClient (client) {
-
+        logger.debug('deleting client', client);
         return this.client.deleteAsync(`/clients/${client}`)
             .spread((result, body) => {
                 return body;
+            })
+            .catch(err => {
+                logger.info('Client does not exist');
             });
     }
 

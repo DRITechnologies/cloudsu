@@ -9,12 +9,11 @@ const fs = require('fs');
 const path = require('path');
 const default_file = fs.readFileSync(path.resolve(__dirname, '../../config/defaults.json'), 'utf8');
 const secure = require('../../config/secure_config.js');
-const config = require('../../config/config.js');
 const crypto_client = require('../../utls/crypto_client.js');
 let token = require('../../utls/token.js');
 
 
-function createIam(params, db, db_arn) {
+function createServerIam(params, db, config_db_arn, servers_db_arn) {
     const policy = {
         Version: '2012-10-17',
         Statement: [{
@@ -23,7 +22,8 @@ function createIam(params, db, db_arn) {
                 'dynamodb:*'
             ],
             Resource: [
-                db_arn
+                config_db_arn,
+                servers_db_arn
             ]
         }]
     };
@@ -50,6 +50,56 @@ function createIam(params, db, db_arn) {
             return iam.createPolicyAsync({
                 PolicyDocument: JSON.stringify(policy),
                 PolicyName: 'concord_db_access'
+            });
+        })
+        .then(response => {
+            return iam.attachUserPolicyAsync({
+                PolicyArn: response.Policy.Arn,
+                UserName: username
+            });
+        })
+        .catch(err => {
+            throw new Error(err);
+        });
+
+}
+
+function createClientIam(params, db, servers_db_arn) {
+    const policy = {
+        Version: '2012-10-17',
+        Statement: [{
+            Effect: 'Allow',
+            Action: [
+                'dynamodb:GetItem'
+            ],
+            Resource: [
+                servers_db_arn
+            ]
+        }]
+    };
+    const iam = Promise.promisifyAll(new AWS.IAM(
+        params.aws
+    ));
+    const username = 'concord_client_access';
+
+    return iam.createUserAsync({
+            UserName: username
+        })
+        .then(response => {
+            return iam.createAccessKeyAsync({
+                UserName: username
+            });
+        })
+        .then(response => {
+            let db_key = response.AccessKey;
+            db_key.region = params.aws.region;
+            db_key = _.omit(db_key, 'CreateDate');
+            return secure.save('db_client', db_key);
+        })
+        .then(response => {
+            return iam.createPolicyAsync({
+                PolicyDocument: JSON.stringify(policy),
+                PolicyName: 'concord_client_db_access'
             });
         })
         .then(response => {
@@ -109,7 +159,7 @@ function setupQueue(params, db) {
         })
         .then(arn => {
 
-            logger.info('adding permissions for sns to sqs');
+            logger.info('adding sns permissions to sqs');
 
             queue_arn = arn.Attributes.QueueArn;
             let policy = {
@@ -137,7 +187,7 @@ function setupQueue(params, db) {
         })
         .then(() => {
 
-            logger.info('queue_arn', queue_arn);
+            logger.info(`subscribing ${queue_arn} to topic ${sns_topic}`);
             return sns.subscribeAsync({
                 Protocol: 'sqs',
                 TopicArn: sns_topic,
@@ -184,25 +234,39 @@ class Setup {
 
     run (req, res) {
 
+
         const params = req.body;
-        const db_name = 'concord';
+        const servers_db_name = 'concord_servers';
+        const config_db_name = 'concord_config';
         const initial_data = JSON.parse(default_file);
         const aws_cred = _.clone(params.aws);
         const dynasty = require('dynasty')(aws_cred);
+        let servers_db_arn;
+        let config_db_arn;
         let db;
-        let db_arn;
 
-        return dynasty.create(db_name, {
+        return dynasty.create(config_db_name, {
                 key_schema: {
                     hash: ['type', 'string'],
                     range: ['name', 'string']
-                }
+                },
+                throughput: { write: 2, read: 2 }
             })
             .delay(5000)
             .then(response => {
+                config_db_arn = response.TableDescription.TableArn;
                 logger.info('created DynamoDB', response.TableDescription.TableArn);
-                db_arn = response.TableDescription.TableArn;
-                db = dynasty.table(db_name);
+                db = dynasty.table(config_db_name);
+                return dynasty.create(servers_db_name, {
+                    key_schema: {
+                        hash: ['instance_id', 'string']
+                    },
+                    throughput: { write: 2, read: 2 }
+                });
+            })
+            .then(response => {
+                servers_db_arn = response.TableDescription.TableArn;
+                logger.info('created DynamoDB', response.TableDescription.TableArn);
                 return db.insert(initial_data);
             })
             .then(() => {
@@ -217,15 +281,21 @@ class Setup {
             })
             .then(() => {
                 logger.info('created SQS queue');
-                return createIam(params, db, db_arn);
+                return createServerIam(params, db, config_db_arn, servers_db_arn);
             })
             .then(() => {
-                logger.info('created iam user');
+
+                logger.info('created server IAM user');
+                return createClientIam(params, db, servers_db_arn);
+            })
+            .then(() => {
+                logger.info('created client IAM user');
                 return createUser(params, db);
             })
             .then(response => {
-                logger.info('created admin user');
-                return config.saveServiceAccount(params.cms);
+                var chef_account = _.clone(params.cms);
+                chef_account.key = crypto_client.encrypt_string(chef_account.key);
+                return db.insert(chef_account);
             })
             .then(response => {
                 logger.info('added chef account account');

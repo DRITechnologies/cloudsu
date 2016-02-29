@@ -1,10 +1,13 @@
 {
-    "globals": { 
+    "globals": {
     "_": true,
     "bootbox": true,
     "stacks": true,
-    "ace": true
+    "ace": true,
+    "module": true,
+    "require": true
      },
+    "esversion": 6,
     "predef": [ "-Promise" ],
     "bitwise": true,
     "curly": true,
@@ -18,9 +21,7 @@
     "loopfunc" : true,
     "newcap" : false,
     "noarg": true,
-    "node": true,
     "scripturl" : true,
-    "strict" : false,
     "smarttabs": true,
     "sub": true,
     "undef" : true,
@@ -30,5 +31,6 @@
     "node": true,
     "latedef": true,
     "undef": true,
-    "eqnull": true
+    "eqnull": true,
+    "strict": false
 }

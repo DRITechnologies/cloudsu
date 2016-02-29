@@ -12,6 +12,7 @@ stacks.controller('setup', function ($scope, $http, $location, $modal, dataStore
         $scope.account.aws.name = 'DEFAULT';
         $scope.account.cms.type = 'CMS';
         $scope.account.cms.name = 'DEFAULT';
+        $scope.account.cms.server = 'CHEF';
         $scope.account.user.type = 'USER';
 
         if ($scope.account.user.password !== $scope.account.user.confirm) {
@@ -21,6 +22,8 @@ stacks.controller('setup', function ($scope, $http, $location, $modal, dataStore
             });
             return;
         }
+
+        console.log($scope.account);
 
         $scope.showSpinner = true;
         $http.post('/api/v1/setup/' + $scope.account.aws.name, $scope.account)

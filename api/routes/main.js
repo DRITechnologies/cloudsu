@@ -121,8 +121,6 @@ class Main {
 
     getServiceAccounts (req, res) {
 
-        console.log('gettings accounts 14213421');
-
         return config.getServiceAccounts(req.params.type)
             .then(response => {
                 res.status(200).json(response);

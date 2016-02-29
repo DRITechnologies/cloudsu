@@ -17,17 +17,17 @@ var db_migration_prime = 'db_migrator/prime';
 var retry_options = {
     interval: 10 * 1000,
     timeout: 15 * 60 * 1000
-}
+};
 
 var auth = {
     user: '',
     pass: '',
     sendImmediately: true
-}
+};
 
 
 function stage1_job(params) {
-    console.log('started stage 1')
+    console.log('started stage 1');
     var url = [jutha_api_base, stage1].join('/');
     return request.async({
             method: 'PATCH',
@@ -43,7 +43,7 @@ function stage1_job(params) {
             }
             console.log('scale groups have been started successfully');
             return "success";
-        })
+        });
 }
 
 function run_db_prime() {
@@ -63,7 +63,7 @@ function run_db_prime() {
             }
             console.log(params);
             return body;
-        })
+        });
 
 }
 
@@ -138,7 +138,7 @@ function stage2_job(params) {
             elb_perf.run(params);
             console.log(body.info);
             return body.status;
-        })
+        });
 }
 
 function run_db_migration() {
@@ -158,13 +158,13 @@ function run_db_migration() {
             }
             console.log(params);
             return body;
-        })
+        });
 
 }
 
 
 function stage3_job(params) {
-    console.log('starting stage 3')
+    console.log('starting stage 3');
     var url = [jutha_api_base, stage3].join('/');
     return request.async({
             method: 'PATCH',
@@ -183,12 +183,12 @@ function stage3_job(params) {
             }
             console.log(body.info);
             return body.status;
-        })
+        });
 
 }
 
 function stage4_job(params) {
-    console.log('starting stage 4')
+    console.log('starting stage 4');
     var url = [jutha_api_base, stage4].join('/');
     return request.async({
             method: 'PATCH',
@@ -207,7 +207,7 @@ function stage4_job(params) {
             }
             console.log(body.info);
             return body.status;
-        })
+        });
 }
 
 

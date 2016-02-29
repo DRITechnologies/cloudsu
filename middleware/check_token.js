@@ -3,7 +3,6 @@
 
 const config = require('../config/config.js');
 const token_client = require('../utls/token.js');
-
 const logger = require('../utls/logger.js');
 
 class AttachAwsAuth {

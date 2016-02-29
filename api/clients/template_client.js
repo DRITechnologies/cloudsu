@@ -4,9 +4,9 @@
 const fs = require('fs');
 const _ = require('underscore');
 const path = require('path');
-
 const config = require('../../config/config.js');
 const logger = require('../../utls/logger.js');
+const secure = require('../../config/secure_config');
 
 //clients
 const ec2_client = require('./ec2_client.js');
@@ -27,6 +27,7 @@ const CPU_HIGH = fs.readFileSync(path.resolve(__dirname, '../../templates/CPU/hi
 const CPU_LOW = fs.readFileSync(path.resolve(__dirname, '../../templates/CPU/low.json'), 'utf8');
 const SP_DOWN = fs.readFileSync(path.resolve(__dirname, '../../templates/ScalePolicy/ScaleDown.json'), 'utf8');
 const SP_UP = fs.readFileSync(path.resolve(__dirname, '../../templates/ScalePolicy/ScaleUp.json'), 'utf8');
+const BOOTSTRAP = fs.readFileSync(path.resolve(__dirname, '../../templates/Scripts/bootstrap.py'), 'utf8');
 
 // utls
 const utls = require('../../utls/utilities.js');
@@ -49,11 +50,6 @@ class ConstructTemplate {
         return this.sourceDefaults()
             .then(defaults => {
 
-                //XXX temporary to get chef checkin
-                params.cms_url = params.cms.url;
-                params.cms_key = params.cms.key;
-                params.cms_validator = params.cms.validator;
-
                 if (params.build_size === 'Single') {
                     return self.get_single_template(template, params);
                 }
@@ -68,6 +64,7 @@ class ConstructTemplate {
 
         const self = this;
         const root_params = _.clone(params);
+        const client_db = secure.get('db_client');
 
         return this.build_volumes(params)
             .then(volumes => {
@@ -100,7 +97,11 @@ class ConstructTemplate {
                     vars.dns_ref = `ELB${vars.app_name}${vars.version}`;
                     vars.dns_type = 'DNSName';
 
-                    // input the params into template
+                    //add client db creds
+                    let bootstrap = _.template(BOOTSTRAP);
+                    bootstrap = bootstrap(client_db);
+
+                    // push asg params into template
                     let asg = _.template(ASG);
                     asg = JSON.parse(asg(vars));
 
@@ -130,8 +131,8 @@ class ConstructTemplate {
                     lc.Properties.UserData = userdata;
                     let metadata = _.template(META_DATA);
                     metadata = JSON.parse(metadata(vars));
-                    metadata['AWS::CloudFormation::Init']['chef_register']['files']['/etc/chef/validation.pem'].content = vars.cms_validator;
                     metadata['AWS::CloudFormation::Init']['chef_register']['files']['/etc/chef/first-boot.json'].content = vars.first_boot;
+                    metadata['AWS::CloudFormation::Init']['chef_register']['files']['/tmp/bootstrap.py'].content = String(bootstrap);
                     lc.Metadata = metadata;
                     lc.Properties.BlockDeviceMappings = volumes;
 
@@ -221,10 +222,12 @@ class ConstructTemplate {
 
     get_single_template (template, params) {
 
+        const client_db = secure.get('db_client');
         //load templates
         const self = this;
         return this.build_volumes(params)
             .then(volumes => {
+                let bootstrap = _.template(BOOTSTRAP);
                 let wc = _.template(WC);
                 let userdata = _.template(USER_DATA);
                 let metadata = _.template(META_DATA);
@@ -263,6 +266,9 @@ class ConstructTemplate {
                     ec2.Properties.IamInstanceProfile = params.iam_profile;
                 }
 
+                //boot strap params
+                bootstrap = bootstrap(client_db);
+
                 // wc
                 wc = wc(params);
 
@@ -274,7 +280,7 @@ class ConstructTemplate {
                 // add metadata
                 metadata = JSON.parse(metadata(params));
                 metadata['AWS::CloudFormation::Init']['chef_register']['files']['/etc/chef/validation.pem'].content = params.cms_validator;
-                metadata['AWS::CloudFormation::Init']['chef_register']['files']['/etc/chef/first-boot.json'].content = params.first_boot;
+                metadata['AWS::CloudFormation::Init']['chef_register']['files']['/tmp/bootstrap.py'].content = String(bootstrap);
                 ec2.Metadata = metadata;
                 template.Resources[params.wc_ref] = ec2;
 
@@ -306,8 +312,8 @@ class ConstructTemplate {
             .then(defaults => {
 
                 return {
-                    ami: defaults['aws_default_ami'],
-                    instance_size: defaults['aws_default_instance_size'],
+                    ami: defaults.aws_default_ami,
+                    instance_size: defaults.aws_default_instance_size,
                     min_size: 1,
                     max_size: 3,
                     port: '3000'
