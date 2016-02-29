@@ -12,14 +12,11 @@ class AttachAwsAuth {
 
         const token = req.headers.token || req.body.token;
 
-        logger.debug('authenticating with token:', token);
-
         return token_client.verify(token)
             .then(response => {
-                logger.debug('verified token:', token);
+                logger.debug('verified token for user:', response.name);
                 return config.getUser(response.name)
                     .then(user => {
-                        logger.debug('Got user:', user);
                         req.user = user;
                         return next();
                     });
