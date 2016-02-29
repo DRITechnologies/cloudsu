@@ -1,6 +1,8 @@
 /*jshint esversion: 6 */
 'use strict';
 
+const err_handler = require('../../utls/error_handler.js');
+
 class Autoscale {
     constructor () {}
 
@@ -16,7 +18,7 @@ class Autoscale {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -32,7 +34,7 @@ class Autoscale {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 }

@@ -2,6 +2,7 @@
 'use strict';
 
 const logger = require('../../utls/logger.js');
+const err_handler = require('../../utls/error_handler.js');
 
 class Upgrade {
     constructor () {}
@@ -23,7 +24,7 @@ class Upgrade {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }
@@ -45,7 +46,7 @@ class Upgrade {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 }

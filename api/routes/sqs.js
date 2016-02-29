@@ -1,6 +1,8 @@
 /*jshint esversion: 6 */
 'use strict';
 
+const err_handler = require('../../utls/error_handler.js');
+
 class Sqs {
     constructor () {}
 
@@ -15,7 +17,7 @@ class Sqs {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -30,7 +32,7 @@ class Sqs {
                 res.status(200).json('successful creation');
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 }

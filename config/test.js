@@ -1,5 +1,9 @@
-const secure = require('../config/secure_config');
+const err_handler = require('../utls/error_handler.js');
 
-const client_db = secure.get('db_client');
-
-console.log(client_db);
+console.log(
+err_handler({
+  cause: {
+    message: 'testing'
+  }
+})
+);

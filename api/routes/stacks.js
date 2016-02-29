@@ -2,6 +2,7 @@
 'use strict';
 
 const logger = require('../../utls/logger.js');
+const err_handler = require('../../utls/error_handler.js');
 
 class Stacks {
     constructor () {}
@@ -18,7 +19,7 @@ class Stacks {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -34,7 +35,7 @@ class Stacks {
             })
             .catch(err => {
                 logger.info(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -50,7 +51,7 @@ class Stacks {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }
@@ -71,7 +72,7 @@ class Stacks {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }
@@ -92,7 +93,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }
@@ -108,7 +109,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }
@@ -124,7 +125,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }
@@ -140,7 +141,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }
@@ -156,7 +157,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -172,7 +173,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -187,7 +188,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 }

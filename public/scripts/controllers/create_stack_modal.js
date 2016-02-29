@@ -103,11 +103,11 @@ stacks.controller('create_stack_modal', function ($scope, $http, $modalInstance,
                 dataStore.addAlert('success', 'successfully created stack: ' + $scope.stack.stack_name);
                 $location.path('/');
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.showSpinner = false;
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };

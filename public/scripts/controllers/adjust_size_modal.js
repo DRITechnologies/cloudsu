@@ -15,10 +15,10 @@ stacks.controller('adjust_size_modal', function ($scope, $http, $modalInstance, 
                 $modalInstance.dismiss('cancel');
                 dataStore.addAlert('success', 'successfully adjusted scale group size');
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };

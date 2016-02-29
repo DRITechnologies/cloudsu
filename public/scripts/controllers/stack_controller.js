@@ -38,8 +38,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                     group.Instances = mergeEc2Objects(group.Instances, data);
                     return group;
                 })
-                .error(function (res) {
-                    dataStore.addAlert('danger', res.message);
+                .error(function (err) {
+                    dataStore.addAlert('danger', err);
                 });
         });
     }
@@ -52,7 +52,7 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                 dataStore.setShowSpinner(false);
             })
             .error(function (err) {
-                dataStore.addAlert('danger', err.message);
+                dataStore.addAlert('danger', err);
                 dataStore.setShowSpinner(false);
             });
 
@@ -81,8 +81,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                     group.LoadBalancerNames = data.LoadBalancerDescriptions;
                     return group;
                 })
-                .error(function (res) {
-                    dataStore.addAlert('danger', res.message);
+                .error(function (err) {
+                    dataStore.addAlert('danger', err);
                 });
         });
     }
@@ -99,8 +99,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                 $scope.scaleGroups = addTags(groups);
                 dataStore.setShowSpinner(false);
             })
-            .error(function (res) {
-                dataStore.addAlert('danger', res.message);
+            .error(function (err) {
+                dataStore.addAlert('danger', err);
             });
     }
 
@@ -167,8 +167,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                     }).success(function (res) {
                         dataStore.addAlert('success', res);
                     })
-                    .error(function (res) {
-                        dataStore.addAlert('danger', res.message);
+                    .error(function (err) {
+                        dataStore.addAlert('danger', err);
                     });
             }
         });
@@ -186,8 +186,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
             .success(function (response) {
                 dataStore.addAlert('success', response);
             })
-            .error(function (res) {
-                dataStore.addAlert('danger', res.message);
+            .error(function (err) {
+                dataStore.addAlert('danger', err);
             });
     };
 
@@ -209,8 +209,9 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                         }
                     }
                 });
-            }).error(function (res) {
-                dataStore.addAlert('danger', res.message);
+            })
+            .error(function (err) {
+                dataStore.addAlert('danger', err);
             });
     };
 
@@ -249,7 +250,7 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
             $scope.stack_status = response;
         })
         .error(function (err) {
-            dataStore.addAlert('danger', err.message);
+            dataStore.addAlert('danger', err);
         });
 
 
@@ -257,7 +258,6 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
     $http.get('/api/v1/stacks/' + $scope.stack_name)
         .success(function (data) {
             $scope.resources = data.StackResources;
-            console.log(data);
             var instances = _.filter(data.StackResources, function (x) {
                 return x.ResourceType === 'AWS::EC2::Instance';
             });
@@ -272,14 +272,17 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
             } else {
                 dataStore.setShowSpinner(false);
             }
+        })
+        .error(function (err) {
+            dataStore.addAlert('danger', err);
         });
 
     $http.get('/api/v1/stacks/describeEvents/' + $scope.stack_name)
         .success(function (response) {
             $scope.stack_logs = response;
         })
-        .error(function (res) {
-            dataStore.addAlert('danger', res.message);
+        .error(function (err) {
+            dataStore.addAlert('danger', err);
         });
 
     $http.get('/api/v1/chef/environments/' + $scope.stack_name)
@@ -292,8 +295,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                 dataStore.setBuildSize(defaults.concord_params.build_size);
             }
         })
-        .error(function (res) {
-            dataStore.addAlert('danger', res.message);
+        .error(function (err) {
+            dataStore.addAlert('danger', err);
         });
 
 });

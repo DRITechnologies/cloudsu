@@ -11,10 +11,10 @@ stacks.controller('elb_modal', function ($scope, $http, $modalInstance, elbs, sc
                 $modalInstance.dismiss();
                 dataStore.addAlert('success', 'connected elb: ' + $scope.elb_name + ' to scale group: ' + scale_group);
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };

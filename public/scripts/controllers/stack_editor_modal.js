@@ -29,10 +29,10 @@ stacks.controller('stack_editor_modal', function ($scope, $http, $modalInstance,
                 $modalInstance.dismiss();
                 dataStore.addAlert('success', 'successfully updated stack');
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };

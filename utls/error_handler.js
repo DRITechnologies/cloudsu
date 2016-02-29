@@ -1,15 +1,15 @@
 /*jshint esversion: 6 */
-'use strict'
+'use strict';
 
-export default function (err) {
+const logger = require('./logger.js');
+
+module.exports =  function (err) {
+    logger.error(err);
     if (err.cause) {
-        console.log(err.cause.message);
         return err.cause.message;
     } else if (err.message) {
-        console.log(err.message);
         return err.message;
     } else {
         return err;
     }
-
-};;
+};

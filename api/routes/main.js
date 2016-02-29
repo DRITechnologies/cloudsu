@@ -1,11 +1,8 @@
 /*jshint esversion: 6 */
 'use strict';
 
-//config service
 const config = require('../../config/config.js');
-
-
-// logger
+const err_handler = require('../../utls/error_handler.js');
 const logger = require('../../utls/logger.js');
 
 
@@ -76,7 +73,7 @@ class Main {
                 res.status(200).json(certs);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -92,7 +89,7 @@ class Main {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -104,7 +101,7 @@ class Main {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -115,7 +112,7 @@ class Main {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -127,7 +124,7 @@ class Main {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 }

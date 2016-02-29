@@ -47,11 +47,11 @@ stacks.controller('upgrade_modal', function($scope, $http, $modalInstance, stack
                 $modalInstance.dismiss();
                 dataStore.addAlert('success', 'successfully started upgrade');
             })
-            .error(function(res) {
+            .error(function(err) {
                 $scope.showSpinner = false;
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };

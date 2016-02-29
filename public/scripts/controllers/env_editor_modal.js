@@ -30,10 +30,10 @@ stacks.controller('env_editor_modal', function ($scope, $http, $modalInstance, e
                 $modalInstance.dismiss();
                 dataStore.addAlert('success', 'successfully updated environment');
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };

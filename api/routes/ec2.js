@@ -1,10 +1,8 @@
 /*jshint esversion: 6 */
 'use strict';
 
-//logger
 const logger = require('../../utls/logger.js');
-
-//config
+const err_handler = require('../../utls/error_handler.js');
 const config = require('../../config/config.js');
 
 
@@ -18,7 +16,7 @@ class Ec2 {
                 res.status(200).json(size_array);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -34,7 +32,7 @@ class Ec2 {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -49,7 +47,7 @@ class Ec2 {
                 res.status(200).json(images);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -64,7 +62,7 @@ class Ec2 {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }
@@ -81,7 +79,7 @@ class Ec2 {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -97,7 +95,7 @@ class Ec2 {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -112,7 +110,7 @@ class Ec2 {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 }

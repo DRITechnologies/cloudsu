@@ -28,7 +28,6 @@ stacks.controller('login_controller', function ($scope, $http, $location, $modal
                 $location.path('/');
             })
             .error(function (err) {
-
                 //stop spinnner and present error
                 $scope.showSpinner = false;
                 $scope.alerts.push({

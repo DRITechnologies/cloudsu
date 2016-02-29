@@ -7,10 +7,10 @@ stacks.controller('rollback_modal', function ($scope, $http, $modalInstance, sta
         .success(function (response) {
             $scope.rollback_available = response;
         })
-        .error(function (res) {
+        .error(function (err) {
             $scope.alerts_modal.push({
                 type: 'danger',
-                msg: res.message
+                msg: err
             });
         });
 
@@ -24,11 +24,11 @@ stacks.controller('rollback_modal', function ($scope, $http, $modalInstance, sta
                 dataStore.addAlert('success', 'successfully rolled stack back');
                 $modalInstance.dismiss('cancel');
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.showSpinner = false;
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };

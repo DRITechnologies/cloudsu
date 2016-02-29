@@ -5,8 +5,6 @@ stacks.controller('stacks_controller', function ($scope, $http, $location, $moda
     dataStore.setShowSpinner(true);
 
 
-    //set short delay to ensure local storage is up to date
-
     $http.get('/api/v1/stacks')
         .success(function (res) {
             $scope.stacks = res.StackSummaries;
@@ -32,8 +30,8 @@ stacks.controller('stacks_controller', function ($scope, $http, $location, $moda
                     .success(function (res) {
                         dataStore.addAlert('success', 'successfully deleted stack: ' + stack_name);
                     })
-                    .error(function (res) {
-                        dataStore.addAlert('danger', res.message);
+                    .error(function (err) {
+                        dataStore.addAlert('danger', err);
                     });
             }
         });

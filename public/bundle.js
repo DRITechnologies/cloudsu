@@ -72848,10 +72848,10 @@ stacks.controller('adjust_size_modal', function ($scope, $http, $modalInstance, 
                 $modalInstance.dismiss('cancel');
                 dataStore.addAlert('success', 'successfully adjusted scale group size');
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };
@@ -72867,6 +72867,7 @@ stacks.controller('adjust_size_modal', function ($scope, $http, $modalInstance, 
 
 
 });
+
 stacks.controller('create_stack_modal', function ($scope, $http, $modalInstance, dataStore, $location) {
 
     $scope.alerts_modal = [];
@@ -72972,11 +72973,11 @@ stacks.controller('create_stack_modal', function ($scope, $http, $modalInstance,
                 dataStore.addAlert('success', 'successfully created stack: ' + $scope.stack.stack_name);
                 $location.path('/');
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.showSpinner = false;
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };
@@ -72998,6 +72999,7 @@ stacks.controller('create_stack_modal', function ($scope, $http, $modalInstance,
     };
 
 });
+
 stacks.controller('elb_modal', function ($scope, $http, $modalInstance, elbs, scale_group, dataStore) {
     $scope.alerts_modal = [];
     $scope.elbs = elbs;
@@ -73011,10 +73013,10 @@ stacks.controller('elb_modal', function ($scope, $http, $modalInstance, elbs, sc
                 $modalInstance.dismiss();
                 dataStore.addAlert('success', 'connected elb: ' + $scope.elb_name + ' to scale group: ' + scale_group);
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };
@@ -73028,6 +73030,7 @@ stacks.controller('elb_modal', function ($scope, $http, $modalInstance, elbs, sc
     };
 
 });
+
 // model editor view
 stacks.controller('env_editor_modal', function ($scope, $http, $modalInstance, environment,
     dataStore) {
@@ -73060,10 +73063,10 @@ stacks.controller('env_editor_modal', function ($scope, $http, $modalInstance, e
                 $modalInstance.dismiss();
                 dataStore.addAlert('success', 'successfully updated environment');
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };
@@ -73076,6 +73079,7 @@ stacks.controller('env_editor_modal', function ($scope, $http, $modalInstance, e
         $scope.alerts_modal.splice(index, 1);
     };
 });
+
 stacks.controller('footer_bar', function ($scope, $http, dataStore) {
 
 });
@@ -73109,7 +73113,6 @@ stacks.controller('login_controller', function ($scope, $http, $location, $modal
                 $location.path('/');
             })
             .error(function (err) {
-
                 //stop spinnner and present error
                 $scope.showSpinner = false;
                 $scope.alerts.push({
@@ -73192,10 +73195,10 @@ stacks.controller('nav_bar', function ($scope, $http, $location, $modal, dataSto
                     }
                 });
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };
@@ -73220,10 +73223,10 @@ stacks.controller('nav_bar', function ($scope, $http, $location, $modal, dataSto
                     }
                 });
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };
@@ -73299,7 +73302,7 @@ stacks.controller('nav_bar', function ($scope, $http, $location, $modal, dataSto
                         $location.path('/');
                         dataStore.addAlert('success', 'successfully deleted stack: ' + $scope.stack_name);
                     })
-                    .error(function (res) {
+                    .error(function (err) {
                         $location.path('/');
                     });
             }
@@ -73328,10 +73331,10 @@ stacks.controller('rollback_modal', function ($scope, $http, $modalInstance, sta
         .success(function (response) {
             $scope.rollback_available = response;
         })
-        .error(function (res) {
+        .error(function (err) {
             $scope.alerts_modal.push({
                 type: 'danger',
-                msg: res.message
+                msg: err
             });
         });
 
@@ -73345,11 +73348,11 @@ stacks.controller('rollback_modal', function ($scope, $http, $modalInstance, sta
                 dataStore.addAlert('success', 'successfully rolled stack back');
                 $modalInstance.dismiss('cancel');
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.showSpinner = false;
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };
@@ -73364,6 +73367,7 @@ stacks.controller('rollback_modal', function ($scope, $http, $modalInstance, sta
 
 
 });
+
 stacks.controller('service_account_modal', function ($scope, $http, $location, $modal, $modalInstance, dataStore, type, server, account) {
     $scope.alerts_modal = [];
 
@@ -73444,7 +73448,7 @@ stacks.controller('setup', function ($scope, $http, $location, $modal, dataStore
                 $scope.showSpinner = false;
                 $scope.alerts.push({
                     type: 'danger',
-                    msg: err.cause.message
+                    msg: err
                 });
             });
     };
@@ -73495,8 +73499,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                     group.Instances = mergeEc2Objects(group.Instances, data);
                     return group;
                 })
-                .error(function (res) {
-                    dataStore.addAlert('danger', res.message);
+                .error(function (err) {
+                    dataStore.addAlert('danger', err);
                 });
         });
     }
@@ -73509,7 +73513,7 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                 dataStore.setShowSpinner(false);
             })
             .error(function (err) {
-                dataStore.addAlert('danger', err.message);
+                dataStore.addAlert('danger', err);
                 dataStore.setShowSpinner(false);
             });
 
@@ -73538,8 +73542,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                     group.LoadBalancerNames = data.LoadBalancerDescriptions;
                     return group;
                 })
-                .error(function (res) {
-                    dataStore.addAlert('danger', res.message);
+                .error(function (err) {
+                    dataStore.addAlert('danger', err);
                 });
         });
     }
@@ -73556,8 +73560,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                 $scope.scaleGroups = addTags(groups);
                 dataStore.setShowSpinner(false);
             })
-            .error(function (res) {
-                dataStore.addAlert('danger', res.message);
+            .error(function (err) {
+                dataStore.addAlert('danger', err);
             });
     }
 
@@ -73624,8 +73628,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                     }).success(function (res) {
                         dataStore.addAlert('success', res);
                     })
-                    .error(function (res) {
-                        dataStore.addAlert('danger', res.message);
+                    .error(function (err) {
+                        dataStore.addAlert('danger', err);
                     });
             }
         });
@@ -73643,8 +73647,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
             .success(function (response) {
                 dataStore.addAlert('success', response);
             })
-            .error(function (res) {
-                dataStore.addAlert('danger', res.message);
+            .error(function (err) {
+                dataStore.addAlert('danger', err);
             });
     };
 
@@ -73666,8 +73670,9 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                         }
                     }
                 });
-            }).error(function (res) {
-                dataStore.addAlert('danger', res.message);
+            })
+            .error(function (err) {
+                dataStore.addAlert('danger', err);
             });
     };
 
@@ -73706,7 +73711,7 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
             $scope.stack_status = response;
         })
         .error(function (err) {
-            dataStore.addAlert('danger', err.message);
+            dataStore.addAlert('danger', err);
         });
 
 
@@ -73714,7 +73719,6 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
     $http.get('/api/v1/stacks/' + $scope.stack_name)
         .success(function (data) {
             $scope.resources = data.StackResources;
-            console.log(data);
             var instances = _.filter(data.StackResources, function (x) {
                 return x.ResourceType === 'AWS::EC2::Instance';
             });
@@ -73729,14 +73733,17 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
             } else {
                 dataStore.setShowSpinner(false);
             }
+        })
+        .error(function (err) {
+            dataStore.addAlert('danger', err);
         });
 
     $http.get('/api/v1/stacks/describeEvents/' + $scope.stack_name)
         .success(function (response) {
             $scope.stack_logs = response;
         })
-        .error(function (res) {
-            dataStore.addAlert('danger', res.message);
+        .error(function (err) {
+            dataStore.addAlert('danger', err);
         });
 
     $http.get('/api/v1/chef/environments/' + $scope.stack_name)
@@ -73749,8 +73756,8 @@ stacks.controller('stack_controller', function ($scope, $routeParams, $http, $mo
                 dataStore.setBuildSize(defaults.concord_params.build_size);
             }
         })
-        .error(function (res) {
-            dataStore.addAlert('danger', res.message);
+        .error(function (err) {
+            dataStore.addAlert('danger', err);
         });
 
 });
@@ -73786,10 +73793,10 @@ stacks.controller('stack_editor_modal', function ($scope, $http, $modalInstance,
                 $modalInstance.dismiss();
                 dataStore.addAlert('success', 'successfully updated stack');
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };
@@ -73802,14 +73809,13 @@ stacks.controller('stack_editor_modal', function ($scope, $http, $modalInstance,
         $scope.alerts_modal.splice(index, 1);
     };
 });
+
 // view controllers
 stacks.controller('stacks_controller', function ($scope, $http, $location, $modal, dataStore) {
     dataStore.setShowBurger(false);
     dataStore.setShowPlus(true);
     dataStore.setShowSpinner(true);
 
-
-    //set short delay to ensure local storage is up to date
 
     $http.get('/api/v1/stacks')
         .success(function (res) {
@@ -73836,8 +73842,8 @@ stacks.controller('stacks_controller', function ($scope, $http, $location, $moda
                     .success(function (res) {
                         dataStore.addAlert('success', 'successfully deleted stack: ' + stack_name);
                     })
-                    .error(function (res) {
-                        dataStore.addAlert('danger', res.message);
+                    .error(function (err) {
+                        dataStore.addAlert('danger', err);
                     });
             }
         });
@@ -73876,6 +73882,7 @@ stacks.controller('stacks_controller', function ($scope, $http, $location, $moda
 
 
 });
+
 stacks.controller('system', function ($scope, $http, $location, $modal, dataStore) {
 
     dataStore.setShowBurger(false);
@@ -74033,11 +74040,11 @@ stacks.controller('upgrade_modal', function($scope, $http, $modalInstance, stack
                 $modalInstance.dismiss();
                 dataStore.addAlert('success', 'successfully started upgrade');
             })
-            .error(function(res) {
+            .error(function(err) {
                 $scope.showSpinner = false;
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };
@@ -74051,6 +74058,7 @@ stacks.controller('upgrade_modal', function($scope, $http, $modalInstance, stack
         $scope.alerts_modal.splice(index, 1);
     };
 });
+
 // directives
 stacks.directive('navbar', function () {
     return {
@@ -74245,4 +74253,5 @@ stacks.config(function ($routeProvider) {
             controller: 'login_controller'
         });
 });
+
 },{"angular":5,"angular-bootstrap-npm":1,"angular-moment":2,"angular-route":4,"bootbox":7,"bootstrap":8,"brace":21,"brace/mode/json":22,"brace/theme/solarized_dark":23,"jquery":25,"ngstorage":27,"underscore":28}]},{},[30]);

@@ -5,12 +5,13 @@ const Promise = require('bluebird');
 const _ = require('underscore');
 const AWS = require('aws-sdk');
 const logger = require('../../utls/logger.js');
+const err_handler = require('../../utls/error_handler.js');
 const fs = require('fs');
 const path = require('path');
-const default_file = fs.readFileSync(path.resolve(__dirname, '../../config/defaults.json'), 'utf8');
+const defaults_file = fs.readFileSync(path.resolve(__dirname, '../../config/defaults.json'), 'utf8');
 const secure = require('../../config/secure_config.js');
 const crypto_client = require('../../utls/crypto_client.js');
-let token = require('../../utls/token.js');
+const token = require('../../utls/token.js');
 
 
 function createServerIam(params, db, config_db_arn, servers_db_arn) {
@@ -238,7 +239,7 @@ class Setup {
         const params = req.body;
         const servers_db_name = 'concord_servers';
         const config_db_name = 'concord_config';
-        const initial_data = JSON.parse(default_file);
+        const initial_data = JSON.parse(defaults_file);
         const aws_cred = _.clone(params.aws);
         const dynasty = require('dynasty')(aws_cred);
         let servers_db_arn;
@@ -306,7 +307,7 @@ class Setup {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }

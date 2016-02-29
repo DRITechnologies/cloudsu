@@ -27,10 +27,10 @@ stacks.controller('nav_bar', function ($scope, $http, $location, $modal, dataSto
                     }
                 });
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };
@@ -55,10 +55,10 @@ stacks.controller('nav_bar', function ($scope, $http, $location, $modal, dataSto
                     }
                 });
             })
-            .error(function (res) {
+            .error(function (err) {
                 $scope.alerts_modal.push({
                     type: 'danger',
-                    msg: res.message
+                    msg: err
                 });
             });
     };
@@ -134,7 +134,7 @@ stacks.controller('nav_bar', function ($scope, $http, $location, $modal, dataSto
                         $location.path('/');
                         dataStore.addAlert('success', 'successfully deleted stack: ' + $scope.stack_name);
                     })
-                    .error(function (res) {
+                    .error(function (err) {
                         $location.path('/');
                     });
             }

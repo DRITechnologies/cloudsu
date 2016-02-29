@@ -3,6 +3,7 @@
 
 const accounts_client = require('../clients/accounts_client.js');
 const logger = require('../../utls/logger.js');
+const err_handler = require('../../utls/error_handler.js');
 
 
 class Accounts {
@@ -15,7 +16,7 @@ class Accounts {
                 res.status(200).json(user);
             })
             .catch(err => {
-                res.status(401).json(err);
+                res.status(401).json(err_handler(err));
             });
     }
 
@@ -26,7 +27,7 @@ class Accounts {
                 res.status(200).json(user);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -40,7 +41,7 @@ class Accounts {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }

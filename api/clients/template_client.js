@@ -235,7 +235,7 @@ class ConstructTemplate {
                 let ec2 = _.template(EC2);
 
                 if (params.route_53) {
-                    //dns
+                    // create dns name stack_name + domain
                     params.wc_ref = 'instance';
                     params.dns_type = 'PrivateDnsName';
                     params.dns = [params.stack_name, '.', params.domain].join('');

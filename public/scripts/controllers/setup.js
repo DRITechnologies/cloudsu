@@ -38,7 +38,7 @@ stacks.controller('setup', function ($scope, $http, $location, $modal, dataStore
                 $scope.showSpinner = false;
                 $scope.alerts.push({
                     type: 'danger',
-                    msg: err.cause.message
+                    msg: err
                 });
             });
     };

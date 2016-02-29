@@ -2,7 +2,7 @@
 'use strict';
 
 const logger = require('../../utls/logger.js');
-
+const err_handler = require('../../utls/error_handler.js');
 
 class Elb {
     constructor () {}
@@ -19,7 +19,7 @@ class Elb {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -35,7 +35,7 @@ class Elb {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }
@@ -51,7 +51,7 @@ class Elb {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }
@@ -67,7 +67,7 @@ class Elb {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 
@@ -82,7 +82,7 @@ class Elb {
                 res.status(200).json(response);
             })
             .catch(err => {
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
 
     }
@@ -101,7 +101,7 @@ class Elb {
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err);
+                res.status(500).json(err_handler(err));
             });
     }
 }
