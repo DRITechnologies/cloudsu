@@ -1,7 +1,7 @@
 /*jshint esversion: 6 */
-'use strict'
+'use strict';
 
-const NodeCache = require("node-cache");
+const NodeCache = require('node-cache');
 const Cache = new NodeCache({
     stdTTL: 300,
     checkperiod: 150

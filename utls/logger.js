@@ -1,19 +1,15 @@
 /*jshint esversion: 6 */
-'use strict'
+'use strict';
 
+const log_level = process.env.CONCORD_LOG_LEVEL || 'debug';
 const winston = require('winston');
-const path = require('path');
-
-//get root of application folder
-const app_root = path.resolve(__dirname, '../');
-
 winston.emitErrs = true;
 
 
 const logger = new winston.Logger({
     transports: [
         new winston.transports.Console({
-            level: 'debug',
+            level: log_level,
             handleExceptions: true,
             json: false,
             colorize: true,

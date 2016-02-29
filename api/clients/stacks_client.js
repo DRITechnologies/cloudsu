@@ -69,6 +69,16 @@ class StacksClient {
         let template_body = {};
         const self = this;
 
+        //allows api to return while backend verifies
+        function verify(params) {
+          return self.waitForStack(params.stack_name, 15, 50)
+          .then(() => {
+             if (params.build_size === 'HA') {
+                return elb_client.connectElbs(params);
+             }
+          });
+        }
+
         //init chef client
         const chef_client = require('./chef_client.js');
         chef_client.init(params.cms);
@@ -90,13 +100,8 @@ class StacksClient {
                 return chef_client.createEnvironment(params);
             })
             .then(() => {
-                logger.info('waiting for stack');
-                return self.waitForStack(params.stack_name, 15, 1);
-            })
-            .then(() => {
-                if (params.build_size === 'HA') {
-                    return elb_client.connectElbs(params);
-                }
+              verify(params);
+              return 'success';
             })
             .catch(err => {
                 logger.info(err);

@@ -1,5 +1,5 @@
 /*jshint esversion: 6 */
-'use strict'
+'use strict';
 
 const secure = require('../config/secure_config');
 
