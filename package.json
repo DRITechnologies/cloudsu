@@ -1,91 +1,117 @@
 {
-  "name": "concord",
-  "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
-  "dependencies": {
-    "aws-sdk": "latest",
-    "angular-moment": "0.10.2",
-    "angular-route": "1.4.4",
-    "aws": "0.0.3-2",
-    "bluebird": "2.9.30",
-    "body-parser": "1.13.1",
-    "brace": "latest",
-    "bluebird-retry": "0.5.0",
-    "chef": "0.3.1",
-    "express": "4.13.0",
-    "moment": "2.10.6",
-    "morgan": "1.6.1",
-    "nconf": "latest",
-    "method-override": "2.3.3",
-    "winston": "1.0.0",
-    "underscore": "1.8.3",
-    "request": "2.60.0",
-    "pg": "4.4.1",
-    "http-auth": "2.2.8",
-    "pass": "0.2.0",
-    "simple-ssh": "0.8.6",
-    "mkdirp-then": "1.1.0",
-    "repeat": "0.0.6",
-    "dynasty": "latest",
-    "bcrypt": "latest",
-    "node-cache": "latest",
-    "async": "latest",
-    "jsonwebtoken": "latest"
-  },
-  "devDependencies": {
-    "angular": "1.4.4",
-    "angular-bootstrap-npm": "0.13.3",
-    "angular-ui-bootstrap": "0.13.3",
-    "babel-eslint": "^5.0.0",
-    "bootbox": "4.4.0",
-    "bootstrap": "3.3.5",
-    "browserify": "11.0.1",
-    "browserify-shim": "3.8.10",
-    "eslint": "^2.2.0",
-    "eslint-config-airbnb": "^5.0.1",
-    "grunt": "0.4.5",
-    "grunt-aws-s3": "latest",
-    "grunt-browserify": "4.0.0",
-    "grunt-concurrent": "latest",
-    "grunt-contrib-compress": "latest",
-    "grunt-contrib-concat": "latest",
-    "grunt-contrib-cssmin": "0.13.0",
-    "grunt-contrib-jshint": "latest",
-    "grunt-contrib-less": "latest",
-    "grunt-contrib-uglify": "latest",
-    "grunt-contrib-watch": "latest",
-    "grunt-eslint": "^18.0.0",
-    "grunt-nodemon": "latest",
-    "jquery": "2.1.4",
-    "jquery-browserify": "1.8.1",
-    "jshint": "2.8.0",
-    "jshint-stylish": "2.0.1",
-    "ngstorage": "latest"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
-  "browser": {
-    "angular": "./node_modules/angular/angular.js",
-    "angular-local-storage": "./node_modules/angular-local-storage/dist/angular-local-storage.js"
-  },
-  "browserify-shim": {
-    "angular": {
-      "depends": "jquery:jQuery",
-      "exports": "angular"
+    "name": "concord",
+    "version": "1.0.0",
+    "description": "",
+    "main": "server.js",
+    "dependencies": {
+        "aws-sdk": "latest",
+        "angular-moment": "0.10.2",
+        "angular-route": "1.4.4",
+        "aws": "0.0.3-2",
+        "bluebird": "2.9.30",
+        "body-parser": "1.13.1",
+        "brace": "latest",
+        "bluebird-retry": "0.5.0",
+        "chef": "0.3.1",
+        "express": "4.13.0",
+        "moment": "2.10.6",
+        "morgan": "1.6.1",
+        "nconf": "latest",
+        "method-override": "2.3.3",
+        "winston": "1.0.0",
+        "underscore": "1.8.3",
+        "request": "2.60.0",
+        "pg": "4.4.1",
+        "http-auth": "2.2.8",
+        "pass": "0.2.0",
+        "simple-ssh": "0.8.6",
+        "mkdirp-then": "1.1.0",
+        "repeat": "0.0.6",
+        "dynasty": "latest",
+        "bcrypt": "latest",
+        "node-cache": "latest",
+        "async": "latest",
+        "jsonwebtoken": "latest"
     },
-    "angular-local-storage": {
-      "depends": "angular",
-      "exports": "angular.module('LocalStorageModule').name"
-    }
-  },
-  "browserify": {
-    "transform": [
-      "browserify-shim"
-    ]
-  },
-  "author": "David Richards",
-  "license": "ISC"
+    "devDependencies": {
+        "angular": "1.4.4",
+        "angular-bootstrap-npm": "0.13.3",
+        "angular-ui-bootstrap": "0.13.3",
+        "babel-eslint": "^5.0.0",
+        "bootbox": "4.4.0",
+        "bootstrap": "3.3.5",
+        "browserify": "11.0.1",
+        "browserify-shim": "3.8.10",
+        "eslint": "^2.2.0",
+        "grunt": "0.4.5",
+        "grunt-aws-s3": "latest",
+        "grunt-browserify": "4.0.0",
+        "grunt-concurrent": "latest",
+        "grunt-contrib-compress": "latest",
+        "grunt-contrib-concat": "latest",
+        "grunt-contrib-cssmin": "0.13.0",
+        "grunt-contrib-jshint": "latest",
+        "grunt-contrib-less": "latest",
+        "grunt-contrib-uglify": "latest",
+        "grunt-contrib-watch": "latest",
+        "grunt-eslint": "^18.0.0",
+        "grunt-nodemon": "latest",
+        "jquery": "2.1.4",
+        "jquery-browserify": "1.8.1",
+        "jshint": "2.8.0",
+        "jshint-stylish": "2.0.1",
+        "ngstorage": "latest",
+        "grunt-concurrent": "^1.0.0",
+        "grunt-contrib-clean": "^0.6.0",
+        "grunt-contrib-concat": "^0.5.0",
+        "grunt-contrib-connect": "^0.8.0",
+        "grunt-contrib-copy": "^0.6.0",
+        "grunt-contrib-cssmin": "^0.10.0",
+        "grunt-contrib-htmlmin": "^0.3.0",
+        "grunt-contrib-less": "^0.11.4",
+        "grunt-contrib-uglify": "^0.6.0",
+        "grunt-contrib-watch": "^0.6.1",
+        "grunt-filerev": "^2.0.0",
+        "grunt-usemin": "^2.4.0",
+        "grunt-concurrent": "^1.0.0",
+        "grunt-contrib-clean": "^0.6.0",
+        "grunt-contrib-concat": "^0.5.0",
+        "grunt-contrib-connect": "^0.8.0",
+        "grunt-contrib-copy": "^0.6.0",
+        "grunt-contrib-cssmin": "^0.10.0",
+        "grunt-contrib-htmlmin": "^0.3.0",
+        "grunt-contrib-less": "^0.11.4",
+        "grunt-contrib-uglify": "^0.6.0",
+        "grunt-contrib-watch": "^0.6.1",
+        "grunt-filerev": "^2.0.0",
+        "grunt-usemin": "^2.4.0",
+        "load-grunt-tasks": "^0.6.0",
+        "time-grunt": "^1.0.0"
+    },
+    "scripts": {
+        "start": "grunt",
+        "test": "grunt test",
+        "postinstall": "bower install --config.interactive=false"
+    },
+    "browser": {
+        "angular": "./node_modules/angular/angular.js",
+        "angular-local-storage": "./node_modules/angular-local-storage/dist/angular-local-storage.js"
+    },
+    "browserify-shim": {
+        "angular": {
+            "depends": "jquery:jQuery",
+            "exports": "angular"
+        },
+        "angular-local-storage": {
+            "depends": "angular",
+            "exports": "angular.module('LocalStorageModule').name"
+        }
+    },
+    "browserify": {
+        "transform": [
+            "browserify-shim"
+        ]
+    },
+    "author": "David Richards",
+    "license": "ISC"
 }

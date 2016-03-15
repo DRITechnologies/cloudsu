@@ -12,141 +12,143 @@ const secrets_path = 'secrets.json';
 
 function shutdown(message) {
 
-  const config_client = require('../config/config.js');
-  const servers_db = require('./servers_db.js');
-  let group_name = message.AutoScalingGroupName.split('-');
-  let node_name = [group_name[0], group_name[1], message.EC2InstanceId].join('-');
-  logger.debug('terminating instance:', node_name);
+    const config_client = require('../config/config.js');
+    const servers_db = require('./servers_db.js');
+    let group_name = message.AutoScalingGroupName.split('-');
+    let node_name = [group_name[0], group_name[1], message.EC2InstanceId].join('-');
+    logger.debug('terminating instance:', node_name);
 
-  return config_client.getServiceAccount({
-      name: 'DEFAULT',
-      type: 'CMS'
-    })
-    .then(account => {
-      chef_client.init(account);
-      chef_client.deleteNode(node_name);
-      return servers_db.remove(message.EC2InstanceId);
-    });
+    return config_client.getServiceAccount({
+            name: 'DEFAULT',
+            type: 'CMS'
+        })
+        .then(account => {
+            chef_client.init(account);
+            chef_client.deleteNode(node_name);
+            return servers_db.remove(message.EC2InstanceId);
+        });
 }
 
 function startup(message) {
 
-  const config_client = require('../config/config.js');
-  const servers_db = require('./servers_db.js');
-  let group_name = message.AutoScalingGroupName.split('-');
-  let node_name = [group_name[0], group_name[1], message.EC2InstanceId].join('-');
-  logger.debug('launching instance', node_name);
+    const config_client = require('../config/config.js');
+    const servers_db = require('./servers_db.js');
+    let group_name = message.AutoScalingGroupName.split('-');
+    let node_name = [group_name[0], group_name[1], message.EC2InstanceId].join('-');
+    logger.debug('launching instance', node_name);
 
-  var client_body = {
-    'name': node_name,
-    'admin': false,
-    'create_key': true
-  };
-  var chef_url;
+    var client_body = {
+        'name': node_name,
+        'admin': false,
+        'create_key': true
+    };
+    var chef_url;
 
 
-  return config_client.getServiceAccount({
-      name: 'DEFAULT',
-      type: 'CMS'
-    })
-    .then(account => {
-      chef_url = account.url;
-      chef_client.init(account);
-      return chef_client.createClient(client_body);
-    })
-    .then(response => {
-      if (response.error) {
-        logger.error(response.error);
-        return;
-      }
+    return config_client.getServiceAccount({
+            name: 'DEFAULT',
+            type: 'CMS'
+        })
+        .then(account => {
+            chef_url = account.url;
+            chef_client.init(account);
+            return chef_client.createClient(client_body);
+        })
+        .then(response => {
+            if (response.error) {
+                logger.error(response.error);
+                return;
+            }
 
-      const server = {
-        instance_id: message.EC2InstanceId,
-        key: response.private_key,
-        node_name: node_name,
-        chef_url: chef_url,
-        environment: group_name[0]
-      };
-      return servers_db.insert(server);
-    });
+            const server = {
+                instance_id: message.EC2InstanceId,
+                key: response.private_key,
+                node_name: node_name,
+                chef_url: chef_url,
+                environment: group_name[0]
+            };
+            return servers_db.insert(server);
+        });
 }
 
 function parseMessages(messages, sqs_url) {
 
-  return Promise.map(messages, function(message_body) {
-    let handle = message_body.ReceiptHandle;
-    let body = JSON.parse(message_body.Body);
-    let message = JSON.parse(body.Message);
+    return Promise.map(messages, function (message_body) {
+        let handle = message_body.ReceiptHandle;
+        let body = JSON.parse(message_body.Body);
+        let message = JSON.parse(body.Message);
 
-    if (message.Event === 'autoscaling:EC2_INSTANCE_TERMINATE') {
+        if (message.Event === 'autoscaling:EC2_INSTANCE_TERMINATE') {
 
-      return sqs_client.deleteMessage({
-          QueueUrl: sqs_url,
-          ReceiptHandle: handle
-        })
-        .then(response => {
-          return shutdown(message);
-        });
+            return sqs_client.deleteMessage({
+                    QueueUrl: sqs_url,
+                    ReceiptHandle: handle
+                })
+                .then(response => {
+                    return shutdown(message);
+                });
 
-    } else if (message.Event === 'autoscaling:EC2_INSTANCE_LAUNCH') {
+        } else if (message.Event === 'autoscaling:EC2_INSTANCE_LAUNCH') {
 
-      return sqs_client.deleteMessage({
-          QueueUrl: sqs_url,
-          ReceiptHandle: handle
-        })
-        .then(response => {
-          return startup(message);
-        });
+            return sqs_client.deleteMessage({
+                    QueueUrl: sqs_url,
+                    ReceiptHandle: handle
+                })
+                .then(response => {
+                    return startup(message);
+                });
 
-    } else {
+        } else {
 
-      return sqs_client.deleteMessage({
-          QueueUrl: sqs_url,
-          ReceiptHandle: handle
-        })
-        .then(response => {
-          logger.debug('unrecognized command', message.Event);
-        });
-    }
+            return sqs_client.deleteMessage({
+                    QueueUrl: sqs_url,
+                    ReceiptHandle: handle
+                })
+                .then(response => {
+                    logger.debug('unrecognized command', message.Event);
+                });
+        }
 
-  });
+    });
 }
 
 function poll() {
 
-  // needs to be assigned inside the repeating function
-  // because of cached db connection info
-  const config_client = require('../config/config.js');
-  logger.debug('polling sqs for new servers');
+    // needs to be assigned inside the repeating function
+    // because of cached db connection info
+    const config_client = require('../config/config.js');
+    logger.debug('polling sqs for new messages');
 
-  if (!fs.existsSync(secrets_path)) {
-    logger.debug('initial setup has not been completed (secrets.json missing)');
-    return;
-  }
+    if (!fs.existsSync(secrets_path)) {
+        logger.debug('initial setup has not been completed (secrets.json missing)');
+        return;
+    }
 
-  let sqs_url;
+    let sqs_url;
 
-  return config_client.getDefaultAws()
-    .then(response => {
-      sqs_url = response.queue.url;
-      sqs_client.init(response.aws_account);
-      return sqs_client.getMessage(sqs_url);
-    })
-    .then(messages => {
-      if (messages) {
-        logger.debug(`found ${messages.length} SQS messages`);
-        parseMessages(messages, sqs_url);
-      } else {
-        throw 'found 0 SQS messages';
-      }
-    })
-    .catch(err => {
-      logger.debug(err);
-    });
+    return config_client.getDefaultAws()
+        .then(response => {
+            sqs_url = response.queue.url;
+            sqs_client.init(response.aws_account);
+            return sqs_client.getMessage(sqs_url);
+        })
+        .then(messages => {
+            if (messages) {
+                logger.debug(`found ${messages.length} SQS messages`);
+                parseMessages(messages, sqs_url);
+            } else {
+                throw 'found 0 SQS messages';
+            }
+        })
+        .catch(err => {
+            logger.debug(err);
+        });
 }
 
 function kick_it() {
-  repeat(poll).every(20, 's').start.in(Math.floor(Math.random() * 10) + 1, 'sec');
+    repeat(poll)
+        .every(20, 's')
+        .start.in(Math.floor(Math.random() * 10) + 1, 'sec');
 }
 
 module.exports = kick_it();

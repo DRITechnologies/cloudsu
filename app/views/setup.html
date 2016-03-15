@@ -1,0 +1,96 @@
+<div class="modal-header text-center">
+        <h3 class="modal-title">Welcome to Concord</h3>
+</div>
+<div class="modal-body">
+    <form class="form">
+        <h3>
+            Add AWS account to setup components
+        </h3>
+        <small class="text-muted">
+            <ul class="list-unstyled">
+                <li>Concord will create the following components in the region selected below
+                    <ul>
+                        <li>DynamoDB Config Table - Accounts and settings data</li>
+                        <li>DynamoDB Servers Table - Server config data</li>
+                        <li>SQS Queue - Used to store autoscale events</li>
+                        <li>SNS Topic - Needed for caputuring autoscale events</li>
+                        <li>IAM Config User - Full-access account for settings and accounts</li>
+                        <li>IAM Servers User - Read-only account for server table</li>
+                    </ul>
+                </li>
+            </ul>
+            All sensitive data will be encrypted in DynamoDB
+
+        </small>
+        <br>
+        <br>
+        <fieldset>
+            <div class="form-group">
+                <label for="input">Access Key ID</label>
+                <input class="form-control" type="password" name="key" ng-model="account.aws.key" required>
+            </div>
+            <div class="form-group">
+                <label for="input">Secret Access Key</label>
+                <input class="form-control" type="password" name="secret" ng-model="account.aws.secret" required>
+            </div>
+            <div class="form-group">
+                <label for="select">Region</label>
+                <select class="form-control" ng-model="account.aws.region">
+                    <option ng-repeat="region in regions">{{ region }}</option>
+                </select>
+            </div>
+        </fieldset>
+        <br>
+        <fieldset>
+            <h3>
+                Chef Server Setup</h3>
+            <small class="text-muted">
+                Chef is used for all configurations management in concord.
+            </small>
+            <br>
+            <br>
+            <div class="form-group">
+                <label for="input">Username</label>
+                <input class="form-control" type="text" name="username" placeholder="admin" ng-model="account.cms.username" required>
+            </div>
+            <div class="form-group">
+                <label for="input">Server URL</label>
+                <input class="form-control" type="text" name="url" placeholder="https://api.chef.io/organizations/dev" ng-model="account.cms.url" required>
+            </div>
+            <div class="form-group">
+                <label for="input">Key</label>
+                <textarea class="form-control" style="height=200" type="text" name="key" ng-model="account.cms.key" row="5" required></textarea>
+            </div>
+        </fieldset>
+        <br>
+
+        <fieldset>
+            <h3>
+                Create Account (Admin)</h3>
+            <small class="text-muted">
+                Admin accounts can create service accounts for API access
+            </small>
+            <br>
+            <br>
+            <div class="form-group">
+                <label for="input">Email</label>
+                <input class="form-control" type="email" name="name" placeholder="admin@concord.io" ng-model="account.user.name" required>
+            </div>
+            <div class="form-group">
+                <label for="input">Password</label>
+                <input class="form-control" type="password" name="key" ng-model="account.user.password" required>
+            </div>
+            <div class="form-group">
+                <label for="input">Confirm Password</label>
+                <input class="form-control" type="password" name="confirm" ng-model="account.user.confirm" required>
+            </div>
+        </fieldset>
+        <alerts></alerts>
+        <div class="form-group text-center">
+            <button class="btn btn-primary" ng-click="create()">
+                <i ng-show="showSpinner" class="fa fa-circle-o-notch fa-spin"></i>
+                Create
+            </button>
+        </div>
+    </form>
+</div>

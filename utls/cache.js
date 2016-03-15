@@ -1,21 +1,21 @@
 /*jshint esversion: 6 */
 'use strict';
 
-const NodeCache = require('node-cache');
-const Cache = new NodeCache({
+const NodeCache = require( 'node-cache' );
+const Cache = new NodeCache( {
     stdTTL: 300,
     checkperiod: 150
-});
+} );
 
 class cache {
     constructor() {}
 
-    get(key) {
-        return Cache.get(key);
+    get( key ) {
+        return Cache.get( key );
     }
 
-    set(key, obj) {
-        return Cache.set(key, obj);
+    set( key, obj ) {
+        return Cache.set( key, obj );
     }
 
     flush() {

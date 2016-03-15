@@ -2,40 +2,26 @@
 'use strict';
 
 module.exports = function (grunt) {
-    // ===========================================================================
-    // CONFIGURE GRUNT ===========================================================
-    // ===========================================================================
-    function distFiles() {
-        const files = [{
-            expand: true,
-            src: 'server.js'
-        }, {
-            expand: true,
-            src: 'package.json'
-        }, {
-            expand: true,
-            src: 'version.json'
-        }, {
-            expand: true,
-            src: 'config/**'
-        }, {
-            expand: true,
-            src: 'public/**'
-        }, {
-            expand: true,
-            src: 'api/**'
-        }, {
-            expand: true,
-            src: 'templates/**'
-        }, {
-            expand: true,
-            src: 'utls/**'
-        }];
-        return files;
-    }
+
+
+    // Load grunt tasks automatically
+    require('load-grunt-tasks')(grunt);
+
+    // Show grunt task time
+    require('time-grunt')(grunt);
+
+    // Configurable paths for the app
+    var appConfig = {
+        app: 'app',
+        dist: 'dist'
+    };
+
 
 
     grunt.initConfig({
+
+        // Project settings
+        concord: appConfig,
 
         // get the configuration info from package.json ----------------------------
         // this way we can use things like name and version (pkg.name)
@@ -44,44 +30,19 @@ module.exports = function (grunt) {
         // all of our configuration will go here
         watch: {
             browser_js: {
-                files: ['public/scripts/**/*.js', 'api/**/*.js'],
+                files: ['app/**/*.js', 'app/**/*.html', 'api/**/*.js', 'config/**/*.js', 'utls/**/*.js', 'middleware/**/*.js'],
                 tasks: ['jshint', 'build']
             }
 
         },
 
         nodemon: {
-            main: {
-                script: 'server.js'
-            }
-        },
-        // grunt-contrib-compress config
-        compress: {
-            source: {
+            dev: {
+                script: 'server.js',
                 options: {
-                    mode: 'tgz',
-                    pretty: 'true',
-                    archive: 'artifacts/service.tar.gz',
-                    level: 1
-                },
-                files: distFiles()
-            }
-        },
-        aws_s3: {
-            options: {
-                access: 'private',
-                accessKeyId: '',
-                secretAccessKey: '',
-                region: 'us-west-2'
-            },
-            main: {
-                options: {
-                    bucket: ''
-                },
-                files: [{
-                    src: 'artifacts/service.tar.gz',
-                    dest: '<%= grunt.config.get("service.version") %>/service.tar.gz'
-                }]
+                    ext: 'js,html',
+                    watch: ['app/**/*.js', 'api/**/*.js', 'config/**/*.js', 'utls/**/*.js', 'middleware/**/*.js']
+                }
             }
         },
 
@@ -91,7 +52,7 @@ module.exports = function (grunt) {
                 reporter: require('jshint-stylish')
             },
 
-            build: ['Gruntfile.js', 'public/scripts/**/*.js', 'api/**/*.js']
+            build: ['Gruntfile.js', 'app/**/*.js', 'api/**/*.js', 'utls/**/*.js', 'config/**/*.js']
         },
 
         browserify: {
@@ -104,35 +65,124 @@ module.exports = function (grunt) {
 
         concurrent: {
             main: {
-                tasks: ['nodemon::main', 'watch::browser_js'],
+                tasks: ['nodemon::dev', 'watch::browser_js'],
                 options: {
                     logConcurrentOutput: true
                 }
             }
         },
-        concat: {
-            dist: {
-                // the files to concatenate
-                src: ['public/index.js', 'public/scripts/**/*.js'],
-                // the location of the resulting JS file
-                dest: 'public/concat.js'
+
+
+        // Compile less to css
+        less: {
+            development: {
+                options: {
+                    compress: true,
+                    optimization: 2
+                },
+                files: {
+                    'app/styles/style.css': 'app/less/style.less'
+                }
             }
+        },
+
+        uglify: {
+            options: {
+                mangle: false
+            }
+        },
+        // Clean dist folder
+        clean: {
+            dist: {
+                files: [{
+                    dot: true,
+                    src: [
+                        '.tmp',
+                        '<%= concord.dist %>/{,*/}*',
+                        '!<%= concord.dist %>/.git*'
+                    ]
+                }]
+            },
+            server: '.tmp'
+        },
+        // Copies remaining files to places other tasks can use
+        copy: {
+            dist: {
+                files: [{
+                    expand: true,
+                    dot: true,
+                    cwd: '<%= concord.app %>',
+                    dest: '<%= concord.dist %>',
+                    src: [
+                        '*.{ico,png,txt}',
+                        '.htaccess',
+                        '*.html',
+                        'views/{,*/}*.html',
+                        'styles/patterns/*.*',
+                        'img/{,*/}*.*'
+                    ]
+                }, {
+                    expand: true,
+                    dot: true,
+                    cwd: 'bower_components/fontawesome',
+                    src: ['fonts/*.*'],
+                    dest: '<%= concord.dist %>'
+                }, {
+                    expand: true,
+                    dot: true,
+                    cwd: 'bower_components/bootstrap',
+                    src: ['fonts/*.*'],
+                    dest: '<%= concord.dist %>'
+                }]
+            },
+            styles: {
+                expand: true,
+                cwd: '<%= concord.app %>/styles',
+                dest: '.tmp/styles/',
+                src: '{,*/}*.css'
+            }
+        },
+        // Renames files for browser caching purposes
+        filerev: {
+            dist: {
+                src: [
+                    '<%= concord.dist %>/scripts/{,*/}*.js',
+                    '<%= concord.dist %>/styles/{,*/}*.css',
+                    '<%= concord.dist %>/styles/fonts/*'
+                ]
+            }
+        },
+        htmlmin: {
+            dist: {
+                options: {
+                    collapseWhitespace: true,
+                    conservativeCollapse: true,
+                    collapseBooleanAttributes: true,
+                    removeCommentsFromCDATA: true,
+                    removeOptionalTags: true
+                },
+                files: [{
+                    expand: true,
+                    cwd: '<%= concord.dist %>',
+                    src: ['*.html', 'views/{,*/}*.html'],
+                    dest: '<%= concord.dist %>'
+                }]
+            }
+        },
+        useminPrepare: {
+            html: 'app/index.html',
+            options: {
+                dest: 'dist'
+            }
+        },
+        usemin: {
+            html: ['dist/index.html']
         }
+
 
     });
 
-    grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.loadNpmTasks('grunt-contrib-cssmin');
-    grunt.loadNpmTasks('grunt-contrib-compress');
-    grunt.loadNpmTasks('grunt-browserify');
-    grunt.loadNpmTasks('grunt-aws-s3');
-    grunt.loadNpmTasks('grunt-concurrent');
-    grunt.loadNpmTasks('grunt-contrib-watch');
-
-    grunt.loadNpmTasks('grunt-nodemon');
+    require('load-grunt-tasks')(grunt);
 
     grunt.registerTask('version_file', 'create artifact version file', () => {
         const version = grunt.config.get('service.version') || grunt.option('build-version') || null;
@@ -144,39 +194,27 @@ module.exports = function (grunt) {
         }));
     });
 
-    // publish service artifact
-    grunt.registerTask('publish', 'publish artifacts to s3', () => {
-        let version = grunt.option('build-version');
-
-        const now = new Date().getTime();
-        if (!version) {
-            // use timestamp
-            version = ['local', now].join('-');
-        }
-
-        grunt.log.write('publishing artifact with version', version);
-
-        grunt.config.set('service.version', version);
-        grunt.task.run([
-            'version_file',
-            'build',
-            'compress:source',
-            'aws_s3'
-        ]);
-    });
-
-    grunt.registerTask('eslint', [
-        'eslint'
-    ]);
-
-    grunt.registerTask('lint', [
-        'jshint'
-    ]);
-
+    // Build version for production
     grunt.registerTask('build', [
+        'jshint',
+        'clean:dist',
+        'less',
+        'useminPrepare',
         'concat',
-        'browserify'
+        'copy:dist',
+        'cssmin',
+        'uglify',
+        'filerev',
+        'usemin',
+        'htmlmin'
     ]);
+
+    // Run build version of app
+    grunt.registerTask('server', [
+        'build',
+        'connect:dist:keepalive'
+    ]);
+
 
     grunt.registerTask('run', ['nodemon:main']);
 

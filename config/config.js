@@ -7,9 +7,9 @@ const Promise = require('bluebird');
 const crypto_client = require('../utls/crypto_client.js');
 
 class Config {
-    constructor () {}
+    constructor() {}
 
-    save (key, value) {
+    save(key, value) {
 
         //flush cache on updates
         cache.flush();
@@ -28,7 +28,7 @@ class Config {
 
     }
 
-    get (key) {
+    get(key) {
 
         return new Promise(function (resolve, reject) {
             //check cache
@@ -57,7 +57,7 @@ class Config {
         });
     }
 
-    getAll () {
+    getAll() {
 
         return new Promise(function (resolve, reject) {
             //check cache
@@ -83,7 +83,7 @@ class Config {
         });
     }
 
-    saveServiceAccount (params) {
+    saveServiceAccount(params) {
 
         //flush cache on updates
         cache.flush();
@@ -97,14 +97,14 @@ class Config {
             key = 'secret';
         }
 
-        let secret = crypto_client.encrypt_string(params[key])
+        let secret = crypto_client.encrypt_string(params[key]);
         params[key] = secret;
 
         return db.insert(params);
 
     }
 
-    getServiceAccounts (type) {
+    getServiceAccounts(type) {
 
         return new Promise(function (resolve, reject) {
             //check cache
@@ -126,7 +126,7 @@ class Config {
         });
     }
 
-    getServiceAccount (params) {
+    getServiceAccount(params) {
 
         return new Promise(function (resolve, reject) {
             //check cache
@@ -153,9 +153,9 @@ class Config {
                     } else if (account.type === 'AWS') {
                         return crypto_client.decrypt_string(account.secret);
                     } else {
-                        return crypto_client.decrypt_string(account.key)
+                        return crypto_client.decrypt_string(account.key);
                     }
-                    return false
+                    return false;
                 })
                 .then(x => {
                     if (!account) {
@@ -173,7 +173,7 @@ class Config {
 
     }
 
-    getDefaultAws () {
+    getDefaultAws() {
 
         let query = {
             range: 'DEFAULT',
@@ -184,8 +184,8 @@ class Config {
 
         //return value if not undef
         if (val) {
-            logger.debug('using cache for account', qeury.range);
-            return resolve(val);
+            logger.debug('using cache for account', query.range);
+            return val;
         }
 
         const db = require('../utls/db.js');
@@ -206,7 +206,7 @@ class Config {
             });
     }
 
-    deleteServiceAccount (params) {
+    deleteServiceAccount(params) {
 
         //flush cache on updates
         cache.flush();
@@ -220,7 +220,7 @@ class Config {
         });
     }
 
-    getUser (name) {
+    getUser(name) {
 
         return new Promise(function (resolve, reject) {
             //check cache
@@ -245,7 +245,7 @@ class Config {
         });
     }
 
-    updateUser (params) {
+    updateUser(params) {
 
         //flush cache on updates
         cache.flush();
@@ -253,7 +253,6 @@ class Config {
         const db = require('../utls/db.js');
         logger.info('updating user account', params.type, params.name);
 
-        const name = params.name;
         const obj = _.omit(params, ['name', 'type']);
 
         return db.update({
@@ -263,7 +262,7 @@ class Config {
 
     }
 
-    createUser (params) {
+    createUser(params) {
 
         //flush cache on updates
         cache.flush();
@@ -274,7 +273,7 @@ class Config {
         return db.insert(params);
     }
 
-    deleteUser (params) {
+    deleteUser(params) {
 
         //flush cache on updates
         cache.flush();

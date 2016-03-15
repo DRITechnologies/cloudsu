@@ -1,37 +1,41 @@
-'use strict'
+'use strict';
 
-const Promise = require('bluebird');
-const jwt = require('jsonwebtoken');
+const Promise = require( 'bluebird' );
+const jwt = require( 'jsonwebtoken' );
 
 const key = 'gbXQ2y+8cpl63n&';
-const logger = require('./logger.js');
+const logger = require( './logger.js' );
 
 
 
 class token {
     constructor() {}
 
-    sign(name) {
-        logger.info('singing token for:', name);
-        return jwt.sign({ name: name }, key, { expiresIn: '24h' });
+    sign( name ) {
+        logger.info( 'singing token for:', name );
+        return jwt.sign( {
+            name: name
+        }, key, {
+            expiresIn: '24h'
+        } );
     }
 
-    verify(token) {
+    verify( token ) {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise( function ( resolve, reject ) {
 
-                jwt.verify(token, key, (err, decoded) => {
-                    if (err) {
-                        logger.error(err);
-                        return reject(err);
+                jwt.verify( token, key, ( err, decoded ) => {
+                    if ( err ) {
+                        logger.error( err );
+                        return reject( err );
                     }
-                    return resolve(decoded);
-                });
+                    return resolve( decoded );
+                } );
 
-            })
-            .catch(err => {
-                throw new Error('error verifying token');
-            });
+            } )
+            .catch( err => {
+                throw new Error( 'error verifying token' );
+            } );
 
     }
 }
