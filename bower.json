@@ -29,7 +29,8 @@
         "ngstorage": "latest",
         "angular-moment": "latest",
         "angular-underscore-module": "latest",
-        "ngBootbox": "latest"
+        "ngBootbox": "latest",
+        "angular-ladda": "latest"
     },
     "resolutions": {
         "jquery": "~2.1.4",

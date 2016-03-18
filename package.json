@@ -12,7 +12,7 @@
         "body-parser": "1.13.1",
         "brace": "latest",
         "bluebird-retry": "0.5.0",
-        "chef": "0.3.1",
+        "chef": "latest",
         "express": "4.13.0",
         "moment": "2.10.6",
         "morgan": "1.6.1",

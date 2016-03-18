@@ -75,6 +75,7 @@ module.exports = function (app) {
     app.get('/api/v1/ec2/images', ec2.describeImages);
     app.get('/api/v1/ec2/sizes', ec2.sizes);
     app.get('/api/v1/ec2/keys', ec2.describeKeyPairs);
+    app.get('/api/v1/ec2/security_groups', ec2.describeSecurityGroups);
     app.get('/api/v1/ec2/:instances', ec2.instances);
     app.get('/api/v1/ec2/instances/:stack_name', ec2.instancesByStack);
     app.get('/api/v1/ec2/sample/images', ec2.sampleImages);
@@ -111,6 +112,9 @@ module.exports = function (app) {
     app.get('/api/v1/chef/data/:data_bag', chef.getDataBagItem);
     app.get('/api/v1/chef/data/:data_bag/:item', chef.getDataBagItem);
     app.put('/api/v1/chef/data/:data_bag/:item', chef.saveDataBagItem);
+
+    //chef recipes
+    app.get('/api/v1/chef/recipes', chef.recipes);
 
     //service account
     app.post('/api/v1/services/save_account', main.saveServiceAccount);

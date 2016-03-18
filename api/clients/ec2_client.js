@@ -10,24 +10,26 @@ const config = require('../../config/config.js');
 
 
 class Ec2Client {
-    constructor () {}
+    constructor() {}
 
-    init (account) {
+    init(account) {
         this.ec2 = Promise.promisifyAll(new AWS.EC2(account));
     }
 
-    instances (instance_array) {
+    instances(instance_array) {
 
         return this.ec2.describeInstancesAsync({
                 InstanceIds: instance_array
             })
             .then(result => {
-                return _.chain(result.Reservations).pluck('Instances').flatten();
+                return _.chain(result.Reservations)
+                    .pluck('Instances')
+                    .flatten();
             });
 
     }
 
-    instancesByStack (stack_name) {
+    instancesByStack(stack_name) {
 
         return this.ec2.describeInstancesAsync({
             Filters: [{
@@ -39,7 +41,7 @@ class Ec2Client {
 
     }
 
-    describeKeyPairs () {
+    describeKeyPairs() {
 
         return this.ec2.describeKeyPairsAsync()
             .then(keys => {
@@ -48,7 +50,7 @@ class Ec2Client {
 
     }
 
-    describeImages () {
+    describeImages() {
 
         return this.ec2.describeImagesAsync({
                 Owners: ['self', 'amazon']
@@ -59,7 +61,7 @@ class Ec2Client {
             });
     }
 
-    sampleImages () {
+    sampleImages() {
 
         return config.get('aws_default_images')
             .then(images => {
@@ -67,11 +69,19 @@ class Ec2Client {
             });
     }
 
-    instanceStoreMap () {
+    instanceStoreMap() {
 
         return config.get('aws_instancestore_map')
             .then(stores => {
                 return stores;
+            });
+    }
+
+    describeSecurityGroups() {
+
+        return this.ec2.describeSecurityGroupsAsync()
+            .then(response => {
+                return response.SecurityGroups;
             });
     }
 }

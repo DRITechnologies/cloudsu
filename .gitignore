@@ -42,3 +42,6 @@ artifacts
 
 # dist
 dist
+
+#temp
+.tmp

@@ -468,11 +468,13 @@ angular
     .controller('stacksController', function ($scope, $http, $state, $uibModal, $ngBootbox, dataStore) {
 
         //Get stacks from AWS
-        $http.get('/api/v1/stacks')
-            .success(function (res) {
-                console.log(res);
-                $scope.stacks = res.StackSummaries;
-            });
+        function refresh() {
+            $http.get('/api/v1/stacks')
+                .success(function (res) {
+                    console.log(res);
+                    $scope.stacks = res.StackSummaries;
+                });
+        }
 
         $scope.openCreateForm = function () {
             $uibModal.open({
@@ -493,18 +495,19 @@ angular
         //Delete stack but confirm first
         $scope.deleteStack = function ($event, stack_name) {
             $event.stopImmediatePropagation();
-            $ngBootbox.confirm('Are you sure you want to delete ' + stack_name + '?', function (
-                result) {
-                if (result) {
+            $ngBootbox.confirm('Are you sure you want to delete ' + stack_name + '?')
+                .then(function () {
                     $http.delete('/api/v1/stacks/' + stack_name)
                         .success(function (res) {
-                            dataStore.addAlert('success', 'successfully deleted stack: ' + stack_name);
+                            refresh();
                         })
                         .error(function (err) {
-                            dataStore.addAlert('danger', err);
+                            $scope.alerts.push({
+                                type: 'danger',
+                                msg: err
+                            });
                         });
-                }
-            });
+                });
         };
 
 
@@ -546,6 +549,8 @@ angular
             }
         };
 
+        //get initial data
+        refresh();
 
     });
 
@@ -683,10 +688,11 @@ angular
 
 angular
     .module('stacks')
-    .controller('createStack', function ($scope, $http, $state, $uibModalInstance, dataStore) {
+    .controller('createStack', function ($scope, $http, $state, $uibModalInstance, dataStore, _) {
 
         $scope.alerts = [];
-        $scope.advanced = false;
+        $scope.sgs = [];
+        $scope.elb_sgs = [];
         $scope.stack = {};
         $scope.stack.instance_store = false;
         $scope.stack.ebs_volume = false;
@@ -696,6 +702,8 @@ angular
         $scope.stack.ebs_root_size = 30;
         $scope.showSpinner = false;
         $scope.stack.volumes = [];
+        $scope.stack.recipes = [];
+        $scope.stack.update_list = [];
 
         $http.get('/api/v1/ec2/sample/images')
             .success(function (response) {
@@ -715,7 +723,6 @@ angular
 
         $http.get('/api/v1/ec2/keys')
             .success(function (res) {
-                console.log(res);
                 $scope.keys = res;
             });
 
@@ -729,10 +736,39 @@ angular
                 $scope.regions = response;
             });
 
+        $http.get('/api/v1/ec2/security_groups')
+            .success(function (response) {
+                console.log(response);
+                $scope.security_groups = response;
+            });
+
+        $http.get('/api/v1/chef/recipes')
+            .success(function (response) {
+                console.log(response);
+                $scope.recipes = response;
+            });
+
 
         $scope.createStack = function () {
             $scope.showSpinner = true;
-            $scope.stack.update_list = [];
+
+            // check for alphas
+            if (!$scope.stack.stack_name || $scope.stack.stack_name.match(/[^0-9a-z]/i)) {
+                $scope.alerts.push({
+                    type: 'danger',
+                    msg: 'AWS only allows Alphanumeric characters for stack names'
+                });
+                $scope.showSpinner = false;
+                return;
+            }
+
+            //convert recipe string to array
+            if ($scope.stack.recipes_string) {
+                $scope.stack.recipes = $scope.stack.recipes_string.replace(/ /g, '')
+                    .split(',');
+            } else {
+                $scope.stack.recipes = [];
+            }
 
             var app_obj = {
                 app_name: $scope.stack.app_name,
@@ -750,40 +786,10 @@ angular
                 $scope.stack.regions = [$scope.stack.regions];
             }
 
+            //pluck just the sg id
+            $scope.stack.elb_security_groups = _.pluck($scope.elb_sgs, 'GroupId');
+            $scope.stack.security_groups = _.pluck($scope.sgs, 'GroupId');
 
-            //convert instance group strings to array
-            if ($scope.stack.instance_groups_string) {
-                $scope.stack.security_groups = $scope.stack.instance_groups_string.replace(/ /g, '')
-                    .split(',');
-            } else {
-                $scope.stack.security_groups = [];
-            }
-
-            //convert elb security group string to array
-            if ($scope.stack.elb_groups_string) {
-                $scope.stack.elb_security_groups = $scope.stack.elb_groups_string.replace(/ /g, '')
-                    .split(',');
-            } else {
-                $scope.stack.elb_security_groups = [];
-            }
-
-            //convert recipe string to array
-            if ($scope.stack.recipes_string) {
-                $scope.stack.recipes = $scope.stack.recipes_string.replace(/ /g, '')
-                    .split(',');
-            } else {
-                $scope.stack.recipes = [];
-            }
-
-            // check for alphas
-            if (!$scope.stack.stack_name || $scope.stack.stack_name.match(/[^0-9a-z]/i)) {
-                $scope.alerts_modal.push({
-                    type: 'danger',
-                    msg: 'AWS only allows Alphanumeric characters for stack names'
-                });
-                $scope.showSpinner = false;
-                return;
-            }
 
             console.log($scope.stack);
 
@@ -810,7 +816,7 @@ angular
         };
 
         // close alert
-        $scope.close_alert = function (index) {
+        $scope.closeAlert = function (index) {
             $scope.alerts.splice(index, 1);
         };
 
@@ -827,6 +833,25 @@ angular
             $scope.stack.volumes.splice(index, 1);
         };
 
+        // adds security group from the form
+        $scope.addSecurityGroup = function (group) {
+            $scope.sgs.push(group);
+        };
+
+        // removes a security group from the form
+        $scope.removeSecurityGroup = function (index) {
+            $scope.sgs.splice(index, 1);
+        };
+
+        // adds elb security group from the form
+        $scope.addElbSecurityGroup = function (group) {
+            $scope.elb_sgs.push(group);
+        };
+
+        // removes an elb security group from the form
+        $scope.removeElbSecurityGroup = function (index) {
+            $scope.elb_sgs.splice(index, 1);
+        };
 
 
     });

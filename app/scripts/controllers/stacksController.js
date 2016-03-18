@@ -4,11 +4,13 @@ angular
     .controller('stacksController', function ($scope, $http, $state, $uibModal, $ngBootbox, dataStore) {
 
         //Get stacks from AWS
-        $http.get('/api/v1/stacks')
-            .success(function (res) {
-                console.log(res);
-                $scope.stacks = res.StackSummaries;
-            });
+        function refresh() {
+            $http.get('/api/v1/stacks')
+                .success(function (res) {
+                    console.log(res);
+                    $scope.stacks = res.StackSummaries;
+                });
+        }
 
         $scope.openCreateForm = function () {
             $uibModal.open({
@@ -29,18 +31,19 @@ angular
         //Delete stack but confirm first
         $scope.deleteStack = function ($event, stack_name) {
             $event.stopImmediatePropagation();
-            $ngBootbox.confirm('Are you sure you want to delete ' + stack_name + '?', function (
-                result) {
-                if (result) {
+            $ngBootbox.confirm('Are you sure you want to delete ' + stack_name + '?')
+                .then(function () {
                     $http.delete('/api/v1/stacks/' + stack_name)
                         .success(function (res) {
-                            dataStore.addAlert('success', 'successfully deleted stack: ' + stack_name);
+                            refresh();
                         })
                         .error(function (err) {
-                            dataStore.addAlert('danger', err);
+                            $scope.alerts.push({
+                                type: 'danger',
+                                msg: err
+                            });
                         });
-                }
-            });
+                });
         };
 
 
@@ -82,5 +85,7 @@ angular
             }
         };
 
+        //get initial data
+        refresh();
 
     });

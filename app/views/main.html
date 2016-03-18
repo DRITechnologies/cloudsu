@@ -21,8 +21,8 @@
                     <i class="fa fa-server"></i>
                     {{ stack.StackName }}</h5>
                 <div class="ibox-tools">
-                    <a ng-show="!isUpdating(stack.StackStatus)" class="close-link" ng-click="deleteStack($event, stack.StackName)">
-                        <i class="fa fa-trash"></i>
+                    <a ng-show="!isUpdating(stack.StackStatus)" class="btn btn-default btn-circle pull-right" ng-click="deleteStack($event, stack.StackName)">
+                        <i class="fa fa-close"></i>
                     </a>
                     <i ng-show="isUpdating(stack.StackStatus)" class="fa fa-circle-o-notch fa-spin fa-2x"></i>
                 </div>
