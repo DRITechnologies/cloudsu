@@ -471,7 +471,6 @@ angular
         function refresh() {
             $http.get('/api/v1/stacks')
                 .success(function (res) {
-                    console.log(res);
                     $scope.stacks = res.StackSummaries;
                 });
         }

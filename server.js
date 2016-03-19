@@ -10,6 +10,9 @@ const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const numCPUs = require('os').cpus().length;
 
+// determine listening port
+const listenPort = process.env.CONCORD_PORT || 3000;
+
 
 // express configuration
 app.use(express.static(`${__dirname}/dist`));
@@ -45,12 +48,12 @@ if (cluster.isMaster) {
 } else {
 
     // listen
-    app.listen(8080, (err, response) => {
+    app.listen(listenPort, (err, response) => {
         if (err) {
             logger.info(err);
             return
         };
-        logger.info('App listening on port 8080');
+        logger.info(`App listening on port ${listenPort}`);
     });
 
 }

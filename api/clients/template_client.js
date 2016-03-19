@@ -34,9 +34,9 @@ const utls = require('../../utls/utilities.js');
 
 
 class ConstructTemplate {
-    constructor () {}
+    constructor() {}
 
-    get (templateBody, params) {
+    get(templateBody, params) {
 
         let template;
 
@@ -60,7 +60,7 @@ class ConstructTemplate {
 
     }
 
-    get_ha_template (template, params, defaults) {
+    get_ha_template(template, params, defaults) {
 
         const self = this;
         const root_params = _.clone(params);
@@ -220,7 +220,7 @@ class ConstructTemplate {
 
     }
 
-    get_single_template (template, params) {
+    get_single_template(template, params) {
 
         const client_db = secure.get('db_client');
         //load templates
@@ -295,7 +295,7 @@ class ConstructTemplate {
             });
     }
 
-    get_first_boot (first_boot, app_name, dns, port) {
+    get_first_boot(first_boot, app_name, dns, port) {
 
         first_boot.service_proxy.services[app_name] = {
             hostname: dns,
@@ -306,7 +306,7 @@ class ConstructTemplate {
 
     }
 
-    sourceDefaults () {
+    sourceDefaults() {
 
         return config.getAll()
             .then(defaults => {
@@ -322,11 +322,12 @@ class ConstructTemplate {
             });
     }
 
-    build_volumes (params) {
+    build_volumes(params) {
 
         return ec2_client.instanceStoreMap()
             .then(map => {
-                const size = _.clone(params.instance_size).replace('.', '_');
+                const size = _.clone(params.instance_size)
+                    .replace('.', '_');
                 const ephemeral_disks = map[size];
                 const BlockDeviceMappings = [];
                 if (ephemeral_disks && params.instance_store) {
@@ -360,14 +361,15 @@ class ConstructTemplate {
                 return BlockDeviceMappings;
             })
             .then(BlockDeviceMappings => {
-
-                if (params.aditional_ebs) {
-                    _.each(params.additional_ebs_volumes, (disk, index) => {
+                if (params.volumes) {
+                    const alphabet = 'fghijklmnop';
+                    _.each(params.volumes, (disk, index) => {
+                        const character = alphabet[index];
                         BlockDeviceMappings.push({
-                            DeviceName: `/dev/sda${index}`,
+                            DeviceName: `/dev/sd${character}`,
                             Ebs: {
                                 VolumeSize: disk.size,
-                                VolumeType: 'gp2',
+                                VolumeType: disk.type,
                                 DeleteOnTermination: true
                             }
                         });

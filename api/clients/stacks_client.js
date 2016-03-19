@@ -16,14 +16,14 @@ const elb_client = require('./elb_client.js');
 
 class StacksClient {
 
-    constructor () {}
+    constructor() {}
 
-    init (account) {
+    init(account) {
         this.cloudformation = Promise.promisifyAll(new AWS.CloudFormation(account));
         elb_client.init(account);
     }
 
-    listStacks () {
+    listStacks() {
         logger.info('getting list of stacks');
         return this.cloudformation.listStacksAsync({
             StackStatusFilter: [
@@ -47,36 +47,37 @@ class StacksClient {
 
     }
 
-    stack (stack_name) {
+    stack(stack_name) {
         return this.cloudformation.describeStackResourcesAsync({
             StackName: stack_name
         });
     }
 
-    stackStatus (stack_name) {
+    stackStatus(stack_name) {
         logger.info('getting stack status:', stack_name);
         return this.cloudformation.describeStacksAsync({
                 StackName: stack_name
             })
             .then(response => {
-                const status = _.first(response.Stacks).StackStatus;
+                const status = _.first(response.Stacks)
+                    .StackStatus;
                 return status;
             });
     }
 
-    createStack (params) {
+    createStack(params) {
 
         let template_body = {};
         const self = this;
 
         //allows api to return while backend verifies
         function verify(params) {
-          return self.waitForStack(params.stack_name, 15, 50)
-          .then(() => {
-             if (params.build_size === 'HA') {
-                return elb_client.connectElbs(params);
-             }
-          });
+            return self.waitForStack(params.stack_name, 15, 50)
+                .then(() => {
+                    if (params.build_size === 'HA') {
+                        return elb_client.connectElbs(params);
+                    }
+                });
         }
 
         //init chef client
@@ -99,9 +100,9 @@ class StacksClient {
                 logger.info('creating environment');
                 return chef_client.createEnvironment(params);
             })
+            .tap(verify(params))
             .then(() => {
-              verify(params);
-              return 'success';
+                return 'success';
             })
             .catch(err => {
                 logger.info(err);
@@ -110,7 +111,7 @@ class StacksClient {
 
     }
 
-    deleteAsg (params) {
+    deleteAsg(params) {
 
         const self = this;
 
@@ -133,7 +134,7 @@ class StacksClient {
 
     }
 
-    adjustSize (params) {
+    adjustSize(params) {
 
         const self = this;
 
@@ -154,7 +155,7 @@ class StacksClient {
             });
     }
 
-    deleteStack (params) {
+    deleteStack(params) {
 
         const chef_client = require('./chef_client.js');
         chef_client.init(params.cms);
@@ -173,7 +174,7 @@ class StacksClient {
             });
     }
 
-    waitForStack (stack_name, timeout, max_attempts) {
+    waitForStack(stack_name, timeout, max_attempts) {
         const self = this;
         let count = 0;
 
@@ -183,33 +184,34 @@ class StacksClient {
         return retry(cancelfn => {
             count++;
             return self.cloudformation.describeStacksAsync({
-                StackName: stack_name
-            }).then(response => {
-                const stack = _.find(response.Stacks, x => {
-                    return x.StackName === stack_name;
+                    StackName: stack_name
+                })
+                .then(response => {
+                    const stack = _.find(response.Stacks, x => {
+                        return x.StackName === stack_name;
+                    });
+                    logger.info('Polling for stack success: ', stack_name, stack.StackStatus);
+                    if (!stack) {
+                        cancelfn(new Error('Stack not found!'));
+                    } else if (count > max_attempts) {
+                        return;
+                    } else if (stack.StackStatus === 'UPDATE_COMPLETE' || stack.StackStatus === 'CREATE_COMPLETE') {
+                        // Success!
+                        logger.info('stack is ready', stack_name);
+                        return;
+                    } else if (stack.StackStatus === 'UPDATE_IN_PROGRESS' || stack.StackStatus === 'CREATE_IN_PROGRESS') {
+                        throw new Error('Stack not ready');
+                    } else {
+                        cancelfn(new Error(`Stack in unexexpected state: ${stack.StackStatus}`));
+                    }
                 });
-                logger.info('Polling for stack success: ', stack_name, stack.StackStatus);
-                if (!stack) {
-                    cancelfn(new Error('Stack not found!'));
-                } else if (count > max_attempts) {
-                    return;
-                } else if (stack.StackStatus === 'UPDATE_COMPLETE' || stack.StackStatus === 'CREATE_COMPLETE') {
-                    // Success!
-                    logger.info('stack is ready', stack_name);
-                    return;
-                } else if (stack.StackStatus === 'UPDATE_IN_PROGRESS' || stack.StackStatus === 'CREATE_IN_PROGRESS') {
-                    throw new Error('Stack not ready');
-                } else {
-                    cancelfn(new Error(`Stack in unexexpected state: ${stack.StackStatus}`));
-                }
-            });
         }, {
             interval: 10 * 1000,
             timeout: timeout * 60 * 1000
         });
     }
 
-    describe (stack_name) {
+    describe(stack_name) {
 
         return this.cloudformation.describeStacksAsync({
                 StackName: stack_name
@@ -219,7 +221,7 @@ class StacksClient {
             });
     }
 
-    getTemplate (stack_name) {
+    getTemplate(stack_name) {
 
         return this.cloudformation.getTemplateAsync({
                 StackName: stack_name
@@ -229,7 +231,7 @@ class StacksClient {
             });
     }
 
-    updateStack (template, stack_name) {
+    updateStack(template, stack_name) {
 
         logger.info('updating stack:', stack_name);
 
@@ -239,7 +241,7 @@ class StacksClient {
         });
     }
 
-    describeEvents (stack_name) {
+    describeEvents(stack_name) {
 
         return this.cloudformation.describeStackEventsAsync({
                 StackName: stack_name

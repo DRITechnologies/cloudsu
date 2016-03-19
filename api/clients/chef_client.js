@@ -124,7 +124,7 @@ class ChefClient {
 
     createNode(params) {
 
-        return this.client.deleteAsync(`/nodes/${params.name}`, params)
+        return this.client.postAsync(`/nodes/${params.name}`, params)
             .spread((result, body) => {
                 return body;
             });
@@ -154,9 +154,6 @@ class ChefClient {
         return this.client.deleteAsync(`/nodes/${node}`)
             .spread((result, body) => {
                 return self.deleteClient(node);
-            })
-            .spread((result, body) => {
-                return body;
             });
     }
 
