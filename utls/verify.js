@@ -20,6 +20,12 @@ const elb_verify_keys = ['ping_port',
                        'ping_protocol'
                       ];
 
+/*
+This class is used to verify parameters sent from api
+
+This should return a verbose error to help users diagnose
+*/
+
 
 class Verify {
 

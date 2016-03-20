@@ -6,5 +6,6 @@
         'angularMoment', //MomentJS
         'underscore', //Underscore
         'ngBootbox', //NG Bootbox
+        'oitozero.ngSweetAlert' //sweet alert
     ]);
 })();

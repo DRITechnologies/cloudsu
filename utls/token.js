@@ -2,16 +2,15 @@
 
 const Promise = require( 'bluebird' );
 const jwt = require( 'jsonwebtoken' );
-
-const key = 'gbXQ2y+8cpl63n&';
 const logger = require( './logger.js' );
+const key = 'gbXQ2y+8cpl63n&';
 
 
 
 class token {
     constructor() {}
 
-    sign( name ) {
+    sign (name) {
         logger.info( 'singing token for:', name );
         return jwt.sign( {
             name: name
@@ -20,7 +19,7 @@ class token {
         } );
     }
 
-    verify( token ) {
+    verify (token) {
 
         return new Promise( function ( resolve, reject ) {
 
@@ -34,10 +33,22 @@ class token {
 
             } )
             .catch( err => {
-                throw new Error( 'error verifying token' );
+                throw new Error( 'verifying token' );
             } );
 
     }
+
+    create (user) {
+
+      return new Promise( function (resolve, reject) {
+
+        logger.info( 'creating token for:', user.name);
+        const token =  jwt.sign({name: user.name}, key);
+
+        return resolve(token);
+
+    });
+  }
 }
 
 

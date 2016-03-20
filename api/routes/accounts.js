@@ -10,6 +10,7 @@ class Accounts {
     constructor () {}
 
     attemptLogin (req, res) {
+
         const params = req.body;
         return accounts_client.checkPassword(params.email, params.password)
             .then(user => {
@@ -20,15 +21,51 @@ class Accounts {
             });
     }
 
-    updateUser (req, res) {
+    update (req, res) {
+
         const params = req.body;
-        return accounts_client.updateUser(params)
+        return accounts_client.update(params)
             .then(user => {
                 res.status(200).json(user);
             })
             .catch(err => {
                 res.status(500).json(err_handler(err));
             });
+    }
+
+    create (req, res) {
+
+        const params = req.body;
+        return accounts_client.create(params)
+        .then(response => {
+          res.status(200).json(response);
+        })
+        .catch(err => {
+          res.status(500).json(err);
+        });
+    }
+
+    delete (req, res) {
+
+      req.user.user_to_delete = req.body.name;
+      return accounts_client.delete(req.user)
+      .then(response => {
+           res.status(200).json(response);
+      })
+      .catch(err => {
+           res.status(500).json(err);
+      });
+    }
+
+    list (req, res) {
+
+      return accounts_client.list()
+      .then(users => {
+        res.status(200).json(users);
+      })
+      .catch(err => {
+        res.status(500).json(err);
+      });
     }
 
     checkToken (req, res) {
@@ -44,6 +81,17 @@ class Accounts {
                 res.status(500).json(err_handler(err));
             });
 
+    }
+
+    getServiceToken (req, res) {
+
+        return accounts_client.getServiceToken(req.user)
+        .then(response => {
+          res.status(200).json(response);
+        })
+        .catch(err => {
+          res.status(500).json(err);
+        });
     }
 }
 

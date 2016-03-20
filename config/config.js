@@ -1,10 +1,12 @@
 /*jshint esversion: 6 */
 'use strict';
 
+const _ = require('underscore');
 const logger = require('../utls/logger.js');
 const cache = require('../utls/cache.js');
 const Promise = require('bluebird');
 const crypto_client = require('../utls/crypto_client.js');
+const db = require('../utls/db.js');
 
 class Config {
     constructor() {}
@@ -14,7 +16,6 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        const db = require('../utls/db.js');
         // save settings to global
         const obj = {};
         obj[key] = value;
@@ -42,10 +43,8 @@ class Config {
                 }
             }
 
-            // get settings from globals
-            const db = require('../utls/db.js');
             logger.info('Getting data from db for key:', key);
-
+            // get settings from globals
             return db.find({
                     hash: 'SETTINGS',
                     range: 'GLOBAL'
@@ -68,7 +67,6 @@ class Config {
                 return resolve(val);
             }
 
-            const db = require('../utls/db.js');
             logger.info('Getting all global settings');
 
             return db.find({
@@ -88,7 +86,6 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        const db = require('../utls/db.js');
         logger.info('Saving service account:', params.name);
 
         //determine what key to encrypt
@@ -115,7 +112,6 @@ class Config {
                 return resolve(val);
             }
 
-            const db = require('../utls/db.js');
             logger.info('Getting service accounts:', type);
 
             return db.findAll(type)
@@ -138,7 +134,6 @@ class Config {
                 return resolve(val);
             }
 
-            const db = require('../utls/db.js');
             let account;
             logger.info('Getting service account:', params.type, params.name);
 
@@ -188,7 +183,6 @@ class Config {
             return val;
         }
 
-        const db = require('../utls/db.js');
         let params = {};
 
         return db.find(query)
@@ -211,7 +205,6 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        const db = require('../utls/db.js');
         logger.info('Deleting service account:', params.type, params.name);
 
         return db.remove({
@@ -231,8 +224,6 @@ class Config {
                 return resolve(val);
             }
 
-            const db = require('../utls/db.js');
-
             return db.find({
                     hash: 'USER',
                     range: name
@@ -250,10 +241,12 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        const db = require('../utls/db.js');
         logger.info('updating user account', params.type, params.name);
 
+        console.log('before omit', params);
         const obj = _.omit(params, ['name', 'type']);
+        console.log('obj', obj);
+        console.log('params', params);
 
         return db.update({
             hash: 'USER',
@@ -267,26 +260,39 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        const db = require('../utls/db.js');
         logger.info('created user account', params.type, params.name);
 
         return db.insert(params);
     }
 
-    deleteUser(params) {
+    deleteUser(name) {
 
         //flush cache on updates
         cache.flush();
 
-        const db = require('../utls/db.js');
-        logger.info('deleting user account', params.type, params.name);
-
-        //XXX verify user is admin account
+        logger.info('deleting user account', name);
 
         return db.remove({
             hash: 'USER',
-            range: params.name
+            range: name
         });
+    }
+
+    listUsers() {
+
+      return new Promise(function (resolve, reject) {
+      let users = cache.get('all_users');
+
+      if (users) {
+        return users;
+      }
+
+      return db.list('USER')
+      .then(users => {
+        cache.set('all_users', users);
+        return users;
+      });
+    });
     }
 }
 

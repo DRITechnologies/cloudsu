@@ -19,7 +19,7 @@ angular
             //display spinner while authenticating
             $scope.showSpinner = true;
 
-            $http.post('/api/v1/users/login', user)
+            $http.post('/api/v1/accounts/login', user)
                 .success(function (user) {
                     //stop spinnner
                     $scope.showSpinner = false;

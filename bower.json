@@ -31,7 +31,7 @@
         "angular-underscore-module": "latest",
         "ngBootbox": "latest",
         "angular-ladda": "latest",
-        "angularjs-icheck": "latest"
+        "angular-sweetalert": "latest"
     },
     "resolutions": {
         "jquery": "~2.1.4",

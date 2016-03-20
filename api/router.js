@@ -24,7 +24,7 @@ module.exports = function (app) {
 
     //unauthenticated requests
     app.post('/api/v1/setup/:name', setup.run);
-    app.post('/api/v1/users/login', accounts.attemptLogin);
+    app.post('/api/v1/accounts/login', accounts.attemptLogin);
     app.get('/api/v1/ping/:token', accounts.checkToken);
     app.get('/api/v1/region', main.region);
     app.get('/api/v1/regions', main.regions);
@@ -36,6 +36,12 @@ module.exports = function (app) {
     app.use(attach_aws_auth.run);
     app.use(attach_cms_auth.run);
 
+    //accounts
+    app.get('/api/v1/accounts/token', accounts.getServiceToken);
+    app.get('/api/v1/accounts', accounts.list);
+    app.post('/api/v1/accounts', accounts.create);
+    app.put('/api/v1/accounts/', accounts.update);
+    app.delete('/api/v1/accounts', accounts.delete);
 
     //stacks
     app.get('/api/v1/stacks', stacks.listStacks);
@@ -63,9 +69,6 @@ module.exports = function (app) {
     //autoscale groups
     app.put('/api/v1/asg/adjustSize/:asg_group', autoscale.adjustSize);
     app.get('/api/v1/asg/describe/:groups', autoscale.describeAutoScalingGroups);
-
-    //accounts
-    app.put('/api/v1/users/updateUser', accounts.updateUser);
 
     //iam
     app.get('/api/v1/iam/ssl', main.listServerCertificates);

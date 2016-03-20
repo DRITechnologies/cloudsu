@@ -29,7 +29,7 @@ class AccountsClient {
             });
     }
 
-    updateUser (params) {
+    update (params) {
 
         return config.updateUser(params)
             .then(user => {
@@ -37,16 +37,23 @@ class AccountsClient {
             });
     }
 
-    createAccount (params) {
-
+    create (params) {
+        //createUser
         return config.createUser(params);
-
     }
 
-    removeAccount (email) {
+    delete (user) {
 
+        if (user.groups.indexOf('admin') > -1) {
+            throw new Error(user.name + ' is not in the admin group');
+        }
         // remove account after verifying user has permissions
-        return config.deleteUser(email);
+        return config.deleteUser(user.user_to_delete);
+    }
+
+    list () {
+       // list all users
+       return config.listUsers();
     }
 
     checkToken (token) {
@@ -83,6 +90,32 @@ class AccountsClient {
 
         });
 
+    }
+
+    getServiceToken (user) {
+
+      return new Promise(function (resolve, reject) {
+      //check if token already exists and return
+      if (user.service_token) {
+        return resolve(user.service_token);
+      }
+
+      const self = this;
+
+      //create new service token and saves to db
+      return token_client.create(user)
+      .then(token => {
+        user.service_token = token;
+        return self.update(user);
+      })
+      .then(() => {
+        return resolve(user.service_token);
+      })
+      .catch(err => {
+        return reject(err);
+      });
+
+    });
     }
 }
 

@@ -3,7 +3,7 @@
  */
 angular
     .module('stacks')
-    .controller('MainCtrl', function ($scope, $http, $state, dataStore) {
+    .controller('MainCtrl', function ($scope, $http, $state, dataStore, SweetAlert) {
 
         this.userName = dataStore.getActiveUser();
         this.helloText = 'Concord Stacks';
@@ -18,21 +18,26 @@ angular
                 }
             });
 
-        // close alert
-        $scope.close_alert = function (index) {
-            $scope.alerts.splice(index, 1);
-            dataStore.setAlerts($scope.alerts);
-        };
-
         //logout method
         $scope.logout = function () {
             dataStore.clearAll();
             $state.go('login');
         };
 
-        //Get api token
+        //Get bear api token
         $scope.getToken = function () {
-            console.log('getting token');
+            $http.get('/api/v1/accounts/token')
+            .success(function (token){
+              SweetAlert.swal({
+                title: 'Service API Token',
+                text: token,
+                type: 'success',
+                confirmButtonColor: '#1ab394'});
+            })
+            .error(function (err) {
+               console.log(err);
+            });
+
         };
 
     });
