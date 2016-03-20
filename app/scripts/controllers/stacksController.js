@@ -12,12 +12,19 @@ angular
         }
 
         $scope.openCreateForm = function () {
-            $uibModal.open({
+            var modalInstance = $uibModal.open({
                 animation: $scope.animationsEnabled,
                 templateUrl: 'views/modals/createForm.html',
                 controller: 'createStack',
                 size: 'md',
                 resolve: {}
+            });
+
+            modalInstance.result.then(function (selectedItem) {
+                //refresh stacks to the new stack just created
+                refresh();
+            }, function () {
+                console.log('Modal dismissed at: ' + new Date());
             });
         };
 

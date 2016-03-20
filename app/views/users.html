@@ -14,35 +14,35 @@
 </div>
 <div class="wrapper wrapper-content  animated fadeInRight">
     <div class="row">
-    <div class="col-sm-8 col-sm-offset-2">
-        <div class="ibox">
-            <div class="ibox-title">
-                  <button class="btn btn-outline btn-primary centered">Create New User</button>
-            </div>
-            <div class="ibox-content">
-                <div class="full-height-scroll">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <tbody>
-                               <tr ng-repeat="user in users">
-                                 <td> <i class="fa fa-user fa-2x"></i></td>
-                                 <td> {{user.name}} </td>
-                                 <td> {{user.groups}} </td>
-                                 <td>
-                                   <a class="btn btn-default btn-circle pull-right" ng-click="editUser(user)">
-                                       <i class="fa fa-cog"></i>
-                                   </a>
-                                </td>
-                                 <td>
-                                   <a class="btn btn-default btn-circle pull-right" ng-click="removeUser(user)">
-                                       <i class="fa fa-close"></i>
-                                   </a>
-                                </td>
-                               </tr>
-                            </tbody>
-                        </table>
-                    </div>
+        <div class="col-sm-8 col-sm-offset-2">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <button class="btn btn-outline btn-primary centered">Create New User</button>
                 </div>
+                <div class="ibox-content">
+                    <div class="full-height-scroll">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <tbody>
+                                    <tr ng-repeat="user in users">
+                                        <td> <i class="fa fa-user fa-2x"></i></td>
+                                        <td> {{user.name}} </td>
+                                        <td> {{user.groups}} </td>
+                                        <td>
+                                            <div class="btn-toolbar">
+                                                <a class="btn btn-default btn-circle pull-right" ng-click="removeUser(user)">
+                                                    <i class="fa fa-close"></i>
+                                                </a>
+                                                <a class="btn btn-default btn-circle pull-right" ng-click="editUser(user)">
+                                                    <i class="fa fa-cog"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

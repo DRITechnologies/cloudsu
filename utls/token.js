@@ -1,8 +1,8 @@
 'use strict';
 
-const Promise = require( 'bluebird' );
-const jwt = require( 'jsonwebtoken' );
-const logger = require( './logger.js' );
+const Promise = require('bluebird');
+const jwt = require('jsonwebtoken');
+const logger = require('./logger.js');
 const key = 'gbXQ2y+8cpl63n&';
 
 
@@ -10,45 +10,47 @@ const key = 'gbXQ2y+8cpl63n&';
 class token {
     constructor() {}
 
-    sign (name) {
-        logger.info( 'singing token for:', name );
-        return jwt.sign( {
+    sign(name) {
+        logger.info('signing token for:', name);
+        return jwt.sign({
             name: name
         }, key, {
             expiresIn: '24h'
-        } );
+        });
     }
 
-    verify (token) {
+    verify(token) {
 
-        return new Promise( function ( resolve, reject ) {
+        return new Promise(function (resolve, reject) {
 
-                jwt.verify( token, key, ( err, decoded ) => {
-                    if ( err ) {
-                        logger.error( err );
-                        return reject( err );
+                jwt.verify(token, key, (err, decoded) => {
+                    if (err) {
+                        logger.error(err);
+                        return reject(err);
                     }
-                    return resolve( decoded );
-                } );
+                    return resolve(decoded);
+                });
 
-            } )
-            .catch( err => {
-                throw new Error( 'verifying token' );
-            } );
+            })
+            .catch(err => {
+                throw new Error('verifying token');
+            });
 
     }
 
-    create (user) {
+    create(user) {
 
-      return new Promise( function (resolve, reject) {
+        return new Promise(function (resolve, reject) {
 
-        logger.info( 'creating token for:', user.name);
-        const token =  jwt.sign({name: user.name}, key);
+            logger.info('creating token for:', user.name);
+            const token = jwt.sign({
+                name: user.name
+            }, key);
 
-        return resolve(token);
+            return resolve(token);
 
-    });
-  }
+        });
+    }
 }
 
 

@@ -50,7 +50,6 @@ angular
 
         $http.get('/api/v1/ec2/security_groups')
             .success(function (response) {
-                console.log(response);
                 $scope.security_groups = response;
             });
 
@@ -100,8 +99,7 @@ angular
             $http.post(url, $scope.stack)
                 .success(function (res) {
                     $scope.showSpinner = false;
-                    $uibModalInstance.dismiss('cancel');
-                    $state.go('main');
+                    $uibModalInstance.close('created new stack');
                 })
                 .error(function (err) {
                     $scope.showSpinner = false;

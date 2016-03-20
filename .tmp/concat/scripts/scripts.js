@@ -483,12 +483,19 @@ angular
         }
 
         $scope.openCreateForm = function () {
-            $uibModal.open({
+            var modalInstance = $uibModal.open({
                 animation: $scope.animationsEnabled,
                 templateUrl: 'views/modals/createForm.html',
                 controller: 'createStack',
                 size: 'md',
                 resolve: {}
+            });
+
+            modalInstance.result.then(function (selectedItem) {
+                //refresh stacks to the new stack just created
+                refresh();
+            }, function () {
+                console.log('Modal dismissed at: ' + new Date());
             });
         };
 
@@ -591,7 +598,7 @@ angular
                     dataStore.setActiveUser(user.name);
                     dataStore.setActiveAWS(user.aws_account);
                     dataStore.setActiveRegion(user.aws_region);
-                    $state.go('index.main');
+                    $state.go('index.stacks');
                 })
                 .error(function (err) {
                     //stop spinnner and present error
@@ -744,7 +751,6 @@ angular
 
         $http.get('/api/v1/ec2/security_groups')
             .success(function (response) {
-                console.log(response);
                 $scope.security_groups = response;
             });
 
@@ -794,8 +800,7 @@ angular
             $http.post(url, $scope.stack)
                 .success(function (res) {
                     $scope.showSpinner = false;
-                    $uibModalInstance.dismiss('cancel');
-                    $state.go('main');
+                    $uibModalInstance.close('created new stack');
                 })
                 .error(function (err) {
                     $scope.showSpinner = false;

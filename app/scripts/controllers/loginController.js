@@ -29,7 +29,7 @@ angular
                     dataStore.setActiveUser(user.name);
                     dataStore.setActiveAWS(user.aws_account);
                     dataStore.setActiveRegion(user.aws_region);
-                    $state.go('index.main');
+                    $state.go('index.stacks');
                 })
                 .error(function (err) {
                     //stop spinnner and present error
