@@ -5,6 +5,6 @@
         'ngStorage', //NG Storage
         'angularMoment', //MomentJS
         'underscore', //Underscore
-        'ngBootbox' //NG Bootbox
+        'ngBootbox', //NG Bootbox
     ]);
 })();

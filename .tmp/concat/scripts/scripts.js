@@ -90,7 +90,7 @@ $(function () {
         'ngStorage', //NG Storage
         'angularMoment', //MomentJS
         'underscore', //Underscore
-        'ngBootbox' //NG Bootbox
+        'ngBootbox', //NG Bootbox
     ]);
 })();
 
@@ -741,13 +741,6 @@ angular
                 $scope.security_groups = response;
             });
 
-        $http.get('/api/v1/chef/recipes')
-            .success(function (response) {
-                console.log(response);
-                $scope.recipes = response;
-            });
-
-
         $scope.createStack = function () {
             $scope.showSpinner = true;
 
@@ -789,10 +782,7 @@ angular
             $scope.stack.elb_security_groups = _.pluck($scope.elb_sgs, 'GroupId');
             $scope.stack.security_groups = _.pluck($scope.sgs, 'GroupId');
 
-
-            console.log($scope.stack);
-
-            var url = ['/api/v1/stacks/', $scope.stack.stack_name].join('');
+            var url = ['/api/v1/stacks', $scope.stack.stack_name].join('/');
             // create new stack
             $http.post(url, $scope.stack)
                 .success(function (res) {

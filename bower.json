@@ -30,7 +30,8 @@
         "angular-moment": "latest",
         "angular-underscore-module": "latest",
         "ngBootbox": "latest",
-        "angular-ladda": "latest"
+        "angular-ladda": "latest",
+        "angularjs-icheck": "latest"
     },
     "resolutions": {
         "jquery": "~2.1.4",

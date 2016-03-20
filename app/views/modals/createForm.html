@@ -1,9 +1,6 @@
 <div class="modal-body">
     <form name="StackForm" class="form-horizontal">
         <fieldset>
-            <legend>
-                Create New Stack</legend>
-
             <div class="tabs-container">
                 <ul class="nav nav-tabs">
                     <li class="active">
@@ -11,22 +8,22 @@
                             <i class="fa fa-server fa-2x"></i>
                         </a>
                     </li>
-                    <li class="">
-                        <a data-toggle="tab" href="#storage-tab">
-                            <i class="fa fa-hdd-o fa-2x"></i>
-                        </a>
-                    </li>
-                    <li class="">
+                    <li>
                         <a data-toggle="tab" href="#asg-tab">
                             <i class="fa fa-cubes fa-2x"></i>
                         </a>
                     </li>
-                    <li class="">
+                    <li>
+                        <a data-toggle="tab" href="#storage-tab">
+                            <i class="fa fa-hdd-o fa-2x"></i>
+                        </a>
+                    </li>
+                    <li>
                         <a data-toggle="tab" href="#scripts-tab">
                             <i class="fa fa-puzzle-piece fa-2x"></i>
                         </a>
                     </li>
-                    <li class="" ng-show="stack.build_size == 'HA'">
+                    <li ng-show="stack.build_size == 'HA'">
                         <a data-toggle="tab" href="#elb-tab">
                             <i class="fa fa-sitemap fa-2x"></i>
                         </a>
@@ -41,35 +38,33 @@
                     <div id="stack-tab" class="tab-pane active">
 
                         <div class="form-group">
-                            <label for="input" class="col-lg-2 control-label">Stack Name</label>
-                            <div class="col-lg-10">
-                                <input type="text" placeholder="prodapiuswest" ng-model="stack.stack_name">
-                            </div>
+                            <label>Stack Name</label>
+                            <input type="text" class="form-control" placeholder="prodapiuswest" ng-model="stack.stack_name">
                         </div>
 
                         <div class="form-group">
-                            <label for="select" class="col-lg-2 control-label">Build Size
+                            <label>Build Size
                                 <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="(HA) Created with ELB and Auto Scaling Group. (Single) Created with a single EC2 instance."></i>
                             </label>
-                            <div class="col-lg-10">
                                 <select ng-model="stack.build_size" class="form-control" id="select">
                                     <option value="HA">HA</option>
                                     <option value="Single">Single</option>
                                 </select>
-                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="select" class="col-lg-2 control-label">Create Route 53 DNS Record?</label>
-                            <div class="col-lg-10">
-                                <input type="checkbox" ng-model="stack.route_53" name="route_53">
+                        <div class="i-checks form-group">
+                            <label>
+                              <div class="icheckbox_square-green">
+                              <i></i>
+                              <input type="checkbox" ng-model="stack.route_53">
                             </div>
+                              Create Route 53 DNS Record?
+                            </label>
                         </div>
+
                         <div class="form-group" ng-show="stack.route_53">
-                            <label for="select" class="col-lg-2 control-label">Hosted Zone</label>
-                            <div class="col-lg-10">
-                                <input type="text" ng-model="stack.hosted_zone" name="hosted_zone" placeholder="concord.io.">
-                            </div>
+                            <label>Hosted Zone</label>
+                                <input type="text" class="form-control" ng-model="stack.hosted_zone" name="hosted_zone" placeholder="concord.io.">
                         </div>
 
                     </div>
@@ -105,23 +100,22 @@
                           </tbody>
                         </table>
 
-                            <div class="form-group">
-                                <label for="select" class="col-lg-2 control-label">instance Store?</label>
-                                <div class="col-lg-10">
+                            <div class="i-checks form-group">
+                                <label>
                                     <input type="checkbox" ng-model="stack.instance_store" name="instance_store">
-                                </div>
+                                    Instance Store?
+                                </label>
                             </div>
-                            <div class="form-group">
-                                <label for="select" class="col-lg-2 control-label">Root EBS Volume?</label>
-                                <div class="col-lg-10">
-                                    <input type="checkbox" ng-model="stack.ebs_root_volume" name="ebs_volume">
-                                </div>
+
+                            <div class="i-checks form-group">
+                                <label>
+                                <input type="checkbox"ng-model="stack.ebs_root_volume" name="ebs_volume">
+                                Root EBS Volume?
+                                </label>
                             </div>
                             <div ng-show="stack.ebs_root_volume" class="form-group">
-                                <label for="input" class="col-lg-2 control-label">Root Volume Size (GBs)</label>
-                                <div class="col-lg-10">
-                                    <input type="number" name="input" ng-model="stack.ebs_root_size" min="0" max="5000">
-                                </div>
+                                <label>Root Volume Size (GBs)</label>
+                                <input type="number" class="form-control" name="input" ng-model="stack.ebs_root_size" min="0" max="5000">
                             </div>
 
                         </div>
@@ -131,62 +125,48 @@
                         <div id="asg-tab" class="tab-pane">
 
                             <div ng-show="stack.build_size === 'HA'" class="form-group">
-                                <label for="input" class="col-lg-2 control-label">Min Instance Size</label>
-                                <div class="col-lg-10">
-                                    <input type="number" name="min_size" ng-model="stack.min_size" min="0" max="15">
-                                </div>
+                                <label>Min Instance Size</label>
+                                    <input type="number" class="form-control" name="min_size" ng-model="stack.min_size" min="0" max="15">
                             </div>
                             <div ng-show="stack.build_size === 'HA'" class="form-group">
-                                <label for="input" class="col-lg-2 control-label">Max Instance Size</label>
-                                <div class="col-lg-10">
-                                    <input type="number" name="max_size" ng-model="stack.max_size" min="0" max="15">
-                                </div>
+                                <label>Max Instance Size</label>
+                                <input type="number" class="form-control" name="max_size" ng-model="stack.max_size" min="0" max="15">
                             </div>
                             <div class="form-group">
-                                <label for="select" class="col-lg-2 control-label">Instance Size</label>
-                                <div class="col-lg-10">
-                                    <select ng-model="stack.instance_size" class="form-control" id="select">
-                                        <option ng-repeat="size in instanceSizes" ng-value"size">{{size}}</option>
-                                    </select>
-                                </div>
+                                <label>Instance Size</label>
+                                <select ng-model="stack.instance_size" class="form-control">
+                                    <option ng-repeat="size in instanceSizes" class="scrollable-menu" ng-value="size">{{size}}</option>
+                                </select>
                             </div>
                             <div class="form-group">
-                                <label for="select" class="col-lg-2 control-label">Key Pair</label>
-                                <div class="col-lg-10">
-                                    <select ng-model="stack.key" class="form-control" id="select">
-                                        <option ng-repeat="key in keys">{{ key.KeyName }}</option>
-                                    </select>
-                                </div>
+                                <label>Key Pair</label>
+                                <select ng-model="stack.key" class="form-control" id="select">
+                                    <option ng-repeat="key in keys" ng-value="key.KeyName">{{key.KeyName}}</option>
+                                </select>
                             </div>
                             <div class="form-group">
-                                <label for="select" class="col-lg-2 control-label">AMI</label>
-                                <div class="col-lg-10">
-                                    <select ng-model="stack.ami" class="form-control" id="select">
-                                        <option ng-value="image.id" ng-repeat="image in images">{{ image.name }}</option>
-                                    </select>
-                                </div>
+                                <label>AMI</label>
+                                <select ng-model="stack.ami" class="form-control" id="select">
+                                    <option ng-value="image.id" ng-repeat="image in images">{{image.name}}</option>
+                                </select>
                             </div>
                             <div class="form-group">
-                                <label for="select" class="col-lg-2 control-label">AMI ID</label>
-                                <div class="col-lg-10">
-                                    <input type="text" name="ami" ng-model="stack.ami">
-                                </div>
-                            </div>
-
-                            <div class="form-group" ng-show="stack.build_size === 'HA'">
-                                <label for="select" class="col-lg-2 control-label">Multi Availability Zone?</label>
-                                <div class="col-lg-10">
-                                    <input type="checkbox" ng-model="stack.multi_az" name="multi_az">
-                                </div>
+                                <label>AMI ID</label>
+                                <input type="text" class="form-control" name="ami" ng-model="stack.ami">
                             </div>
 
                             <div class="form-group" ng-show="!stack.multi_az">
-                                <label for="select" class="col-lg-2 control-label">Availability Zone</label>
-                                <div class="col-lg-10">
-                                    <select ng-model="stack.regions" class="form-control" id="select">
-                                        <option ng-repeat="region in regions">{{ region }}</option>
-                                    </select>
-                                </div>
+                                <label>Availability Zone</label>
+                                <select ng-model="stack.regions" class="form-control" id="select">
+                                    <option ng-repeat="region in regions" ng-value="region">{{region}}</option>
+                                </select>
+                            </div>
+
+                            <div class="i-checks form-group" ng-show="stack.build_size === 'HA'">
+                                <label>
+                                <input type="checkbox" ng-model="stack.multi_az">
+                                Multi Availability Zone?
+                              </label>
                             </div>
 
                             <table class="table">
@@ -198,7 +178,7 @@
                                         <th>
                                             <div class="btn-group">
                                                 <button type="button" data-toggle="dropdown" class="btn btn-primary btn-outline dropdown-toggle">+ Add Security Group</button>
-                                                <ul class="dropdown-menu">
+                                                <ul class="dropdown-menu scrollable-menu">
                                                     <li ng-repeat="group in security_groups">
                                                         <a class="dropdown-item" ng-click=addSecurityGroup(group)>{{ group.GroupId }}
                                                             |
@@ -237,36 +217,27 @@
                             <div id="scripts-tab" class="tab-pane">
 
                                 <div class="form-group">
-                                    <label for="select" class="col-lg-2 control-label">App Name
+                                    <label>App Name
                                         <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="App name used in chef environment to correlate version in recipe"></i>
                                     </label>
-                                    <div class="col-lg-10">
-                                        <input type="text" name="app_name" placeholder="node-api" ng-model="stack.app_name">
-                                    </div>
+                                    <input type="text" class="form-control" placeholder="node-backend" ng-model="stack.app_name">
                                 </div>
                                 <div class="form-group">
-                                    <label for="select" class="col-lg-2 control-label">App Version
+                                    <label>App Version
                                         <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="App version used in chef environment"></i>
                                     </label>
-                                    <div class="col-lg-10">
-                                        <input type="text" name="app_name" placeholder="staging-2423" ng-model="stack.app_version">
-                                    </div>
+                                    <input type="text" class="form-control" placeholder="prod-2423" ng-model="stack.app_version">
                                 </div>
                                 <div class="form-group">
-                                    <label for="select" class="col-lg-2 control-label">DNS Domain
+                                    <label>Domain
                                         <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="Domain is used to generate a url placed in chef node and environment for use with nginx or apache config"></i>
                                     </label>
-                                    <div class="col-lg-10">
-                                        <input type="text" name="app_name" placeholder="concord.io" ng-model="stack.domain">
-                                    </div>
+                                    <input type="text" class="form-control" placeholder="concord.io" ng-model="stack.domain">
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="recipes_string" class="col-lg-2 control-label">Chef Recipes
-                                    </label>
-                                    <div class="col-lg-10">
-                                        <textarea rows="3" name="recipes_string" ng-model="stack.recipes_string" placeholder="role[base],recipe[nginx], recipe[nodejs], recipe[app]"></textarea>
-                                    </div>
+                                    <label>Chef Recipes</label>
+                                    <textarea rows="3" class="form-control" ng-model="stack.recipes_string" placeholder="role[base], recipe[nginx], recipe[nodejs], recipe[app]"></textarea>
                                 </div>
 
                             </div>
@@ -275,38 +246,31 @@
                             <!-- elb options -->
                             <div id="elb-tab" class="tab-pane">
 
+                              <div class="form-group" ng-show="stack.build_size === 'HA'">
+                                  <label>ELB Ping Port</label>
+                                  <input type="number" class="form-control" name="input" ng-model="stack.elb.ping_port">
+                              </div>
+
                                 <div class="form-group" ng-show="stack.build_size === 'HA'">
-                                    <label for="select" class="col-lg-2 control-label">ELB Ping Protocol</label>
-                                    <div class="col-lg-10">
+                                    <label>ELB Ping Protocol</label>
                                         <select ng-model="stack.elb.ping_protocol" class="form-control" id="select">
                                             <option value="TCP">TCP</option>
                                             <option value="HTTPS">HTTPS</option>
                                             <option value="HTTP">HTTP</option>
                                             <option value="SSL">SSL</option>
                                         </select>
-                                    </div>
                                 </div>
 
-                                <div class="form-group" ng-show="stack.build_size === 'HA'">
-                                    <label for="select" class="col-lg-2 control-label">ELB Ping Port</label>
-                                    <div class="col-lg-10">
-                                        <input type="number" name="input" ng-model="stack.elb.ping_port">
-                                    </div>
-                                </div>
                                 <div class="form-group" ng-show="stack.elb.ping_protocol === 'HTTP' || stack.elb.ping_protocol === 'HTTPS'">
-                                    <label for="select" class="col-lg-2 control-label">ELB Ping Path</label>
-                                    <div class="col-lg-10">
-                                        <input type="text" name="stack_name" placeholder="/api/v1/status" ng-model="stack.elb.ping_path">
-                                    </div>
+                                    <label>ELB Ping Path</label>
+                                    <input type="text" class="form-control" placeholder="/api/v1/status" ng-model="stack.elb.ping_path">
                                 </div>
 
                                 <div class="form-group" ng-show="stack.build_size === 'HA'">
-                                    <label for="select" class="col-lg-2 control-label">SSL Certificate (Optional)</label>
-                                    <div class="col-lg-10">
-                                        <select ng-model="stack.ssl_cert" class="form-control" id="select">
-                                            <option ng-repeat="ssl in ssls" ng-value="ssl.Arn">{{ ssl.ServerCertificateName }}</option>
-                                        </select>
-                                    </div>
+                                    <label>SSL Certificate (Optional)</label>
+                                    <select ng-model="stack.ssl_cert" class="form-control" id="select">
+                                        <option ng-repeat="ssl in ssls" ng-value="ssl.Arn">{{ssl.ServerCertificateName}}</option>
+                                    </select>
                                 </div>
 
                                 <table class="table" ng-show="stack.build_size === 'HA'">
@@ -318,7 +282,7 @@
                                             <th>
                                                 <div class="btn-group">
                                                     <button type="button" data-toggle="dropdown" class="btn btn-primary btn-outline dropdown-toggle">+ Add ELB Security Group</button>
-                                                    <ul class="dropdown-menu">
+                                                    <ul class="dropdown-menu scrollable-menu">
                                                         <li ng-repeat="group in security_groups">
                                                             <a class="dropdown-item" ng-click=addElbSecurityGroup(group)>{{ group.GroupId }}
                                                                 |

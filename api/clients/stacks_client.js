@@ -13,6 +13,9 @@ const logger = require('../../utls/logger.js');
 const template_client = require('./template_client.js');
 const elb_client = require('./elb_client.js');
 
+// Verify client
+const verify = require('../../utls/verify.js');
+
 
 class StacksClient {
 
@@ -71,7 +74,7 @@ class StacksClient {
         const self = this;
 
         //allows api to return while backend verifies
-        function verify(params) {
+        function verify_stack(params) {
             return self.waitForStack(params.stack_name, 15, 50)
                 .then(() => {
                     if (params.build_size === 'HA') {
@@ -83,24 +86,26 @@ class StacksClient {
         //init chef client
         const chef_client = require('./chef_client.js');
         chef_client.init(params.cms);
-
-        return template_client.get(null, params)
-            .then(template => {
-                template_body = template;
-                return self.cloudformation.createStackAsync({
-                    StackName: params.stack_name,
-                    TemplateBody: template,
-                    Tags: [{
-                        Key: 'stack_type',
-                        Value: 'Concord'
-                    }]
-                });
+        return verify.verify_create_stack(params)
+            .then(() => {
+              return template_client.get(null, params)
+                  .then(template => {
+                      template_body = template;
+                      return self.cloudformation.createStackAsync({
+                          StackName: params.stack_name,
+                          TemplateBody: template,
+                          Tags: [{
+                              Key: 'stack_type',
+                              Value: 'Concord'
+                          }]
+                      });
+                  });
             })
             .then(() => {
                 logger.info('creating environment');
                 return chef_client.createEnvironment(params);
             })
-            .tap(verify(params))
+            .tap(verify_stack(params))
             .then(() => {
                 return 'success';
             })

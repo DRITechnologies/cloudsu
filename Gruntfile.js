@@ -52,7 +52,7 @@ module.exports = function (grunt) {
                 reporter: require('jshint-stylish')
             },
 
-            build: ['Gruntfile.js', 'app/**/*.js', 'api/**/*.js', 'utls/**/*.js', 'config/**/*.js']
+            build: ['Gruntfile.js', 'app/scripts/**/*.js', 'api/**/*.js', 'utls/**/*.js', 'config/**/*.js']
         },
 
         browserify: {
@@ -183,16 +183,6 @@ module.exports = function (grunt) {
     });
 
     require('load-grunt-tasks')(grunt);
-
-    grunt.registerTask('version_file', 'create artifact version file', () => {
-        const version = grunt.config.get('service.version') || grunt.option('build-version') || null;
-        if (!version) {
-            grunt.log.write('NO version --  setting to null');
-        }
-        grunt.file.write('./version.json', JSON.stringify({
-            version: version
-        }));
-    });
 
     // Build version for production
     grunt.registerTask('build', [
