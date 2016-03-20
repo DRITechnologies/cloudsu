@@ -5,19 +5,21 @@
                 <h1>
                     {{main.helloText}}
                 </h1>
-                    <div class="m-b-md">
-                        <a ng-click="openCreateForm()" class="btn btn-primary btn-rounded btn-lg">
-                            <i class="fa fa-plus"></i>
-                        </a>
-                </div>
                 <small>
                     {{main.descriptionText}}
                 </small>
+                <div>
+                <br>
+                <a ng-click="openCreateForm()" class="btn btn-primary btn-rounded btn-lg">
+                    <i class="fa fa-plus"></i>
+                </a>
+              </div>
             </div>
         </div>
     </div>
-
-    <alerts></alerts>
+</div>
+<alerts></alerts>
+<div class="wrapper wrapper-content  animated fadeInRight">
     <div class="row">
     <div class="col-lg-4" ng-repeat="stack in stacks">
         <div class="ibox float-e-margins">

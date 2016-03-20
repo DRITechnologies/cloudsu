@@ -1,5 +1,5 @@
 function config($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.otherwise('/index/main');
+    $urlRouterProvider.otherwise('/index/stacks');
 
     $stateProvider
 
@@ -18,14 +18,15 @@ function config($stateProvider, $urlRouterProvider) {
             url: '/index',
             templateUrl: 'views/common/content.html',
         })
-        .state('index.main', {
-            url: '/main',
-            templateUrl: 'views/main.html',
+        .state('index.stacks', {
+            url: '/stacks',
+            templateUrl: 'views/stacks.html',
             controller: 'stacksController'
         })
         .state('index.users', {
             url: '/users',
-            templateUrl: 'views/minor.html'
+            templateUrl: 'views/users.html',
+            controller: 'usersController'
         })
         .state('index.system', {
             url: '/system',

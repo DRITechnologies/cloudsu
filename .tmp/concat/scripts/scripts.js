@@ -96,7 +96,7 @@ $(function () {
 })();
 
 function config($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.otherwise('/index/main');
+    $urlRouterProvider.otherwise('/index/stacks');
 
     $stateProvider
 
@@ -115,14 +115,15 @@ function config($stateProvider, $urlRouterProvider) {
             url: '/index',
             templateUrl: 'views/common/content.html',
         })
-        .state('index.main', {
-            url: '/main',
-            templateUrl: 'views/main.html',
+        .state('index.stacks', {
+            url: '/stacks',
+            templateUrl: 'views/stacks.html',
             controller: 'stacksController'
         })
         .state('index.users', {
             url: '/users',
-            templateUrl: 'views/minor.html'
+            templateUrl: 'views/users.html',
+            controller: 'usersController'
         })
         .state('index.system', {
             url: '/system',
@@ -848,5 +849,19 @@ angular
             $scope.elb_sgs.splice(index, 1);
         };
 
+
+    });
+
+angular
+    .module('stacks')
+    .controller('usersController', function ($scope, $http, $state, $uibModal, dataStore) {
+
+         $http.get('api/v1/accounts/')
+         .success(function (users) {
+             $scope.users = users;
+         })
+         .error(function (err) {
+             console.log(err);
+         });
 
     });

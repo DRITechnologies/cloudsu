@@ -284,13 +284,13 @@ class Config {
       let users = cache.get('all_users');
 
       if (users) {
-        return users;
+        return resolve(users);
       }
 
-      return db.list('USER')
+      return db.findAll('USER')
       .then(users => {
         cache.set('all_users', users);
-        return users;
+        return resolve(users);
       });
     });
     }
