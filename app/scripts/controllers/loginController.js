@@ -12,7 +12,7 @@ angular
 
             //setup http body
             var user = {
-                email: $scope.user.email,
+                name: $scope.user.name,
                 password: $scope.user.password
             };
 

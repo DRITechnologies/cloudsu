@@ -3,6 +3,14 @@
 $(document)
     .ready(function () {
 
+        // i-check checkboxs
+        $('.i-checks')
+            .iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
+
+
         // Full height of sidebar
         function fix_height() {
             var heightWithoutNavbar = $('body > #wrapper')

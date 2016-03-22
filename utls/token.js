@@ -7,7 +7,7 @@ const key = 'gbXQ2y+8cpl63n&';
 
 
 
-class token {
+class Token {
     constructor() {}
 
     sign(name) {
@@ -54,4 +54,4 @@ class token {
 }
 
 
-module.exports = new token();
+module.exports = new Token();

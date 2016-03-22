@@ -11,14 +11,14 @@
         <alerts></alerts>
         <form class="m-t" role="form">
             <div class="form-group">
-                <input type="email" class="form-control" placeholder="Email" ng-model="user.email" required>
+                <input type="email" class="form-control" placeholder="Email" ng-model="user.name" required>
             </div>
             <div class="form-group">
                 <input type="password" class="form-control" placeholder="Password" ng-model="user.password" required>
             </div>
             <button type="submit" ng-click="attemptLogin()" class="btn btn-primary block full-width m-b">
-                <i ng-show="showSpinner" class="fa fa-circle-o-notch fa-spin"></i>
-                Login</button>
+                <i ng-show="showSpinner" class="fa fa-circle-o-notch fa-spin"></i> Login
+            </button>
 
             <p class="text-muted text-center">
                 <small>Do not have an account?</small>

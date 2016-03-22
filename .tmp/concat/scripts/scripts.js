@@ -3,6 +3,14 @@
 $(document)
     .ready(function () {
 
+        // i-check checkboxs
+        $('.i-checks')
+            .iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
+
+
         // Full height of sidebar
         function fix_height() {
             var heightWithoutNavbar = $('body > #wrapper')
@@ -339,12 +347,13 @@ angular
  */
 angular
     .module('stacks')
-    .controller('MainCtrl', function ($scope, $http, $state, dataStore, SweetAlert) {
+    .controller('MainCtrl', function ($scope, $http, $state, $uibModal, dataStore, SweetAlert) {
 
         this.userName = dataStore.getActiveUser();
         this.helloText = 'Concord Stacks';
         this.descriptionText = 'Click + to create a new stack!';
 
+        // ping api request to determine screen if error
         $http.get('/api/v1/ping/' + dataStore.getToken())
             .success(function (res) {
                 if (!res.login) {
@@ -363,17 +372,30 @@ angular
         //Get bear api token
         $scope.getToken = function () {
             $http.get('/api/v1/accounts/token')
-            .success(function (token){
-              SweetAlert.swal({
-                title: 'Service API Token',
-                text: token,
-                type: 'success',
-                confirmButtonColor: '#1ab394'});
-            })
-            .error(function (err) {
-               console.log(err);
-            });
+                .success(function (token) {
+                    SweetAlert.swal({
+                        title: 'Service API Token',
+                        text: '<pre><code>' + token + '</code></pre>',
+                        html: true,
+                        type: 'success',
+                        confirmButtonColor: '#1ab394'
+                    });
+                })
+                .error(function (err) {
+                    //add cool error later on
+                    console.log(err);
+                });
 
+        };
+
+        $scope.resetPassword = function () {
+            //open reset password modal
+            $uibModal.open({
+                animation: true,
+                templateUrl: 'views/modals/resetPassword.html',
+                controller: 'resetPassword',
+                size: 'sm'
+            });
         };
 
     });
@@ -454,9 +476,8 @@ angular
 
         return {
             request: function (config) {
-                config.headers.aws_account = dataStore.getActiveAWS() || '';
-                config.headers.aws_region = dataStore.getActiveRegion() || '';
-                config.headers.cms_name = dataStore.getCmsName() || '';
+                config.headers.aws_account = dataStore.getActiveAWS() || 'DEFAULT';
+                config.headers.aws_region = dataStore.getActiveRegion() || 'us-west-2';
                 config.headers.token = dataStore.getToken() || '';
                 return config;
             }
@@ -469,10 +490,9 @@ angular
         $httpProvider.interceptors.push('httpRequestInterceptor');
     });
 
-// view controllers
 angular
     .module('stacks')
-    .controller('stacksController', function ($scope, $http, $state, $uibModal, $ngBootbox, dataStore) {
+    .controller('stacksController', function ($scope, $http, $state, $uibModal, SweetAlert, dataStore) {
 
         //Get stacks from AWS
         function refresh() {
@@ -484,7 +504,7 @@ angular
 
         $scope.openCreateForm = function () {
             var modalInstance = $uibModal.open({
-                animation: $scope.animationsEnabled,
+                animation: true,
                 templateUrl: 'views/modals/createForm.html',
                 controller: 'createStack',
                 size: 'md',
@@ -508,18 +528,30 @@ angular
         //Delete stack but confirm first
         $scope.deleteStack = function ($event, stack_name) {
             $event.stopImmediatePropagation();
-            $ngBootbox.confirm('Are you sure you want to delete ' + stack_name + '?')
-                .then(function () {
-                    $http.delete('/api/v1/stacks/' + stack_name)
-                        .success(function (res) {
-                            refresh();
-                        })
-                        .error(function (err) {
-                            $scope.alerts.push({
-                                type: 'danger',
-                                msg: err
+
+            SweetAlert.swal({
+                    title: 'Are you sure?',
+                    text: 'All stack resources will be removed: ' + stack_name,
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#1ab394',
+                    confirmButtonText: 'Yes, delete it!',
+                    closeOnConfirm: false
+                },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $http.delete('/api/v1/stacks/' + stack_name)
+                            .success(function (res) {
+                                SweetAlert.swal('Success', stack_name + ' is being deprovisioned.', 'success');
+                                refresh();
+                            })
+                            .error(function (err) {
+                                $scope.alerts.push({
+                                    type: 'danger',
+                                    msg: err
+                                });
                             });
-                        });
+                    }
                 });
         };
 
@@ -581,7 +613,7 @@ angular
 
             //setup http body
             var user = {
-                email: $scope.user.email,
+                name: $scope.user.name,
                 password: $scope.user.password
             };
 
@@ -859,14 +891,208 @@ angular
 
 angular
     .module('stacks')
-    .controller('usersController', function ($scope, $http, $state, $uibModal, dataStore) {
+    .controller('usersController', function ($scope, $http, $state, $uibModal, SweetAlert, dataStore) {
 
-         $http.get('api/v1/accounts/')
-         .success(function (users) {
-             $scope.users = users;
-         })
-         .error(function (err) {
-             console.log(err);
-         });
+        //to make the ui render correctly
+        $scope.admin = true;
+
+        function refresh() {
+            $http.get('api/v1/accounts/')
+                .success(function (users) {
+                    $scope.users = users;
+                    $scope.admin = true;
+                })
+                .error(function (err) {
+                    $scope.admin = false;
+                });
+        }
+
+        $scope.createUser = function () {
+            var modalInstance = $uibModal.open({
+                animation: true,
+                templateUrl: 'views/modals/createUser.html',
+                controller: 'createUser',
+                size: 'md',
+                resolve: {}
+            });
+
+            modalInstance.result.then(function () {
+                //refresh user to show new
+                refresh();
+            }, function () {
+                console.log('Modal dismissed at: ' + new Date());
+            });
+        };
+
+        $scope.editUser = function (user) {
+            if (!user.admin) {
+                SweetAlert.swal({
+                        title: '',
+                        text: 'Make ' + user.name + ' admin?',
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#1ab394',
+                        confirmButtonText: 'Yes',
+                        closeOnConfirm: false
+                    },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                            user.admin = true;
+                            $http.put('/api/v1/accounts/', user)
+                                .success(function (response) {
+                                    SweetAlert.swal('Success', user.name + ' has been added to admin group.', 'success');
+                                    refresh();
+                                });
+                        }
+                    });
+            }
+        };
+
+
+        $scope.removeUser = function (user) {
+            SweetAlert.swal({
+                    title: 'Are you sure?',
+                    text: 'User will be removed from the database: ' + user.name,
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#1ab394',
+                    confirmButtonText: 'Yes, delete user!',
+                    closeOnConfirm: false
+                },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $http.delete('/api/v1/accounts/' + user.name)
+                            .success(function (res) {
+                                SweetAlert.swal('Success', user.name + ' has been removed.', 'success');
+                                refresh();
+                            });
+                    }
+                });
+        };
+
+
+
+
+        //load initial
+        refresh();
+    });
+
+angular
+    .module('stacks')
+    .controller('createUser', function ($scope, $http, $state, $uibModalInstance, dataStore, _) {
+
+        // setup defaults
+        $scope.alerts = [];
+        $scope.token = false;
+        $scope.user = {};
+        $scope.user.type = 'USER';
+        $scope.user.email_pass = false;
+        $scope.showSpinner = false;
+
+        $scope.create = function () {
+
+            //ensure password match
+            if ($scope.user.password !== $scope.user.confirm &&
+                $scope.user.user_type === 'User' &&
+                !$scope.user.email_pass) {
+                return $scope.alerts.push({
+                    type: 'danger',
+                    msg: 'Passwords do not match'
+                });
+                // ensure password is at least 8 characters
+            } else if ($scope.user.user_type === 'Service') {
+                //stub so password length is not hit when it is not used
+            } else if ($scope.user.password.length < 8 &&
+                $scope.user.user_type === 'User' &&
+                !$scope.user.email_pass) {
+                return $scope.alerts.push({
+                    type: 'danger',
+                    msg: 'Passwords must be at least 8 characters'
+                });
+            }
+
+            //start spinner
+            $scope.showSpinner = true;
+
+            // send create request
+            $http.post('/api/v1/accounts', $scope.user)
+                .success(function (response) {
+                    $scope.showSpinner = false;
+                    console.log(response);
+                    if (response.service_token) {
+                        $scope.token = response.service_token;
+                    } else {
+                        $uibModalInstance.close('success');
+                    }
+                })
+                .error(function (err) {
+                    $scope.showSpinner = false;
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
+                });
+        };
+
+        $scope.closeAlert = function (index) {
+            $scope.alerts.splice(index, 1);
+        };
+
+
+        $scope.cancel = function () {
+            $uibModalInstance.close('success');
+        };
+
+    });
+
+angular
+    .module('stacks')
+    .controller('editUser', function ($scope, $http, $state, $uibModalInstance, dataStore, _, user) {
+        console.log('opened edit user modal');
+
+
+
+    });
+
+angular
+    .module('stacks')
+    .controller('resetPassword', function ($scope, $http, $state, $uibModalInstance) {
+
+        $scope.alerts = [];
+
+
+        $scope.save = function () {
+            if ($scope.user.password !== $scope.user.confirm) {
+                return $scope.alerts.push({
+                    type: 'danger',
+                    msg: 'Passwords do not match'
+                });
+            } else if ($scope.user.password < 8) {
+                return $scope.alerts.push({
+                    type: 'danger',
+                    msg: 'Passwords must be at least 8 characters'
+                });
+            }
+
+            $http.put('/api/v1/accounts/reset', $scope.user)
+                .success(function (response) {
+                    $uibModalInstance.dismiss('cancel');
+                })
+                .error(function (err) {
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
+                });
+        };
+
+        $scope.closeAlert = function (index) {
+            $scope.alerts.splice(index, 1);
+        };
+
+
+        $scope.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
 
     });

@@ -1,7 +1,6 @@
-// view controllers
 angular
     .module('stacks')
-    .controller('stacksController', function ($scope, $http, $state, $uibModal, $ngBootbox, dataStore) {
+    .controller('stacksController', function ($scope, $http, $state, $uibModal, SweetAlert, dataStore) {
 
         //Get stacks from AWS
         function refresh() {
@@ -13,7 +12,7 @@ angular
 
         $scope.openCreateForm = function () {
             var modalInstance = $uibModal.open({
-                animation: $scope.animationsEnabled,
+                animation: true,
                 templateUrl: 'views/modals/createForm.html',
                 controller: 'createStack',
                 size: 'md',
@@ -37,18 +36,30 @@ angular
         //Delete stack but confirm first
         $scope.deleteStack = function ($event, stack_name) {
             $event.stopImmediatePropagation();
-            $ngBootbox.confirm('Are you sure you want to delete ' + stack_name + '?')
-                .then(function () {
-                    $http.delete('/api/v1/stacks/' + stack_name)
-                        .success(function (res) {
-                            refresh();
-                        })
-                        .error(function (err) {
-                            $scope.alerts.push({
-                                type: 'danger',
-                                msg: err
+
+            SweetAlert.swal({
+                    title: 'Are you sure?',
+                    text: 'All stack resources will be removed: ' + stack_name,
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#1ab394',
+                    confirmButtonText: 'Yes, delete it!',
+                    closeOnConfirm: false
+                },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $http.delete('/api/v1/stacks/' + stack_name)
+                            .success(function (res) {
+                                SweetAlert.swal('Success', stack_name + ' is being deprovisioned.', 'success');
+                                refresh();
+                            })
+                            .error(function (err) {
+                                $scope.alerts.push({
+                                    type: 'danger',
+                                    msg: err
+                                });
                             });
-                        });
+                    }
                 });
         };
 

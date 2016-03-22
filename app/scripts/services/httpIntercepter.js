@@ -4,9 +4,8 @@ angular
 
         return {
             request: function (config) {
-                config.headers.aws_account = dataStore.getActiveAWS() || '';
-                config.headers.aws_region = dataStore.getActiveRegion() || '';
-                config.headers.cms_name = dataStore.getCmsName() || '';
+                config.headers.aws_account = dataStore.getActiveAWS() || 'DEFAULT';
+                config.headers.aws_region = dataStore.getActiveRegion() || 'us-west-2';
                 config.headers.token = dataStore.getToken() || '';
                 return config;
             }

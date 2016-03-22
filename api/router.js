@@ -38,10 +38,11 @@ module.exports = function (app) {
 
     //accounts
     app.get('/api/v1/accounts/token', accounts.getServiceToken);
+    app.put('/api/v1/accounts/reset', accounts.resetPassword);
     app.get('/api/v1/accounts', accounts.list);
     app.post('/api/v1/accounts', accounts.create);
-    app.put('/api/v1/accounts/', accounts.update);
-    app.delete('/api/v1/accounts', accounts.delete);
+    app.put('/api/v1/accounts', accounts.update);
+    app.delete('/api/v1/accounts/:name', accounts.delete);
 
     //stacks
     app.get('/api/v1/stacks', stacks.listStacks);

@@ -4,94 +4,165 @@
 const accounts_client = require('../clients/accounts_client.js');
 const logger = require('../../utls/logger.js');
 const err_handler = require('../../utls/error_handler.js');
+const config = require('../../config/config.js');
 
 
 class Accounts {
-    constructor () {}
+    constructor() {}
 
-    attemptLogin (req, res) {
+    attemptLogin(req, res) {
 
         const params = req.body;
-        return accounts_client.checkPassword(params.email, params.password)
+        return accounts_client.checkPassword(params.name, params.password)
             .then(user => {
-                res.status(200).json(user);
+                res.status(200)
+                    .json(user);
             })
             .catch(err => {
-                res.status(401).json(err_handler(err));
+                res.status(401)
+                    .json(err_handler(err));
             });
     }
 
-    update (req, res) {
+    resetPassword(req, res) {
 
-        const params = req.body;
-        return accounts_client.update(params)
-            .then(user => {
-                res.status(200).json(user);
+        return accounts_client.resetPassword(req.user.name, req.body.password)
+            .then(response => {
+                res.status(200)
+                    .json(response);
             })
             .catch(err => {
-                res.status(500).json(err_handler(err));
+                res.status(500)
+                    .json(err);
             });
     }
 
-    create (req, res) {
+    update(req, res) {
+
+        if (!req.user.admin) {
+            // send error if user is not an admin
+            res.status(401)
+                .json(req.user.name + ' is not in the admin group');
+            return;
+        }
+
+        const params = req.body;
+        return config.updateUser(params)
+            .then(user => {
+                res.status(200)
+                    .json(user);
+            })
+            .catch(err => {
+                res.status(500)
+                    .json(err_handler(err));
+            });
+    }
+
+    create(req, res) {
+
+        if (!req.user.admin) {
+            // send error if user is not an admin
+            res.status(401)
+                .json(req.user.name + ' is not in the admin group');
+            return;
+        }
 
         const params = req.body;
         return accounts_client.create(params)
-        .then(response => {
-          res.status(200).json(response);
-        })
-        .catch(err => {
-          res.status(500).json(err);
-        });
+            .then(response => {
+                res.status(200)
+                    .json(response);
+            })
+            .catch(err => {
+                res.status(500)
+                    .json(err);
+            });
     }
 
-    delete (req, res) {
+    delete(req, res) {
 
-      req.user.user_to_delete = req.body.name;
-      return accounts_client.delete(req.user)
-      .then(response => {
-           res.status(200).json(response);
-      })
-      .catch(err => {
-           res.status(500).json(err);
-      });
+        const name = req.params.name;
+
+        if (req.user.name === name) {
+            //user cannot delete themselves
+            res.status(401)
+                .json('You cannot delete yourself. Login as another user to delete: ' + name);
+            return;
+        } else if (!req.user.admin) {
+            //cannot delete unless user is an admin
+            res.status(401)
+                .json(req.user.name + ' is not in the admin group');
+            return;
+        }
+
+        console.log('in accounts', name);
+
+        return accounts_client.delete(name)
+            .then(response => {
+                res.status(200)
+                    .json(response);
+            })
+            .catch(err => {
+                res.status(500)
+                    .json(err);
+            });
     }
 
-    list (req, res) {
+    list(req, res) {
 
-      return accounts_client.list()
-      .then(users => {
-        res.status(200).json(users);
-      })
-      .catch(err => {
-        res.status(500).json(err);
-      });
+        if (!req.user.admin) {
+            // user cannot see users list unless they are apart of admin group
+            res.status(401)
+                .json(req.user.name + ' is not in the admin group');
+            return;
+        }
+
+        return accounts_client.list()
+            .then(users => {
+                res.status(200)
+                    .json(users);
+            })
+            .catch(err => {
+                res.status(500)
+                    .json(err);
+            });
     }
 
-    checkToken (req, res) {
+    checkToken(req, res) {
 
         const token = req.params.token;
         return accounts_client.checkToken(token)
             .then(response => {
                 logger.info(response);
-                res.status(200).json(response);
+                res.status(200)
+                    .json(response);
             })
             .catch(err => {
                 logger.error(err);
-                res.status(500).json(err_handler(err));
+                res.status(500)
+                    .json(err_handler(err));
             });
 
     }
 
-    getServiceToken (req, res) {
+    getServiceToken(req, res) {
+
+        if (!req.user.admin) {
+            // only admins can create auth tokens
+            res.status(401)
+                .json(req.user.name + ' is not in the admin group');
+            return;
+        }
 
         return accounts_client.getServiceToken(req.user)
-        .then(response => {
-          res.status(200).json(response);
-        })
-        .catch(err => {
-          res.status(500).json(err);
-        });
+            .then(response => {
+                res.status(200)
+                    .json(response);
+            })
+            .catch(err => {
+                res.status(500)
+                    .json(err);
+            });
     }
 }
 

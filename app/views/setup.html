@@ -1,5 +1,5 @@
 <div class="modal-header text-center">
-        <h3 class="modal-title">Welcome to Concord</h3>
+    <h3 class="modal-title">Welcome to Concord</h3>
 </div>
 <div class="modal-body">
     <form class="form">
@@ -55,12 +55,13 @@
             </div>
             <div class="form-group">
                 <label for="input">Server URL</label>
-                <input class="form-control" type="text" name="url" placeholder="https://api.chef.io/organizations/dev" ng-model="account.cms.url" required>
+                <input class="form-control" type="text" placeholder="https://api.chef.io/organizations/dev" ng-model="account.cms.url" required>
             </div>
             <div class="form-group">
-                <label for="input">Key</label>
-                <textarea class="form-control" style="height=200" type="text" name="key" ng-model="account.cms.key" row="5" required></textarea>
+                <label>Key</label>
+                <textarea class="form-control" type="text" ng-model="account.cms.key" row="4" required></textarea>
             </div>
+
         </fieldset>
         <br>
 
@@ -74,22 +75,21 @@
             <br>
             <div class="form-group">
                 <label for="input">Email</label>
-                <input class="form-control" type="email" name="name" placeholder="admin@concord.io" ng-model="account.user.name" required>
+                <input class="form-control" type="email" placeholder="admin@concord.io" ng-model="account.user.name" required>
             </div>
             <div class="form-group">
                 <label for="input">Password</label>
-                <input class="form-control" type="password" name="key" ng-model="account.user.password" required>
+                <input class="form-control" type="password" ng-model="account.user.password" required>
             </div>
             <div class="form-group">
                 <label for="input">Confirm Password</label>
-                <input class="form-control" type="password" name="confirm" ng-model="account.user.confirm" required>
+                <input class="form-control" type="password" ng-model="account.user.confirm" required>
             </div>
         </fieldset>
         <alerts></alerts>
         <div class="form-group text-center">
             <button class="btn btn-primary" ng-click="create()">
-                <i ng-show="showSpinner" class="fa fa-circle-o-notch fa-spin"></i>
-                Create
+                <i ng-show="showSpinner" class="fa fa-circle-o-notch fa-spin"></i> Create
             </button>
         </div>
     </form>

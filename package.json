@@ -31,7 +31,9 @@
         "bcrypt": "latest",
         "node-cache": "latest",
         "async": "latest",
-        "jsonwebtoken": "latest"
+        "jsonwebtoken": "latest",
+        "password-generator": "latest",
+        "nodemailer": "latest"
     },
     "devDependencies": {
         "angular": "1.4.4",
@@ -42,7 +44,6 @@
         "bootstrap": "3.3.5",
         "browserify": "11.0.1",
         "browserify-shim": "3.8.10",
-        "eslint": "^2.2.0",
         "grunt": "0.4.5",
         "grunt-aws-s3": "latest",
         "grunt-browserify": "4.0.0",

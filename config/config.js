@@ -243,10 +243,7 @@ class Config {
 
         logger.info('updating user account', params.type, params.name);
 
-        console.log('before omit', params);
         const obj = _.omit(params, ['name', 'type']);
-        console.log('obj', obj);
-        console.log('params', params);
 
         return db.update({
             hash: 'USER',
@@ -280,19 +277,19 @@ class Config {
 
     listUsers() {
 
-      return new Promise(function (resolve, reject) {
-      let users = cache.get('all_users');
+        return new Promise(function (resolve, reject) {
+            let users = cache.get('all_users');
 
-      if (users) {
-        return resolve(users);
-      }
+            if (users) {
+                return resolve(users);
+            }
 
-      return db.findAll('USER')
-      .then(users => {
-        cache.set('all_users', users);
-        return resolve(users);
-      });
-    });
+            return db.findAll('USER')
+                .then(users => {
+                    cache.set('all_users', users);
+                    return resolve(users);
+                });
+        });
     }
 }
 

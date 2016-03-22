@@ -2,61 +2,81 @@
 'use strict';
 
 const Promise = require('bluebird');
+const _ = require('underscore');
+const generatePassword = require('password-generator');
 const crypto_client = require('../../utls/crypto_client.js');
 const secure_config = require('../../config/secure_config.js');
 const config = require('../../config/config.js');
 const token_client = require('../../utls/token.js');
+const email_client = require('../../utls/email.js');
 const logger = require('../../utls/logger.js');
 
 class AccountsClient {
-    constructor () {}
+    constructor() {}
 
-    checkPassword (email, password) {
+    checkPassword(name, password) {
 
         // check password against db
-        return config.getUser(email)
+        return config.getUser(name)
             .then(user => {
 
                 if (crypto_client.check_password(user.hash, password)) {
-                    logger.info('successful login attempt:', email);
+                    logger.info('Successful login attempt:', name);
                     user.token = token_client.sign(user.name);
                     return user;
                 } else {
-                    logger.error('failed login attempt:', email);
-                    throw new Error('incorrect email and password combination');
+                    logger.error('failed login attempt:', name);
+                    throw new Error('Incorrect email and password combination');
                 }
 
             });
     }
 
-    update (params) {
+    resetPassword(name, password) {
 
-        return config.updateUser(params)
+        // change users password
+        return config.getUser(name)
             .then(user => {
-                return user;
+                user.hash = crypto_client.encrypt(password);
+                return config.updateUser(user);
             });
     }
 
-    create (params) {
+    create(user) {
         //createUser
-        return config.createUser(params);
-    }
-
-    delete (user) {
-
-        if (user.groups.indexOf('admin') > -1) {
-            throw new Error(user.name + ' is not in the admin group');
+        if (user.user_type === 'Service') {
+            return token_client.create(user)
+                .then(token => {
+                    user.admin = true;
+                    user.service_token = token;
+                    return config.createUser(user);
+                })
+                .then(() => {
+                    return user;
+                });
+        } else if (user.email_pass) {
+            //generate password
+            user.password = generatePassword(12, false);
+            const email_msg = ['Your temporary password is:', user.password].join(' ');
+            email_client.fire(user.name, email_msg);
         }
-        // remove account after verifying user has permissions
-        return config.deleteUser(user.user_to_delete);
+        user.hash = crypto_client.encrypt(user.password);
+        user = _.omit(user, ['password', 'confirm']);
+        return config.createUser(user);
     }
 
-    list () {
-       // list all users
-       return config.listUsers();
+    delete(name) {
+
+        // remove account name variable should be an email
+        return config.deleteUser(name);
     }
 
-    checkToken (token) {
+    list() {
+        // list all users
+        return config.listUsers();
+    }
+
+    checkToken(token) {
 
         return new Promise(function (resolve, reject) {
 
@@ -92,30 +112,28 @@ class AccountsClient {
 
     }
 
-    getServiceToken (user) {
+    getServiceToken(user) {
 
-      return new Promise(function (resolve, reject) {
-      //check if token already exists and return
-      if (user.service_token) {
-        return resolve(user.service_token);
-      }
+        return new Promise(function (resolve, reject) {
+            //check if token already exists and return
+            if (user.service_token) {
+                return resolve(user.service_token);
+            }
 
-      const self = this;
+            //create new service token and saves to db
+            return token_client.create(user)
+                .then(token => {
+                    user.service_token = token;
+                    return config.updateUser(user);
+                })
+                .then(() => {
+                    return resolve(user.service_token);
+                })
+                .catch(err => {
+                    return reject(err);
+                });
 
-      //create new service token and saves to db
-      return token_client.create(user)
-      .then(token => {
-        user.service_token = token;
-        return self.update(user);
-      })
-      .then(() => {
-        return resolve(user.service_token);
-      })
-      .catch(err => {
-        return reject(err);
-      });
-
-    });
+        });
     }
 }
 
