@@ -1,48 +1,67 @@
-<table class="table table-hover">
-    <caption class="text-center">Setup Accounts</caption>
-    <tbody>
-        <tr ng-click="chefModal()">
-            <td>
-                <img src="../../img/chef_logo.png" class="img-responsive" height="50" width="50" alt="chef logo">
-            </td>
-            <td>
-                <h4>Chef server setup</h4>
-            </td>
-        </tr>
-        <tr ng-click="awsModal()">
-            <td>
-                <img src="../../img/aws_logo.png" class="img-responsive" height="95" width="95" alt="aws logo">
-            </td>
-            <td>
-                <h4>AWS account setup</h4>
-            </td>
-        </tr>
-    </tbody>
-</table>
-<br>
-<table class="table table-hover" ng-show="chef_accounts.length">
-    <caption class="text-center">Chef Account</caption>
-    <tbody>
-        <tr ng-click="getChefModal(chef.name)" ng-repeat="chef in chef_accounts">
-            <td>
-                <img src="../../img/chef_logo.png" class="img-responsive" height="50" width="50" alt="chef logo">
-            </td>
-            <td>
-                <h4>Account Name: {{ chef.name }}</h4>
-            </td>
-        </tr>
-    </tbody>
-</table>
-<table class="table table-hover" ng-show="aws_accounts.length">
-    <caption class="text-center">AWS Accounts</caption>
-    <tbody>
-        <tr ng-click="getAwsModal(aws.name)" ng-repeat="aws in aws_accounts">
-            <td>
-                <img src="../../img/aws_logo.png" class="img-responsive" height="35" width="60" alt="aws logo">
-            </td>
-            <td>
-                <h4>Account Name: {{ aws.name }}</h4>
-            </td>
-        </tr>
-    </tbody>
-</table>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="text-center m-t-lg">
+                <h1>
+                    System
+                </h1>
+                <small>
+                  Add and configure system accounts.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div style="text-align: center;">
+                <i ng-show="!admin" class="fa fa-lock" style="font-size: 180px;color: #e5e5e5"></i>
+            </div>
+            <div ng-show="admin" class="ibox">
+                <div class="ibox-title">
+                    <button ng-click="addAccount()" class="btn btn-outline btn-primary centered">Add AWS Account</button>
+                </div>
+                <div class="ibox-content">
+                    <table class="table table-hover">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    Chef
+                                </td>
+                                <td>
+                                    DEFAULT
+                                </td>
+                                <td>
+                                    <div class="btn-toolbar">
+                                        <a class="btn btn-default btn-circle pull-right" ng-click="chefModal()">
+                                            <i class="fa fa-cog"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr ng-repeat="account in aws_accounts">
+                                <td>
+                                    {{ account.type }}
+                                </td>
+                                <td>
+                                    {{ account.name }}
+                                </td>
+                                <td>
+                                    <div class="btn-toolbar">
+                                        <a ng-show="account.name !== 'DEFAULT'" class="btn btn-default btn-circle pull-right" ng-click="removeUser(user)">
+                                            <i class="fa fa-close"></i>
+                                        </a>
+                                        <a class="btn btn-default btn-circle pull-right" ng-click="editUser(user)">
+                                            <i class="fa fa-cog"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

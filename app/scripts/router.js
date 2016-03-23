@@ -30,7 +30,8 @@ function config($stateProvider, $urlRouterProvider) {
         })
         .state('index.system', {
             url: '/system',
-            templateUrl: 'views/system.html'
+            templateUrl: 'views/system.html',
+            controller: 'system'
         });
 }
 angular

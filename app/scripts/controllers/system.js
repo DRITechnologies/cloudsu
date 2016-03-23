@@ -1,58 +1,34 @@
 angular
     .module('stacks')
-    .controller('system', function ($scope, $http, $location, $modal, dataStore) {
+    .controller('system', function ($scope, $http, $location, $uibModal, dataStore) {
 
-        dataStore.setShowBurger(false);
-        dataStore.setShowPlus(false);
+        $scope.alerts = [];
 
+        //to make the ui render correctly
+        $scope.admin = true;
 
-        $http.get('/api/v1/services/get_accounts/CMS')
-            .success(function (response) {
-                $scope.chef_accounts = response;
-            });
+        function refresh() {
+            $http.get('/api/v1/services/get_accounts/AWS')
+                .success(function (response) {
+                    $scope.admin = true;
+                    $scope.aws_accounts = response;
+                })
+                .error(function (err) {
+                    $scope.admin = false;
+                });
+        }
 
-        $http.get('/api/v1/services/get_accounts/AWS')
-            .success(function (response) {
-                $scope.aws_accounts = response;
-            });
-
-        //open chef modal
+        //open modal to edit chef
         $scope.chefModal = function () {
-            $modal.open({
-                animation: $scope.animationsEnabled,
-                templateUrl: 'partials/modals/chef.html',
-                controller: 'service_account_modal',
-                size: 'lg',
-                resolve: {
-                    type: function () {
-                        return 'CMS';
-                    },
-                    server: function () {
-                        return 'CHEF';
-                    },
-                    account: function () {
-                        return false;
-                    }
-                }
-            });
-        };
 
-        $scope.getChefModal = function (name) {
-
-            $http.get('/api/v1/services/get_account/CMS/' + name)
+            $http.get('/api/v1/services/get_account/CMS/DEFAULT')
                 .success(function (response) {
-                    $modal.open({
-                        animation: $scope.animationsEnabled,
-                        templateUrl: 'partials/modals/chef.html',
-                        controller: 'service_account_modal',
-                        size: 'lg',
+                    $uibModal.open({
+                        animation: true,
+                        templateUrl: 'views/modals/chef.html',
+                        size: 'md',
+                        controller: 'systemAccount',
                         resolve: {
-                            type: function () {
-                                return 'CMS';
-                            },
-                            server: function () {
-                                return 'CHEF';
-                            },
                             account: function () {
                                 return response;
                             }
@@ -62,48 +38,24 @@ angular
                 });
         };
 
-        $scope.awsModal = function () {
-            $modal.open({
-                animation: $scope.animationsEnabled,
-                templateUrl: 'partials/modals/aws.html',
-                controller: 'service_account_modal',
-                size: 'lg',
+        $scope.awsModal = function (account) {
+            $scope.aws = account;
+            $uibModal.open({
+                animation: true,
+                templateUrl: 'views/modals/aws.html',
+                size: 'md',
+                controller: 'systemAccount',
                 resolve: {
-                    type: function () {
-                        return 'AWS';
-                    },
-                    server: function () {
-                        return '';
-                    },
                     account: function () {
-                        return false;
+                        return account;
                     }
                 }
             });
         };
 
-        $scope.getAwsModal = function (name) {
-            $http.get('/api/v1/services/get_account/CMS/' + name)
-                .success(function (response) {
-                    $modal.open({
-                        animation: $scope.animationsEnabled,
-                        templateUrl: 'partials/modals/aws.html',
-                        controller: 'service_account_modal',
-                        size: 'lg',
-                        resolve: {
-                            type: function () {
-                                return 'AWS';
-                            },
-                            server: function () {
-                                return '';
-                            },
-                            account: function () {
-                                return response;
-                            }
-                        }
-                    });
-                });
-        };
+
+        // load initial data
+        refresh();
 
 
     });
