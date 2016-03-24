@@ -3,7 +3,7 @@
 
 const NodeCache = require( 'node-cache' );
 const Cache = new NodeCache( {
-    stdTTL: 300,
+    stdTTL: 3000,
     checkperiod: 150
 } );
 

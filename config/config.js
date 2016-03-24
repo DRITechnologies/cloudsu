@@ -31,7 +31,7 @@ class Config {
 
     get(key) {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             //check cache
             const global_config = cache.get('GLOBAL');
 
@@ -58,7 +58,7 @@ class Config {
 
     getAll() {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             //check cache
             const val = cache.get('GLOBAL');
 
@@ -103,7 +103,7 @@ class Config {
 
     getServiceAccounts(type) {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             //check cache
             const val = cache.get(`${type}_service_accounts`);
 
@@ -124,7 +124,7 @@ class Config {
 
     getServiceAccount(params) {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             //check cache
             const val = cache.get(`${params.name}_${params.type}`);
 
@@ -185,8 +185,10 @@ class Config {
 
         let params = {};
 
+        console.log('before db');
         return db.find(query)
             .then(response => {
+                console.log('db_response', response);
                 params = response;
                 params.aws_account = {};
                 params.aws_account.region = response.region;
@@ -197,6 +199,9 @@ class Config {
                 params.aws_account.secretAccessKey = secret;
                 cache.set(`_${query.range}`, params.aws);
                 return params;
+            })
+            .catch(err => {
+                console.log(err);
             });
     }
 
@@ -215,7 +220,7 @@ class Config {
 
     getUser(name) {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             //check cache
             const val = cache.get(name);
 
@@ -277,7 +282,7 @@ class Config {
 
     listUsers() {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             let users = cache.get('all_users');
 
             if (users) {

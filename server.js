@@ -7,7 +7,6 @@ const app = express();
 const logger = require('./utls/logger.js');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const methodOverride = require('method-override');
 const numCPUs = require('os').cpus().length;
 
 // determine listening port
@@ -23,7 +22,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.json({
     type: 'application/vnd.api+json'
 }));
-app.use(methodOverride());
+//app.use(methodOverride());
 app.use(morgan('combined', {
     'stream': logger.stream
 }));
@@ -35,16 +34,18 @@ require('./api/router.js')(app)
 
 
 if (cluster.isMaster) {
-    for (let i = 0; i < numCPUs; i++) {
-        cluster.fork();
-    }
-
+  
     //init functions that only run on master
     //queue rider (looks for new server messages in sqs)
     require('./utls/queue_rider.js');
 
     //start cleanup tool (cleans up expired resources)
     //require('./utls/cleanup_tool.js');
+
+    for (let i = 0; i < numCPUs; i++) {
+        cluster.fork();
+    }
+
 } else {
 
     // listen

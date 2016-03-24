@@ -5,7 +5,11 @@ const secure = require('../config/secure_config');
 
 //get database creds from config
 const db_cred = secure.get('db');
-const dynasty = require('dynasty')(db_cred);
+const dynasty = require('dynasty')({
+    accessKeyId: db_cred.AccessKeyId,
+    secretAccessKey: db_cred.SecretAccessKey,
+    region: db_cred.region
+});
 const logger = require('./logger.js');
 
 

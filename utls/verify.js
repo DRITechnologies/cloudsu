@@ -5,7 +5,7 @@ const Promise = require('bluebird');
 const _ = require('underscore');
 
 const create_stack_keys = [
-                  'ami',
+                   'ami',
                    'app_name',
                    'app_version',
                    'build_size',

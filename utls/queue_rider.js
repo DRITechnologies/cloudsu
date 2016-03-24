@@ -73,7 +73,7 @@ function startup(message) {
 
 function parseMessages(messages, sqs_url) {
 
-    return Promise.map(messages, function (message_body) {
+    return Promise.map(messages, function(message_body) {
         let handle = message_body.ReceiptHandle;
         let body = JSON.parse(message_body.Body);
         let message = JSON.parse(body.Message);
@@ -128,6 +128,7 @@ function poll() {
 
     return config_client.getDefaultAws()
         .then(response => {
+            console.log('response', response);
             sqs_url = response.queue.url;
             sqs_client.init(response.aws_account);
             return sqs_client.getMessage(sqs_url);
@@ -141,6 +142,7 @@ function poll() {
             }
         })
         .catch(err => {
+            console.log('errorororor', err);
             logger.debug(err);
         });
 }
