@@ -20,7 +20,7 @@ const attach_cms_auth = require('../middleware/attach_cms_auth.js');
 const check_token = require('../middleware/check_token.js');
 
 
-module.exports = function (app) {
+module.exports = function(app) {
 
     //unauthenticated requests
     app.post('/api/v1/setup/:name', setup.run);
@@ -121,6 +121,7 @@ module.exports = function (app) {
     app.get('/api/v1/chef/recipes', chef.recipes);
 
     //service account
+    app.delete('/api/v1/services/:type/:name', main.deleteServiceAccount);
     app.post('/api/v1/services/save_account', main.saveServiceAccount);
     app.get('/api/v1/services/get_accounts/:type', main.getServiceAccounts);
     app.get('/api/v1/services/get_account/:type/:name', main.getServiceAccount);

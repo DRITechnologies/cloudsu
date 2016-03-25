@@ -185,10 +185,8 @@ class Config {
 
         let params = {};
 
-        console.log('before db');
         return db.find(query)
             .then(response => {
-                console.log('db_response', response);
                 params = response;
                 params.aws_account = {};
                 params.aws_account.region = response.region;
@@ -199,9 +197,6 @@ class Config {
                 params.aws_account.secretAccessKey = secret;
                 cache.set(`_${query.range}`, params.aws);
                 return params;
-            })
-            .catch(err => {
-                console.log(err);
             });
     }
 

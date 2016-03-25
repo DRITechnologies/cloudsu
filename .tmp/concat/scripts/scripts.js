@@ -91,14 +91,13 @@ $(function () {
         });
 });
 
-(function () {
+(function() {
     angular.module('stacks', [
         'ui.router', // Routing
         'ui.bootstrap', // Bootstrap
         'ngStorage', //NG Storage
         'angularMoment', //MomentJS
         'underscore', //Underscore
-        'ngBootbox', //NG Bootbox
         'oitozero.ngSweetAlert' //sweet alert
     ]);
 })();
@@ -348,13 +347,14 @@ angular
  */
 angular
     .module('stacks')
-    .controller('MainCtrl', function ($scope, $http, $state, $uibModal, dataStore, SweetAlert) {
+    .controller('MainCtrl', function($scope, $http, $state, $uibModal, dataStore, SweetAlert) {
 
-        this.userName = dataStore.getActiveUser();
+        $scope.userName = dataStore.getActiveUser();
         this.helloText = 'Concord Stacks';
         this.descriptionText = 'Click + to create a new stack!';
 
         // ping api request to determine screen if error
+        /*
         $http.get('/api/v1/ping/' + dataStore.getToken())
             .success(function (res) {
                 if (!res.login) {
@@ -363,17 +363,18 @@ angular
                     return;
                 }
             });
+        */
 
         //logout method
-        $scope.logout = function () {
+        $scope.logout = function() {
             dataStore.clearAll();
             $state.go('login');
         };
 
         //Get bear api token
-        $scope.getToken = function () {
+        $scope.getToken = function() {
             $http.get('/api/v1/accounts/token')
-                .success(function (token) {
+                .success(function(token) {
                     SweetAlert.swal({
                         title: 'Service API Token',
                         text: '<pre><code>' + token + '</code></pre>',
@@ -382,14 +383,14 @@ angular
                         confirmButtonColor: '#1ab394'
                     });
                 })
-                .error(function (err) {
+                .error(function(err) {
                     //add cool error later on
                     console.log(err);
                 });
 
         };
 
-        $scope.resetPassword = function () {
+        $scope.resetPassword = function() {
             //open reset password modal
             $uibModal.open({
                 animation: true,
@@ -473,12 +474,11 @@ angular
 
 angular
     .module('stacks')
-    .factory('httpRequestInterceptor', function (dataStore) {
-
+    .factory('httpRequestInterceptor', function(dataStore) {
         return {
-            request: function (config) {
+            request: function(config) {
                 config.headers.aws_account = dataStore.getActiveAWS() || 'DEFAULT';
-                config.headers.aws_region = dataStore.getActiveRegion() || 'us-west-2';
+                config.headers.aws_region = dataStore.getActiveRegion() || 'us-east-1';
                 config.headers.token = dataStore.getToken() || '';
                 return config;
             }
@@ -487,47 +487,61 @@ angular
 
 angular
     .module('stacks')
-    .config(function ($httpProvider) {
+    .factory('httpResponseInterceptor', function(dataStore, $location) {
+        return {
+            responseError: function(err) {
+                console.log(err);
+                if (err.status === 401) {
+                    $location.path('/login');
+                }
+                return [];
+            }
+        };
+    });
+
+angular
+    .module('stacks')
+    .config(function($httpProvider) {
+        $httpProvider.interceptors.push('httpResponseInterceptor');
         $httpProvider.interceptors.push('httpRequestInterceptor');
     });
 
 angular
     .module('stacks')
-    .controller('stacksController', function ($scope, $http, $state, $uibModal, SweetAlert, dataStore) {
+    .controller('stacksController', function($rootScope, $scope, $http, $state, $uibModal, SweetAlert, dataStore) {
 
         //Get stacks from AWS
         function refresh() {
             $http.get('/api/v1/stacks')
-                .success(function (res) {
+                .success(function(res) {
                     $scope.stacks = res.StackSummaries;
                 });
         }
 
-        $scope.openCreateForm = function () {
+        $scope.openCreateForm = function() {
             var modalInstance = $uibModal.open({
                 animation: true,
                 templateUrl: 'views/modals/createForm.html',
                 controller: 'createStack',
-                size: 'md',
-                resolve: {}
+                size: 'md'
             });
 
-            modalInstance.result.then(function (selectedItem) {
-                //refresh stacks to the new stack just created
+            modalInstance.result.then(function(selectedItem) {
+                //refresh service accounts
                 refresh();
-            }, function () {
+            }, function() {
                 console.log('Modal dismissed at: ' + new Date());
             });
         };
 
         //Open stack detail view
-        $scope.openStack = function (stack_name) {
+        $scope.openStack = function(stack_name) {
             dataStore.setStack(stack_name);
             $state.go('/stack/' + stack_name);
         };
 
         //Delete stack but confirm first
-        $scope.deleteStack = function ($event, stack_name) {
+        $scope.deleteStack = function($event, stack_name) {
             $event.stopImmediatePropagation();
 
             SweetAlert.swal({
@@ -539,14 +553,14 @@ angular
                     confirmButtonText: 'Yes, delete it!',
                     closeOnConfirm: false
                 },
-                function (isConfirm) {
+                function(isConfirm) {
                     if (isConfirm) {
                         $http.delete('/api/v1/stacks/' + stack_name)
-                            .success(function (res) {
+                            .success(function(res) {
                                 SweetAlert.swal('Success', stack_name + ' is being deprovisioned.', 'success');
                                 refresh();
                             })
-                            .error(function (err) {
+                            .error(function(err) {
                                 $scope.alerts.push({
                                     type: 'danger',
                                     msg: err
@@ -557,37 +571,37 @@ angular
         };
 
 
-        $scope.rowColor = function (status) {
+        $scope.rowColor = function(status) {
             switch (true) {
-            case status.includes('DELETE_IN_PROGRESS'):
-                return 'danger';
-            case status.includes('ROLLBACK'):
-                return 'warning';
-            case status.includes('PROGRESS'):
-                return 'success';
-            case status.includes('FAILED'):
-                return 'danger';
-            default:
-                return '';
+                case status.includes('DELETE_IN_PROGRESS'):
+                    return 'danger';
+                case status.includes('ROLLBACK'):
+                    return 'warning';
+                case status.includes('PROGRESS'):
+                    return 'success';
+                case status.includes('FAILED'):
+                    return 'danger';
+                default:
+                    return '';
             }
         };
 
-        $scope.stackStatus = function (status) {
+        $scope.stackStatus = function(status) {
             switch (true) {
-            case status.includes('DELETE_IN_PROGRESS'):
-                return 'fa fa-cloud';
-            case status.includes('ROLLBACK'):
-                return 'fa fa-cloud';
-            case status.includes('PROGRESS'):
-                return 'fa fa-ship';
-            case status.includes('FAILED'):
-                return 'fa fa-cloud';
-            default:
-                return 'fa fa-sun-o';
+                case status.includes('DELETE_IN_PROGRESS'):
+                    return 'fa fa-cloud';
+                case status.includes('ROLLBACK'):
+                    return 'fa fa-cloud';
+                case status.includes('PROGRESS'):
+                    return 'fa fa-ship';
+                case status.includes('FAILED'):
+                    return 'fa fa-cloud';
+                default:
+                    return 'fa fa-sun-o';
             }
         };
 
-        $scope.isUpdating = function (status) {
+        $scope.isUpdating = function(status) {
             if (status.includes('PROGRESS')) {
                 return true;
             } else {
@@ -602,7 +616,7 @@ angular
 
 angular
     .module('stacks')
-    .controller('loginController', function ($scope, $http, $state, $uibModal, dataStore) {
+    .controller('loginController', function($rootScope, $scope, $http, $state, $uibModal, dataStore) {
         //set default spinner action
         $scope.showSpinner = false;
         //remove all data in local storage
@@ -610,9 +624,14 @@ angular
         $scope.alerts = [];
 
 
-        $scope.attemptLogin = function () {
+        $scope.attemptLogin = function() {
 
-            //setup http body
+            // return if empty form
+            if (!$scope.user) {
+                return;
+            }
+
+            // setup http body
             var user = {
                 name: $scope.user.name,
                 password: $scope.user.password
@@ -622,7 +641,7 @@ angular
             $scope.showSpinner = true;
 
             $http.post('/api/v1/accounts/login', user)
-                .success(function (user) {
+                .success(function(user) {
                     //stop spinnner
                     $scope.showSpinner = false;
 
@@ -633,7 +652,7 @@ angular
                     dataStore.setActiveRegion(user.aws_region);
                     $state.go('index.stacks');
                 })
-                .error(function (err) {
+                .error(function(err) {
                     //stop spinnner and present error
                     $scope.showSpinner = false;
                     $scope.alerts.push({
@@ -644,15 +663,15 @@ angular
 
         };
 
-        $scope.closeAlert = function (index) {
+        $scope.closeAlert = function(index) {
             //remove alert at index
             $scope.alerts.splice(index, 1);
         };
 
-        $scope.setup = function () {
+        $scope.setup = function() {
             //only show setup modal if it has not run before
             $http.get('/api/v1/ping/' + dataStore.getToken())
-                .success(function (res) {
+                .success(function(res) {
                     if (!res.setup) {
                         dataStore.setIsLogin(false);
                         $uibModal.open({
@@ -661,7 +680,7 @@ angular
                             controller: 'setup',
                             size: 'md',
                             resolve: {
-                                items: function () {
+                                items: function() {
                                     return $scope.items;
                                 }
                             }
@@ -892,23 +911,23 @@ angular
 
 angular
     .module('stacks')
-    .controller('usersController', function ($scope, $http, $state, $uibModal, SweetAlert, dataStore) {
+    .controller('usersController', function($scope, $http, $state, $uibModal, SweetAlert, dataStore) {
 
         //to make the ui render correctly
         $scope.admin = true;
 
         function refresh() {
             $http.get('api/v1/accounts/')
-                .success(function (users) {
+                .success(function(users) {
                     $scope.users = users;
                     $scope.admin = true;
                 })
-                .error(function (err) {
+                .error(function(err) {
                     $scope.admin = false;
                 });
         }
 
-        $scope.createUser = function () {
+        $scope.createUser = function() {
             var modalInstance = $uibModal.open({
                 animation: true,
                 templateUrl: 'views/modals/createUser.html',
@@ -917,40 +936,38 @@ angular
                 resolve: {}
             });
 
-            modalInstance.result.then(function () {
+            modalInstance.result.then(function() {
                 //refresh user to show new
                 refresh();
-            }, function () {
+            }, function() {
                 console.log('Modal dismissed at: ' + new Date());
             });
         };
 
-        $scope.editUser = function (user) {
-            if (!user.admin) {
-                SweetAlert.swal({
-                        title: '',
-                        text: 'Make ' + user.name + ' admin?',
-                        type: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#1ab394',
-                        confirmButtonText: 'Yes',
-                        closeOnConfirm: false
-                    },
-                    function (isConfirm) {
-                        if (isConfirm) {
-                            user.admin = true;
-                            $http.put('/api/v1/accounts/', user)
-                                .success(function (response) {
-                                    SweetAlert.swal('Success', user.name + ' has been added to admin group.', 'success');
-                                    refresh();
-                                });
-                        }
-                    });
-            }
+        $scope.editUser = function(user) {
+            SweetAlert.swal({
+                    title: '',
+                    text: 'Switch ' + user.name + ' admin status?',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#1ab394',
+                    confirmButtonText: 'Yes',
+                    closeOnConfirm: false
+                },
+                function(isConfirm) {
+                    if (isConfirm) {
+                        user.admin = !user.admin;
+                        $http.put('/api/v1/accounts/', user)
+                            .success(function(response) {
+                                refresh();
+                                SweetAlert.swal('Success', user.name + ' admin status has been changed to: ' + user.admin, 'success');
+                            });
+                    }
+                });
         };
 
 
-        $scope.removeUser = function (user) {
+        $scope.removeUser = function(user) {
             SweetAlert.swal({
                     title: 'Are you sure?',
                     text: 'User will be removed from the database: ' + user.name,
@@ -960,10 +977,10 @@ angular
                     confirmButtonText: 'Yes, delete user!',
                     closeOnConfirm: false
                 },
-                function (isConfirm) {
+                function(isConfirm) {
                     if (isConfirm) {
                         $http.delete('/api/v1/accounts/' + user.name)
-                            .success(function (res) {
+                            .success(function(res) {
                                 SweetAlert.swal('Success', user.name + ' has been removed.', 'success');
                                 refresh();
                             });
@@ -1100,37 +1117,40 @@ angular
 
 angular
     .module('stacks')
-    .controller('system', function ($scope, $http, $location, $uibModal, dataStore) {
+    .controller('system', function($scope, $http, $uibModal, dataStore, SweetAlert) {
 
         $scope.alerts = [];
 
         //to make the ui render correctly
         $scope.admin = true;
 
+        // refresh aws accounts
         function refresh() {
             $http.get('/api/v1/services/get_accounts/AWS')
-                .success(function (response) {
+                .success(function(response) {
                     $scope.admin = true;
                     $scope.aws_accounts = response;
                 })
-                .error(function (err) {
+                .error(function(err) {
                     $scope.admin = false;
                 });
         }
 
         //open modal to edit chef
-        $scope.chefModal = function () {
-
+        $scope.chefModal = function() {
             $http.get('/api/v1/services/get_account/CMS/DEFAULT')
-                .success(function (response) {
+                .success(function(response) {
                     $uibModal.open({
                         animation: true,
                         templateUrl: 'views/modals/chef.html',
                         size: 'md',
-                        controller: 'systemAccount',
+                        controller: 'serviceAccount',
                         resolve: {
-                            account: function () {
+                            account: function() {
                                 return response;
+                            },
+                            type: function() {
+                                return 'CMS';
                             }
                         }
                     });
@@ -1138,24 +1158,97 @@ angular
                 });
         };
 
-        $scope.awsModal = function (account) {
-            $scope.aws = account;
-            $uibModal.open({
+        // open aws account modal
+        $scope.awsModal = function(account) {
+            var modalInstance = $uibModal.open({
                 animation: true,
                 templateUrl: 'views/modals/aws.html',
                 size: 'md',
-                controller: 'systemAccount',
+                controller: 'serviceAccount',
                 resolve: {
-                    account: function () {
+                    account: function() {
                         return account;
+                    },
+                    type: function() {
+                        return 'AWS';
                     }
                 }
             });
+
+            modalInstance.result.then(function(selectedItem) {
+                //refresh stacks to the new stack just created
+                refresh();
+            }, function() {
+                console.log('Modal dismissed at: ' + new Date());
+            });
+        };
+
+        // remove service account
+        $scope.removeAccount = function(account) {
+            SweetAlert.swal({
+                    title: 'Are you sure?',
+                    text: 'Account will be removed: ' + account.name,
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#1ab394',
+                    confirmButtonText: 'Yes, delete it!',
+                    closeOnConfirm: false
+                },
+                function(isConfirm) {
+                    if (isConfirm) {
+                        $http.delete(['/api/v1/services', account.type, account.name].join('/'))
+                            .success(function(response) {
+                                SweetAlert.swal('Success', account.name + ' has been removed.', 'success');
+                                refresh();
+                            })
+                            .error(function(err) {
+                                $scope.alerts.push({
+                                    type: 'danger',
+                                    msg: err
+                                });
+                            });
+                    }
+                });
         };
 
 
         // load initial data
         refresh();
 
+
+    });
+
+angular
+    .module('stacks')
+    .controller('serviceAccount', function($scope, $http, $uibModalInstance, dataStore, _, account, type) {
+
+        $scope.alerts = [];
+
+        console.log(type);
+
+        $scope.account = account || {};
+        $scope.account.type = type;
+
+        $scope.saveServiceAccount = function() {
+
+            $http.post('/api/v1/services/save_account', $scope.account)
+                .success(function(res) {
+                    $uibModalInstance.close(true);
+                })
+                .error(function(err) {
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
+                });
+        };
+
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.close_alert_modal = function(index) {
+            $scope.alerts_modal.splice(index, 1);
+        };
 
     });

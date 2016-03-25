@@ -1,22 +1,22 @@
 angular
     .module('stacks')
-    .controller('usersController', function ($scope, $http, $state, $uibModal, SweetAlert, dataStore) {
+    .controller('usersController', function($scope, $http, $state, $uibModal, SweetAlert, dataStore) {
 
         //to make the ui render correctly
         $scope.admin = true;
 
         function refresh() {
             $http.get('api/v1/accounts/')
-                .success(function (users) {
+                .success(function(users) {
                     $scope.users = users;
                     $scope.admin = true;
                 })
-                .error(function (err) {
+                .error(function(err) {
                     $scope.admin = false;
                 });
         }
 
-        $scope.createUser = function () {
+        $scope.createUser = function() {
             var modalInstance = $uibModal.open({
                 animation: true,
                 templateUrl: 'views/modals/createUser.html',
@@ -25,40 +25,38 @@ angular
                 resolve: {}
             });
 
-            modalInstance.result.then(function () {
+            modalInstance.result.then(function() {
                 //refresh user to show new
                 refresh();
-            }, function () {
+            }, function() {
                 console.log('Modal dismissed at: ' + new Date());
             });
         };
 
-        $scope.editUser = function (user) {
-            if (!user.admin) {
-                SweetAlert.swal({
-                        title: '',
-                        text: 'Make ' + user.name + ' admin?',
-                        type: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#1ab394',
-                        confirmButtonText: 'Yes',
-                        closeOnConfirm: false
-                    },
-                    function (isConfirm) {
-                        if (isConfirm) {
-                            user.admin = true;
-                            $http.put('/api/v1/accounts/', user)
-                                .success(function (response) {
-                                    SweetAlert.swal('Success', user.name + ' has been added to admin group.', 'success');
-                                    refresh();
-                                });
-                        }
-                    });
-            }
+        $scope.editUser = function(user) {
+            SweetAlert.swal({
+                    title: '',
+                    text: 'Switch ' + user.name + ' admin status?',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#1ab394',
+                    confirmButtonText: 'Yes',
+                    closeOnConfirm: false
+                },
+                function(isConfirm) {
+                    if (isConfirm) {
+                        user.admin = !user.admin;
+                        $http.put('/api/v1/accounts/', user)
+                            .success(function(response) {
+                                refresh();
+                                SweetAlert.swal('Success', user.name + ' admin status has been changed to: ' + user.admin, 'success');
+                            });
+                    }
+                });
         };
 
 
-        $scope.removeUser = function (user) {
+        $scope.removeUser = function(user) {
             SweetAlert.swal({
                     title: 'Are you sure?',
                     text: 'User will be removed from the database: ' + user.name,
@@ -68,10 +66,10 @@ angular
                     confirmButtonText: 'Yes, delete user!',
                     closeOnConfirm: false
                 },
-                function (isConfirm) {
+                function(isConfirm) {
                     if (isConfirm) {
                         $http.delete('/api/v1/accounts/' + user.name)
-                            .success(function (res) {
+                            .success(function(res) {
                                 SweetAlert.swal('Success', user.name + ' has been removed.', 'success');
                                 refresh();
                             });

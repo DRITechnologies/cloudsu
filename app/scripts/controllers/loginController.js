@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('loginController', function ($scope, $http, $state, $uibModal, dataStore) {
+    .controller('loginController', function($rootScope, $scope, $http, $state, $uibModal, dataStore) {
         //set default spinner action
         $scope.showSpinner = false;
         //remove all data in local storage
@@ -8,9 +8,14 @@ angular
         $scope.alerts = [];
 
 
-        $scope.attemptLogin = function () {
+        $scope.attemptLogin = function() {
 
-            //setup http body
+            // return if empty form
+            if (!$scope.user) {
+                return;
+            }
+
+            // setup http body
             var user = {
                 name: $scope.user.name,
                 password: $scope.user.password
@@ -20,7 +25,7 @@ angular
             $scope.showSpinner = true;
 
             $http.post('/api/v1/accounts/login', user)
-                .success(function (user) {
+                .success(function(user) {
                     //stop spinnner
                     $scope.showSpinner = false;
 
@@ -31,7 +36,7 @@ angular
                     dataStore.setActiveRegion(user.aws_region);
                     $state.go('index.stacks');
                 })
-                .error(function (err) {
+                .error(function(err) {
                     //stop spinnner and present error
                     $scope.showSpinner = false;
                     $scope.alerts.push({
@@ -42,15 +47,15 @@ angular
 
         };
 
-        $scope.closeAlert = function (index) {
+        $scope.closeAlert = function(index) {
             //remove alert at index
             $scope.alerts.splice(index, 1);
         };
 
-        $scope.setup = function () {
+        $scope.setup = function() {
             //only show setup modal if it has not run before
             $http.get('/api/v1/ping/' + dataStore.getToken())
-                .success(function (res) {
+                .success(function(res) {
                     if (!res.setup) {
                         dataStore.setIsLogin(false);
                         $uibModal.open({
@@ -59,7 +64,7 @@ angular
                             controller: 'setup',
                             size: 'md',
                             resolve: {
-                                items: function () {
+                                items: function() {
                                     return $scope.items;
                                 }
                             }

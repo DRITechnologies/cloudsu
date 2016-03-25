@@ -7,15 +7,15 @@ const logger = require('../../utls/logger.js');
 
 
 class Main {
-    constructor () {}
+    constructor() {}
 
-    region (req, res) {
+    region(req, res) {
         //return default region from global configs
         const region = 'us-west-2';
         res.status(200).json(region);
     }
 
-    regions (req, res) {
+    regions(req, res) {
         const region = [
             'us-east-1',
             'us-west-2',
@@ -35,7 +35,7 @@ class Main {
         }
     }
 
-    regionMap (req, res) {
+    regionMap(req, res) {
 
         const region = req.headers.aws_region;
 
@@ -46,7 +46,7 @@ class Main {
 
     }
 
-    bucketRegions (req, res) {
+    bucketRegions(req, res) {
         const bucket_region = [
             'us-east-1',
             'us-west-1',
@@ -62,7 +62,7 @@ class Main {
 
     }
 
-    listServerCertificates (req, res) {
+    listServerCertificates(req, res) {
 
         const aws_account = req.aws_account;
         const iam_client = require('../clients/iam_client.js');
@@ -77,7 +77,7 @@ class Main {
             });
     }
 
-    listInstanceProfiles (req, res) {
+    listInstanceProfiles(req, res) {
 
         const aws_account = req.aws_account;
         const iam_client = require('../clients/iam_client.js');
@@ -93,7 +93,22 @@ class Main {
             });
     }
 
-    saveServiceAccount (req, res) {
+    deleteServiceAccount(req, res) {
+
+        if (req.params.name === 'DEFAULT') {
+            return res.status(403).json('Cannot delete DEFAULT service accounts');
+        }
+
+        return config.deleteServiceAccount(req.params)
+            .then(response => {
+                res.status(200).json(response);
+            })
+            .catch(err => {
+                res.status(500).json(err);
+            });
+    }
+
+    saveServiceAccount(req, res) {
 
         return config.saveServiceAccount(req.body)
             .then(response => {
@@ -105,7 +120,7 @@ class Main {
             });
     }
 
-    getServiceAccount (req, res) {
+    getServiceAccount(req, res) {
 
         return config.getServiceAccount(req.params)
             .then(response => {
@@ -116,7 +131,7 @@ class Main {
             });
     }
 
-    getServiceAccounts (req, res) {
+    getServiceAccounts(req, res) {
 
         return config.getServiceAccounts(req.params.type)
             .then(response => {

@@ -128,7 +128,6 @@ function poll() {
 
     return config_client.getDefaultAws()
         .then(response => {
-            console.log('response', response);
             sqs_url = response.queue.url;
             sqs_client.init(response.aws_account);
             return sqs_client.getMessage(sqs_url);
@@ -142,7 +141,6 @@ function poll() {
             }
         })
         .catch(err => {
-            console.log('errorororor', err);
             logger.debug(err);
         });
 }

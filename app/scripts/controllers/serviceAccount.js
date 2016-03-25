@@ -1,18 +1,21 @@
 angular
     .module('stacks')
-    .controller('systemAccount', function ($scope, $http, $location, $uibModalInstance, dataStore, _, account) {
+    .controller('serviceAccount', function($scope, $http, $uibModalInstance, dataStore, _, account, type) {
 
         $scope.alerts = [];
 
-        $scope.account = account;
+        console.log(type);
 
-        $scope.saveServiceAccount = function () {
+        $scope.account = account || {};
+        $scope.account.type = type;
+
+        $scope.saveServiceAccount = function() {
 
             $http.post('/api/v1/services/save_account', $scope.account)
-                .success(function (res) {
-                    $uibModalInstance.dismiss('cancel');
+                .success(function(res) {
+                    $uibModalInstance.close(true);
                 })
-                .error(function (err) {
+                .error(function(err) {
                     $scope.alerts.push({
                         type: 'danger',
                         msg: err
@@ -20,11 +23,11 @@ angular
                 });
         };
 
-        $scope.cancel = function () {
+        $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function (index) {
+        $scope.close_alert_modal = function(index) {
             $scope.alerts_modal.splice(index, 1);
         };
 

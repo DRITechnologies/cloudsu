@@ -5,15 +5,15 @@
         </legend>
         <div class="form-group">
             <label for="input">Username</label>
-            <input class="form-control" type="text" placeholder="admin" ng-model="account.username" required>
+            <input class="form-control" type="text" placeholder="admin" ng-model="account.username">
         </div>
         <div class="form-group">
             <label for="input">Server URL</label>
-            <input class="form-control" type="text" placeholder="https://api.chef.io/organizations/dev" ng-model="account.url" required>
+            <input class="form-control" type="text" placeholder="https://api.chef.io/organizations/prod" ng-model="account.url">
         </div>
         <div class="form-group">
             <label for="input">Key</label>
-            <textarea class="form-control" type="text" name="key" ng-model="account.key" row="5" required>
+            <textarea class="form-control" type="text" ng-model="account.key" rows="6">
             </textarea>
         </div>
         <alerts></alerts>

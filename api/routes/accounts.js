@@ -41,7 +41,7 @@ class Accounts {
 
         if (!req.user.admin) {
             // send error if user is not an admin
-            res.status(401)
+            res.status(403)
                 .json(req.user.name + ' is not in the admin group');
             return;
         }
@@ -62,7 +62,7 @@ class Accounts {
 
         if (!req.user.admin) {
             // send error if user is not an admin
-            res.status(401)
+            res.status(403)
                 .json(req.user.name + ' is not in the admin group');
             return;
         }
@@ -85,12 +85,12 @@ class Accounts {
 
         if (req.user.name === name) {
             //user cannot delete themselves
-            res.status(401)
+            res.status(403)
                 .json('You cannot delete yourself. Login as another user to delete: ' + name);
             return;
         } else if (!req.user.admin) {
             //cannot delete unless user is an admin
-            res.status(401)
+            res.status(403)
                 .json(req.user.name + ' is not in the admin group');
             return;
         }
@@ -112,7 +112,7 @@ class Accounts {
 
         if (!req.user.admin) {
             // user cannot see users list unless they are apart of admin group
-            res.status(401)
+            res.status(403)
                 .json(req.user.name + ' is not in the admin group');
             return;
         }
@@ -149,7 +149,7 @@ class Accounts {
 
         if (!req.user.admin) {
             // only admins can create auth tokens
-            res.status(401)
+            res.status(403)
                 .json(req.user.name + ' is not in the admin group');
             return;
         }

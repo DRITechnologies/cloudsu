@@ -215,6 +215,7 @@ function setupQueue(params, db) {
 function createUser(params, db) {
 
     let user = params.user;
+    user.invincible = true;
 
     user.aws_account = params.aws.name;
     user.aws_region = params.aws.region;
@@ -231,9 +232,9 @@ function createUser(params, db) {
 
 
 class Setup {
-    constructor () {}
+    constructor() {}
 
-    run (req, res) {
+    run(req, res) {
 
 
         const params = req.body;
@@ -251,7 +252,10 @@ class Setup {
                     hash: ['type', 'string'],
                     range: ['name', 'string']
                 },
-                throughput: { write: 2, read: 2 }
+                throughput: {
+                    write: 2,
+                    read: 2
+                }
             })
             .delay(5000)
             .then(response => {
@@ -262,7 +266,10 @@ class Setup {
                     key_schema: {
                         hash: ['instance_id', 'string']
                     },
-                    throughput: { write: 2, read: 2 }
+                    throughput: {
+                        write: 2,
+                        read: 2
+                    }
                 });
             })
             .then(response => {
