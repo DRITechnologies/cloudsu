@@ -557,13 +557,28 @@ angular
     .module('stacks')
     .controller('stacksController', function($rootScope, $scope, $http, $state, $uibModal, SweetAlert, dataStore) {
 
+        // set refreshCount
+        var refreshCount = 0;
+
         //Get stacks from AWS
         function refresh() {
+            console.log('refreshing data');
             $http.get('/api/v1/stacks')
                 .success(function(res) {
                     $scope.stacks = res.StackSummaries;
                     $scope.$parent.stacks = res.StackSummaries;
                 });
+        }
+
+        function refreshRetry(iterations) {
+            // refresh every 10 seconds for interval
+            setTimeout(function() {
+                if (refreshCount < iterations) {
+                    refresh();
+                    refreshRetry(iterations);
+                    refreshCount++;
+                }
+            }, 10000);
         }
 
         //catch alerts from parent to refresh
@@ -581,7 +596,7 @@ angular
 
             modalInstance.result.then(function(selectedItem) {
                 //refresh service accounts
-                refresh();
+                refreshRetry(50);
             }, function() {
                 console.log('Modal dismissed at: ' + new Date());
             });
@@ -611,7 +626,7 @@ angular
                         $http.delete('/api/v1/stacks/' + stack_name)
                             .success(function(res) {
                                 SweetAlert.swal('Success', stack_name + ' is being deprovisioned.', 'success');
-                                refresh();
+                                refreshRetry(30);
                             })
                             .error(function(err) {
                                 $scope.alerts.push({
@@ -624,18 +639,18 @@ angular
         };
 
 
-        $scope.rowColor = function(status) {
+        $scope.panelColor = function(status) {
             switch (true) {
                 case status.includes('DELETE_IN_PROGRESS'):
-                    return 'danger';
+                    return 'panel panel-danger';
                 case status.includes('ROLLBACK'):
-                    return 'warning';
+                    return 'panel panel-warning';
                 case status.includes('PROGRESS'):
-                    return 'success';
+                    return 'panel panel-info';
                 case status.includes('FAILED'):
-                    return 'danger';
+                    return 'panel panel-danger';
                 default:
-                    return '';
+                    return 'panel panel-primary';
             }
         };
 

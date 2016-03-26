@@ -62,7 +62,7 @@ class ChefClient {
 
         return this.client.getAsync(`/environments/${environment}`)
             .then(result => {
-                return body.body;
+                return result.body;
             });
 
     }
