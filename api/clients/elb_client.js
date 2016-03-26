@@ -9,9 +9,9 @@ const utls = require('../../utls/utilities.js');
 const logger = require('../../utls/logger.js');
 
 class ElbClient {
-    constructor () {}
+    constructor() {}
 
-    init (account) {
+    init(account) {
 
         this.elb = Promise.promisifyAll(new AWS.ELB(account));
         this.autoscaling = Promise.promisifyAll(new AWS.AutoScaling(account));
@@ -19,9 +19,11 @@ class ElbClient {
 
     }
 
-    connectElbs (params) {
+    connectElbs(params) {
 
         const self = this;
+
+        logger.info('ELB connect with update list:', params.update_list);
 
         return this.cloudformation.describeStackResourcesAsync({
             StackName: params.stack_name
@@ -45,7 +47,7 @@ class ElbClient {
         });
     }
 
-    disconnectElbs (params) {
+    disconnectElbs(params) {
 
         const self = this;
 
@@ -71,7 +73,7 @@ class ElbClient {
         });
     }
 
-    connectElb (params) {
+    connectElb(params) {
 
         return this.autoscaling.attachLoadBalancersAsync({
             AutoScalingGroupName: params.scale_group,
@@ -79,7 +81,7 @@ class ElbClient {
         });
     }
 
-    disconnectElb (params) {
+    disconnectElb(params) {
 
         return this.autoscaling.detachLoadBalancersAsync({
             AutoScalingGroupName: params.scale_group,
@@ -87,7 +89,7 @@ class ElbClient {
         });
     }
 
-    getAvailableElbs (stack_name) {
+    getAvailableElbs(stack_name) {
 
         return this.cloudformation.describeStackResourcesAsync({
                 StackName: stack_name
@@ -100,7 +102,7 @@ class ElbClient {
             });
     }
 
-    getElbs (elbs) {
+    getElbs(elbs) {
 
         return this.elb.describeLoadBalancersAsync({
             LoadBalancerNames: elbs

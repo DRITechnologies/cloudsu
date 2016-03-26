@@ -120,12 +120,16 @@
                     <div id="asg-tab" class="tab-pane">
 
                         <div ng-show="stack.build_size === 'HA'" class="form-group">
-                            <label>Min Instance Size</label>
-                            <input type="number" class="form-control" name="min_size" ng-model="stack.min_size" min="0" max="15">
+                            <label>Min Scale Group Size</label>
+                            <input type="number" class="form-control" ng-model="stack.min_size">
                         </div>
                         <div ng-show="stack.build_size === 'HA'" class="form-group">
-                            <label>Max Instance Size</label>
-                            <input type="number" class="form-control" name="max_size" ng-model="stack.max_size" min="0" max="15">
+                            <label>Desired Scale Group Size</label>
+                            <input type="number" class="form-control" ng-model="stack.desired_size">
+                        </div>
+                        <div ng-show="stack.build_size === 'HA'" class="form-group">
+                            <label>Max Scale Group Size</label>
+                            <input type="number" class="form-control" ng-model="stack.max_size">
                         </div>
                         <div class="form-group">
                             <label>Instance Size</label>

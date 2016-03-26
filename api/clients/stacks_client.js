@@ -70,13 +70,13 @@ class StacksClient {
 
     createStack(params) {
 
-        let template_body = {};
         const self = this;
 
         //allows api to return while backend verifies
-        function verify_stack(params) {
+        function verifyStack(params) {
+            console.log('verifying stack completes');
             return self.waitForStack(params.stack_name, 15, 50)
-                .then(() => {
+                .then(result => {
                     if (params.build_size === 'HA') {
                         return elb_client.connectElbs(params);
                     }
@@ -86,34 +86,33 @@ class StacksClient {
         //init chef client
         const chef_client = require('./chef_client.js');
         chef_client.init(params.cms);
+        //verify parameters to ensure they are valid
         return verify.verify_create_stack(params)
             .then(() => {
-              return template_client.get(null, params)
-                  .then(template => {
-                      template_body = template;
-                      return self.cloudformation.createStackAsync({
-                          StackName: params.stack_name,
-                          TemplateBody: template,
-                          Tags: [{
-                              Key: 'stack_type',
-                              Value: 'Concord'
-                          }]
-                      });
-                  });
+                //create template with posted params
+                return template_client.get(null, params)
+                    .then(template => {
+                        //send template to aws
+                        return self.cloudformation.createStackAsync({
+                            StackName: params.stack_name,
+                            TemplateBody: template,
+                            Tags: [{
+                                Key: 'stack_type',
+                                Value: 'Concord'
+                            }]
+                        });
+                    });
             })
             .then(() => {
-                logger.info('creating environment');
+                //create chef environment with params
+                logger.info('creating chef environment');
                 return chef_client.createEnvironment(params);
             })
-            .tap(verify_stack(params))
+            .tap(verifyStack(params))
             .then(() => {
+                //return success message
                 return 'success';
-            })
-            .catch(err => {
-                logger.info(err);
-                throw new Error(err);
             });
-
     }
 
     deleteAsg(params) {
@@ -186,7 +185,7 @@ class StacksClient {
         timeout = timeout || 20;
         max_attempts = max_attempts || 500;
 
-        return retry(cancelfn => {
+        const check_status = function() {
             count++;
             return self.cloudformation.describeStacksAsync({
                     StackName: stack_name
@@ -196,21 +195,24 @@ class StacksClient {
                         return x.StackName === stack_name;
                     });
                     logger.info('Polling for stack success: ', stack_name, stack.StackStatus);
-                    if (!stack) {
-                        cancelfn(new Error('Stack not found!'));
+                    if (!stack && count > 3) {
+                        throw new retry.StopError('Stack not found');
                     } else if (count > max_attempts) {
                         return;
                     } else if (stack.StackStatus === 'UPDATE_COMPLETE' || stack.StackStatus === 'CREATE_COMPLETE') {
                         // Success!
-                        logger.info('stack is ready', stack_name);
-                        return;
+                        const successMsg = 'stack is ready';
+                        logger.info(successMsg, stack_name);
+                        return successMsg;
                     } else if (stack.StackStatus === 'UPDATE_IN_PROGRESS' || stack.StackStatus === 'CREATE_IN_PROGRESS') {
-                        throw new Error('Stack not ready');
+                        throw new Error(`Stack is not ready: ${stack.StackStatus}`);
                     } else {
-                        cancelfn(new Error(`Stack in unexexpected state: ${stack.StackStatus}`));
+                        throw new retry.StopError(`Stack in unexexpected state: ${stack.StackStatus}`);
                     }
                 });
-        }, {
+        };
+
+        return retry(check_status, {
             interval: 10 * 1000,
             timeout: timeout * 60 * 1000
         });

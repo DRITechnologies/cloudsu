@@ -355,6 +355,9 @@ angular
         $scope.activeAws = dataStore.getActiveAWS();
         $scope.activeRegion = dataStore.getActiveRegion();
 
+        //stacks array to be assinged in child controller
+        $scope.stacks = [];
+
         //send refesh to child controller
         function childRefresh() {
             $scope.$broadcast('refresh');
@@ -559,11 +562,12 @@ angular
             $http.get('/api/v1/stacks')
                 .success(function(res) {
                     $scope.stacks = res.StackSummaries;
+                    $scope.$parent.stacks = res.StackSummaries;
                 });
         }
 
         //catch alerts from parent to refresh
-        $scope.$on('refresh', function(e) {
+        $scope.$on('refresh', function() {
             refresh();
         });
 

@@ -5,9 +5,9 @@ const logger = require('../../utls/logger.js');
 const err_handler = require('../../utls/error_handler.js');
 
 class Stacks {
-    constructor () {}
+    constructor() {}
 
-    listStacks (req, res) {
+    listStacks(req, res) {
 
         let aws_account = req.aws_account;
         let stacks_client = require('../clients/stacks_client.js');
@@ -23,7 +23,7 @@ class Stacks {
             });
     }
 
-    stack (req, res) {
+    stack(req, res) {
 
         let aws_account = req.aws_account;
         let stacks_client = require('../clients/stacks_client.js');
@@ -39,7 +39,7 @@ class Stacks {
             });
     }
 
-    stackStatus (req, res) {
+    stackStatus(req, res) {
 
         let aws_account = req.aws_account;
         let stacks_client = require('../clients/stacks_client.js');
@@ -56,7 +56,7 @@ class Stacks {
 
     }
 
-    createStack (req, res) {
+    createStack(req, res) {
 
         let aws_account = req.aws_account;
         let stacks_client = require('../clients/stacks_client.js');
@@ -77,7 +77,7 @@ class Stacks {
 
     }
 
-    deleteStack (req, res) {
+    deleteStack(req, res) {
 
         let aws_account = req.aws_account;
         let stacks_client = require('../clients/stacks_client.js');
@@ -98,7 +98,7 @@ class Stacks {
 
     }
 
-    describe (req, res) {
+    describe(req, res) {
 
         let aws_account = req.aws_account;
         let stacks_client = require('../clients/stacks_client.js');
@@ -114,7 +114,7 @@ class Stacks {
 
     }
 
-    deleteAsg (req, res) {
+    deleteAsg(req, res) {
 
         let aws_account = req.aws_account;
         let stacks_client = require('../clients/stacks_client.js');
@@ -130,7 +130,7 @@ class Stacks {
 
     }
 
-    adjustSize (req, res) {
+    adjustSize(req, res) {
 
         let aws_account = req.aws_account;
         let stacks_client = require('../clients/stacks_client.js');
@@ -146,7 +146,7 @@ class Stacks {
 
     }
 
-    getTemplate (req, res) {
+    getTemplate(req, res) {
 
         let aws_account = req.aws_account;
         let stacks_client = require('../clients/stacks_client.js');
@@ -161,7 +161,7 @@ class Stacks {
             });
     }
 
-    updateStack (req, res) {
+    updateStack(req, res) {
 
         let aws_account = req.aws_account;
         let stacks_client = require('../clients/stacks_client.js');
@@ -177,7 +177,7 @@ class Stacks {
             });
     }
 
-    describeEvents (req, res) {
+    describeEvents(req, res) {
 
         let aws_account = req.aws_account;
         let stacks_client = require('../clients/stacks_client.js');

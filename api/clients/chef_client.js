@@ -20,8 +20,6 @@ class ChefClient {
 
     createEnvironment(params) {
 
-        logger.info('creating chef environment', params);
-
         let concord_params = _.clone(params);
 
         concord_params = _.omit(concord_params, [
@@ -35,6 +33,8 @@ class ChefClient {
             'cms',
             'aws'
         ]);
+
+        logger.info('creating chef environment', concord_params);
 
         const default_attributes = {};
         default_attributes.status = 'READY';
@@ -52,8 +52,8 @@ class ChefClient {
         };
 
         return this.client.postAsync('/environments', environment)
-            .spread((result, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             });
 
     }
@@ -61,8 +61,8 @@ class ChefClient {
     getEnvironment(environment) {
 
         return this.client.getAsync(`/environments/${environment}`)
-            .spread((result, body) => {
-                return body;
+            .then(result => {
+                return body.body;
             });
 
     }
@@ -70,8 +70,8 @@ class ChefClient {
     getEnvironments() {
 
         return this.client.getAsync('/environments')
-            .spread((result, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             });
 
     }
@@ -79,8 +79,11 @@ class ChefClient {
     getEnvironmentNodes(environment) {
 
         return this.client.getAsync(`/environments/${environment}/nodes`)
-            .spread((result, body) => {
-                return _.keys(body);
+            .then(result => {
+                return _.keys(result.body);
+            })
+            .catch(err => {
+                logger.error(err);
             });
 
     }
@@ -88,26 +91,32 @@ class ChefClient {
     updateEnvironment(params) {
 
         return this.client.putAsync(`/environments/${params.name}`, params)
-            .spread((result, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             });
     }
 
     deleteEnvironment(environment) {
         logger.info('deleting chef environment:', environment);
         return this.client.deleteAsync(`/environments/${environment}`)
-            .spread((result, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             });
     }
 
     deleteEnvironmentNodes(environment) {
+
         logger.info('removing all chef nodes in environment:', environment);
 
         const self = this;
 
         return this.getEnvironmentNodes(environment)
             .then(nodes => {
+                // catch empty response
+                if (!nodes) {
+                    return;
+                }
+                // remove node and client from chef
                 return Promise.map(nodes, node => {
                     return self.deleteNode(node);
                 });
@@ -125,16 +134,16 @@ class ChefClient {
     createNode(params) {
 
         return this.client.postAsync(`/nodes/${params.name}`, params)
-            .spread((result, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             });
     }
 
     getNode(node) {
 
         return this.client.getAsync(`/nodes/${node}`)
-            .spread((result, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             });
 
     }
@@ -142,42 +151,45 @@ class ChefClient {
     updateNode(node) {
 
         return this.client.putAsync(`/nodes/${node.name}`, node)
-            .spread((result, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             });
 
     }
 
     deleteNode(node) {
         const self = this;
-        logger.info('deleting node:', node);
+        logger.info('deleting chef node:', node);
         return this.client.deleteAsync(`/nodes/${node}`)
-            .spread((result, body) => {
+            .then(result => {
                 return self.deleteClient(node);
+            })
+            .catch(err => {
+                logger.error(err);
             });
     }
 
     createClient(params) {
 
         return this.client.postAsync('/clients', params)
-            .spread((result, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             });
     }
 
     getClient(client) {
 
         return this.client.getAsync(`/clients/${client}`)
-            .spread((result, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             });
     }
 
     deleteClient(client) {
-        logger.debug('deleting client', client);
+        logger.debug('deleting chef client', client);
         return this.client.deleteAsync(`/clients/${client}`)
-            .spread((result, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             })
             .catch(err => {
                 logger.info('Client does not exist');
@@ -186,37 +198,36 @@ class ChefClient {
 
     createDataBag(params) {
         return this.client.postAsync('/data/', params)
-            .spread((response, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             });
     }
 
     getDataBag(data_bag) {
         return this.client.getAsync(`/data/${data_bag}`)
-            .spread((response, body) => {
-                return _.keys(body);
+            .then(result => {
+                return _.keys(result.body);
             });
     }
 
     getDataBagItem(data_bag, item) {
         return this.client.getAsync(`/data/${data_bag}/${item}`)
-            .spread((response, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             });
     }
 
     saveDataBagItem(data_bag, item) {
         return this.client.putAsync(`/data/${data_bag}/${item}`)
-            .spread((response, body) => {
-                return body;
+            .then(result => {
+                return result.body;
             });
     }
 
     recipes() {
         return this.client.getAsync('/cookbooks/_recipes')
-            .spread((response, body) => {
-                console.log(body);
-                return body;
+            .then(result => {
+                return result.body;
             });
     }
 }
