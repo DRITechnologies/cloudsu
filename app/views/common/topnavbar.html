@@ -5,13 +5,22 @@
 
         </div>
 
+        <ul class="nav navbar-top-links navbar-left">
+            <li>
+                <a data-toggle="dropdown"><i class="fa fa-ticket"></i> {{activeAws}}<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li ng-repeat="account in aws_accounts"><a ng-click="activateAccount(account)">{{account}}</a></li>
+                </ul>
+            </li>
+            <li>
+                <a data-toggle="dropdown"><i class="fa fa-globe"></i> {{activeRegion}} <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li ng-repeat="region in aws_regions"><a ng-click="activateRegion(region)">{{region}}</a></li>
+                </ul>
+            </li>
+        </ul>
+
         <ul class="nav navbar-top-links navbar-right">
-            <li>
-                <button class="btn btn-primary btn-outline dropdown-toggle"> PROD <span class="caret"></span></button>
-            </li>
-            <li>
-                <button class="btn btn-primary btn-outline dropdown-toggle"> us-west-1 <span class="caret"></span></button>
-            </li>
             <li>
                 <a ng-click="logout()">
                     <i class="fa fa-sign-out"></i> Log out

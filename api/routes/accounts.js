@@ -1,6 +1,7 @@
 /*jshint esversion: 6 */
 'use strict';
 
+const _ = require('underscore');
 const accounts_client = require('../clients/accounts_client.js');
 const logger = require('../../utls/logger.js');
 const err_handler = require('../../utls/error_handler.js');
@@ -33,7 +34,7 @@ class Accounts {
             })
             .catch(err => {
                 res.status(500)
-                    .json(err);
+                    .json(err_handler(err));
             });
     }
 
@@ -46,7 +47,7 @@ class Accounts {
             return;
         }
 
-        const params = req.body;
+        const params = _.extend(req.user, req.body);
         return config.updateUser(params)
             .then(user => {
                 res.status(200)
@@ -75,7 +76,7 @@ class Accounts {
             })
             .catch(err => {
                 res.status(500)
-                    .json(err);
+                    .json(err_handler(err));
             });
     }
 
@@ -104,7 +105,7 @@ class Accounts {
             })
             .catch(err => {
                 res.status(500)
-                    .json(err);
+                    .json(err_handler(err));
             });
     }
 
@@ -124,7 +125,7 @@ class Accounts {
             })
             .catch(err => {
                 res.status(500)
-                    .json(err);
+                    .json(err_handler(err));
             });
     }
 
@@ -161,7 +162,7 @@ class Accounts {
             })
             .catch(err => {
                 res.status(500)
-                    .json(err);
+                    .json(err_handler(err));
             });
     }
 }

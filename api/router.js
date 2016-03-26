@@ -125,6 +125,7 @@ module.exports = function(app) {
     app.post('/api/v1/services/save_account', main.saveServiceAccount);
     app.get('/api/v1/services/get_accounts/:type', main.getServiceAccounts);
     app.get('/api/v1/services/get_account/:type/:name', main.getServiceAccount);
+    app.get('/api/v1/services/list', main.getServiceList);
 
     //elb
     app.patch('/api/v1/elb/disconnect', elb.disconnectElb);

@@ -9,7 +9,6 @@ angular
 
 
         $scope.attemptLogin = function() {
-
             // return if empty form
             if (!$scope.user) {
                 return;
@@ -29,11 +28,23 @@ angular
                     //stop spinnner
                     $scope.showSpinner = false;
 
-                    //load settings for user
+                    //save user settings in localstorage
                     dataStore.setToken(user.token);
                     dataStore.setActiveUser(user.name);
                     dataStore.setActiveAWS(user.aws_account);
                     dataStore.setActiveRegion(user.aws_region);
+
+                    //set parent values because they will not reload
+                    if (user.aws_account) {
+                        $scope.$parent.activeAws = user.aws_account;
+                    }
+                    if (user.aws_region) {
+                        $scope.$parent.activeRegion = user.aws_region;
+                    }
+                    if (user.name) {
+                        $scope.$parent.userName = user.name;
+                    }
+
                     $state.go('index.stacks');
                 })
                 .error(function(err) {

@@ -1,67 +1,67 @@
 //factories
 angular
     .module('stacks')
-    .factory('dataStore', function ($localStorage, $window) {
+    .factory('dataStore', function($localStorage, $window) {
 
         return {
-            setStack: function (stack_name) {
+            setStack: function(stack_name) {
                 $localStorage.stack_name = stack_name;
             },
-            getStack: function () {
+            getStack: function() {
                 return $localStorage.stack_name;
             },
-            clearStack: function () {
+            clearStack: function() {
                 $localStorage.stack_name = '';
             },
-            setActiveUser: function (email) {
+            setActiveUser: function(email) {
                 $localStorage.email = email;
             },
-            getActiveUser: function () {
+            getActiveUser: function() {
                 return $localStorage.email;
             },
-            setActiveAWS: function (account) {
+            setActiveAWS: function(account) {
                 $localStorage.aws_account = account;
             },
-            getActiveAWS: function () {
-                return $localStorage.aws_account;
+            getActiveAWS: function() {
+                return $localStorage.aws_account || 'DEFAULT';
             },
-            setActiveRegion: function (region) {
+            setActiveRegion: function(region) {
                 $localStorage.aws_region = region;
             },
-            getActiveRegion: function () {
-                return $localStorage.aws_region;
+            getActiveRegion: function() {
+                return $localStorage.aws_region || 'us-east-1';
             },
-            getCmsType: function () {
+            getCmsType: function() {
                 return $localStorage.cms_type;
             },
-            setCmsType: function (cms_type) {
+            setCmsType: function(cms_type) {
                 $localStorage.cms_type = cms_type;
             },
-            getCmsName: function () {
+            getCmsName: function() {
                 return $localStorage.cms_name;
             },
-            setCmsName: function (cms_name) {
+            setCmsName: function(cms_name) {
                 $localStorage.cms_name = cms_name;
             },
-            setToken: function (token) {
+            setToken: function(token) {
                 $localStorage.token = token;
             },
-            getToken: function () {
+            getToken: function() {
                 return $localStorage.token;
             },
-            setBuildSize: function (build_type) {
+            setBuildSize: function(build_type) {
                 $localStorage.build_type = build_type;
             },
-            getBuildSize: function () {
+            getBuildSize: function() {
                 return $localStorage.build_type;
             },
-            setRegion: function (region) {
+            setRegion: function(region) {
                 $localStorage.region = region;
             },
-            getRegion: function () {
+            getRegion: function() {
                 return $localStorage.region;
             },
-            clearAll: function () {
+            clearAll: function() {
                 $localStorage.$reset();
             }
         };

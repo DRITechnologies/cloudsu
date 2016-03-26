@@ -10,6 +10,11 @@ angular
                 });
         }
 
+        //catch alerts from parent to refresh
+        $scope.$on('refresh', function(e) {
+            refresh();
+        });
+
         $scope.openCreateForm = function() {
             var modalInstance = $uibModal.open({
                 animation: true,

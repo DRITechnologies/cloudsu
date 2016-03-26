@@ -349,9 +349,28 @@ angular
     .module('stacks')
     .controller('MainCtrl', function($scope, $http, $state, $uibModal, dataStore, SweetAlert) {
 
-        $scope.userName = dataStore.getActiveUser();
         this.helloText = 'Concord Stacks';
         this.descriptionText = 'Click + to create a new stack!';
+        $scope.userName = dataStore.getActiveUser();
+        $scope.activeAws = dataStore.getActiveAWS();
+        $scope.activeRegion = dataStore.getActiveRegion();
+
+        //send refesh to child controller
+        function childRefresh() {
+            $scope.$broadcast('refresh');
+        }
+
+        //get available regions
+        $http.get('/api/v1/regions')
+            .success(function(regions) {
+                $scope.aws_regions = regions;
+            });
+
+        //get available aws accounts
+        $http.get('/api/v1/services/list')
+            .success(function(accounts) {
+                $scope.aws_accounts = accounts;
+            });
 
         // ping api request to determine screen if error
         /*
@@ -384,7 +403,7 @@ angular
                     });
                 })
                 .error(function(err) {
-                    //add cool error later on
+                    //XXX add cool error later on
                     console.log(err);
                 });
 
@@ -400,72 +419,97 @@ angular
             });
         };
 
+        $scope.activateRegion = function(region) {
+            //save active account in local storage
+            dataStore.setActiveRegion(region);
+            $scope.activeRegion = region;
+            //refresh child screen to reflect changes
+            childRefresh();
+            //update db so changes will be reflected in next login
+            $http.put('/api/v1/accounts', {
+                aws_region: region
+            });
+
+        };
+
+        $scope.activateAccount = function(account) {
+            //save active account in local storage
+            dataStore.setActiveAWS(account);
+            $scope.activeAws = account;
+            //refresh child screen to reflect changes
+            childRefresh();
+            //update db so changes will be reflected in next login
+            $http.put('/api/v1/accounts', {
+                aws_account: account
+            });
+        };
+
     });
 
 //factories
 angular
     .module('stacks')
-    .factory('dataStore', function ($localStorage, $window) {
+    .factory('dataStore', function($localStorage, $window) {
 
         return {
-            setStack: function (stack_name) {
+            setStack: function(stack_name) {
                 $localStorage.stack_name = stack_name;
             },
-            getStack: function () {
+            getStack: function() {
                 return $localStorage.stack_name;
             },
-            clearStack: function () {
+            clearStack: function() {
                 $localStorage.stack_name = '';
             },
-            setActiveUser: function (email) {
+            setActiveUser: function(email) {
                 $localStorage.email = email;
             },
-            getActiveUser: function () {
+            getActiveUser: function() {
                 return $localStorage.email;
             },
-            setActiveAWS: function (account) {
+            setActiveAWS: function(account) {
                 $localStorage.aws_account = account;
             },
-            getActiveAWS: function () {
-                return $localStorage.aws_account;
+            getActiveAWS: function() {
+                return $localStorage.aws_account || 'DEFAULT';
             },
-            setActiveRegion: function (region) {
+            setActiveRegion: function(region) {
                 $localStorage.aws_region = region;
             },
-            getActiveRegion: function () {
-                return $localStorage.aws_region;
+            getActiveRegion: function() {
+                return $localStorage.aws_region || 'us-east-1';
             },
-            getCmsType: function () {
+            getCmsType: function() {
                 return $localStorage.cms_type;
             },
-            setCmsType: function (cms_type) {
+            setCmsType: function(cms_type) {
                 $localStorage.cms_type = cms_type;
             },
-            getCmsName: function () {
+            getCmsName: function() {
                 return $localStorage.cms_name;
             },
-            setCmsName: function (cms_name) {
+            setCmsName: function(cms_name) {
                 $localStorage.cms_name = cms_name;
             },
-            setToken: function (token) {
+            setToken: function(token) {
                 $localStorage.token = token;
             },
-            getToken: function () {
+            getToken: function() {
                 return $localStorage.token;
             },
-            setBuildSize: function (build_type) {
+            setBuildSize: function(build_type) {
                 $localStorage.build_type = build_type;
             },
-            getBuildSize: function () {
+            getBuildSize: function() {
                 return $localStorage.build_type;
             },
-            setRegion: function (region) {
+            setRegion: function(region) {
                 $localStorage.region = region;
             },
-            getRegion: function () {
+            getRegion: function() {
                 return $localStorage.region;
             },
-            clearAll: function () {
+            clearAll: function() {
                 $localStorage.$reset();
             }
         };
@@ -517,6 +561,11 @@ angular
                     $scope.stacks = res.StackSummaries;
                 });
         }
+
+        //catch alerts from parent to refresh
+        $scope.$on('refresh', function(e) {
+            refresh();
+        });
 
         $scope.openCreateForm = function() {
             var modalInstance = $uibModal.open({
@@ -625,7 +674,6 @@ angular
 
 
         $scope.attemptLogin = function() {
-
             // return if empty form
             if (!$scope.user) {
                 return;
@@ -645,11 +693,23 @@ angular
                     //stop spinnner
                     $scope.showSpinner = false;
 
-                    //load settings for user
+                    //save user settings in localstorage
                     dataStore.setToken(user.token);
                     dataStore.setActiveUser(user.name);
                     dataStore.setActiveAWS(user.aws_account);
                     dataStore.setActiveRegion(user.aws_region);
+
+                    //set parent values because they will not reload
+                    if (user.aws_account) {
+                        $scope.$parent.activeAws = user.aws_account;
+                    }
+                    if (user.aws_region) {
+                        $scope.$parent.activeRegion = user.aws_region;
+                    }
+                    if (user.name) {
+                        $scope.$parent.userName = user.name;
+                    }
+
                     $state.go('index.stacks');
                 })
                 .error(function(err) {

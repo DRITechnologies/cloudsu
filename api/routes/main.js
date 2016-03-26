@@ -1,6 +1,7 @@
 /*jshint esversion: 6 */
 'use strict';
 
+const _ = require('underscore');
 const config = require('../../config/config.js');
 const err_handler = require('../../utls/error_handler.js');
 const logger = require('../../utls/logger.js');
@@ -140,6 +141,17 @@ class Main {
             .catch(err => {
                 logger.error(err);
                 res.status(500).json(err_handler(err));
+            });
+    }
+
+    getServiceList(req, res) {
+
+        return config.getServiceAccounts('AWS')
+            .then(response => {
+                res.status(200).json(_.pluck(response, 'name'));
+            })
+            .catch(err => {
+                res.status(500).json(err);
             });
     }
 }
