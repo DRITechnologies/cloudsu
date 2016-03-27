@@ -1,7 +1,7 @@
 /*jshint esversion: 6 */
 'use strict';
 
-module.exports = function (grunt) {
+module.exports = function(grunt) {
 
 
     // Load grunt tasks automatically
@@ -121,6 +121,12 @@ module.exports = function (grunt) {
                         'styles/patterns/*.*',
                         'img/{,*/}*.*'
                     ]
+                }, {
+                    expand: true,
+                    dot: true,
+                    cwd: 'app/styles',
+                    src: ['fonts/*.*'],
+                    dest: '<%= concord.dist %>'
                 }, {
                     expand: true,
                     dot: true,

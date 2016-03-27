@@ -49,8 +49,11 @@ angular
 
         //Open stack detail view
         $scope.openStack = function(stack_name) {
+            console.log('clicked open stack', stack_name);
             dataStore.setStack(stack_name);
-            $state.go('/stack/' + stack_name);
+            $state.go('index.detail', {
+                stack_name: stack_name
+            });
         };
 
         //Delete stack but confirm first

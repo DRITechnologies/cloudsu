@@ -22,7 +22,7 @@
 <div class="wrapper wrapper-content  animated fadeInRight">
     <div class="row">
         <div class="col-lg-4" ng-repeat="stack in stacks">
-            <div ng-class="panelColor(stack.StackStatus)">
+            <div ng-class="panelColor(stack.StackStatus)" ng-click="openStack(stack.StackName)">
                 <div class="panel-heading clearfix">
                     <span class="verticle-align">
                        <h3 class="panel-title pull-left" style="padding-top: 7.5px;">

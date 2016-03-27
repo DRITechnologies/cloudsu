@@ -122,6 +122,11 @@ function config($stateProvider, $urlRouterProvider) {
             url: '/index',
             templateUrl: 'views/common/content.html',
         })
+        .state('index.detail', {
+            url: '/stacks/:stack_name',
+            templateUrl: 'views/stack.html',
+            controller: 'stackController'
+        })
         .state('index.stacks', {
             url: '/stacks',
             templateUrl: 'views/stacks.html',
@@ -141,7 +146,7 @@ function config($stateProvider, $urlRouterProvider) {
 angular
     .module('stacks')
     .config(config)
-    .run(function ($rootScope, $state) {
+    .run(function($rootScope, $state) {
         $rootScope.$state = $state;
     });
 
@@ -150,13 +155,13 @@ angular
  */
 function pageTitle($rootScope, $timeout) {
     return {
-        link: function (scope, element) {
-            var listener = function (event, toState, toParams, fromState, fromParams) {
+        link: function(scope, element) {
+            var listener = function(event, toState, toParams, fromState, fromParams) {
                 // Default title - load on Dashboard 1
                 var title = 'Concord';
                 // Create your own title pattern
 
-                $timeout(function () {
+                $timeout(function() {
                     element.text(title);
                 });
             };
@@ -171,9 +176,9 @@ function pageTitle($rootScope, $timeout) {
 function sideNavigation($timeout) {
     return {
         restrict: 'A',
-        link: function (scope, element) {
+        link: function(scope, element) {
             // Call the metsiMenu plugin and plug it to sidebar navigation
-            $timeout(function () {
+            $timeout(function() {
                 element.metisMenu();
             });
         }
@@ -188,9 +193,9 @@ function iboxTools($timeout) {
         restrict: 'A',
         scope: true,
         templateUrl: 'views/common/ibox_tools.html',
-        controller: function ($scope, $element) {
+        controller: function($scope, $element) {
             // Function for collapse ibox
-            $scope.showhide = function () {
+            $scope.showhide = function() {
                     var ibox = $element.closest('div.ibox');
                     var icon = $element.find('i:first');
                     var content = ibox.find('div.ibox-content');
@@ -200,14 +205,14 @@ function iboxTools($timeout) {
                         .toggleClass('fa-chevron-down');
                     ibox.toggleClass('')
                         .toggleClass('border-bottom');
-                    $timeout(function () {
+                    $timeout(function() {
                         ibox.resize();
                         ibox.find('[id^=map-]')
                             .resize();
                     }, 50);
                 },
                 // Function for close ibox
-                $scope.closebox = function () {
+                $scope.closebox = function() {
                     var ibox = $element.closest('div.ibox');
                     ibox.remove();
                 };
@@ -222,8 +227,8 @@ function minimalizaSidebar($timeout) {
     return {
         restrict: 'A',
         template: '<a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="" ng-click="minimalize()"><i class="fa fa-bars"></i></a>',
-        controller: function ($scope, $element) {
-            $scope.minimalize = function () {
+        controller: function($scope, $element) {
+            $scope.minimalize = function() {
                 $('body')
                     .toggleClass('mini-navbar');
                 if (!$('body')
@@ -234,7 +239,7 @@ function minimalizaSidebar($timeout) {
                         .hide();
                     // For smoothly turn on menu
                     setTimeout(
-                        function () {
+                        function() {
                             $('#side-menu')
                                 .fadeIn(400);
                         }, 200);
@@ -243,7 +248,7 @@ function minimalizaSidebar($timeout) {
                     $('#side-menu')
                         .hide();
                     setTimeout(
-                        function () {
+                        function() {
                             $('#side-menu')
                                 .fadeIn(400);
                         }, 100);
@@ -265,9 +270,9 @@ function iboxToolsFullScreen($timeout) {
         restrict: 'A',
         scope: true,
         templateUrl: 'views/common/ibox_tools_full_screen.html',
-        controller: function ($scope, $element) {
+        controller: function($scope, $element) {
             // Function for collapse ibox
-            $scope.showhide = function () {
+            $scope.showhide = function() {
                 var ibox = $element.closest('div.ibox');
                 var icon = $element.find('i:first');
                 var content = ibox.find('div.ibox-content');
@@ -277,19 +282,19 @@ function iboxToolsFullScreen($timeout) {
                     .toggleClass('fa-chevron-down');
                 ibox.toggleClass('')
                     .toggleClass('border-bottom');
-                $timeout(function () {
+                $timeout(function() {
                     ibox.resize();
                     ibox.find('[id^=map-]')
                         .resize();
                 }, 50);
             };
             // Function for close ibox
-            $scope.closebox = function () {
+            $scope.closebox = function() {
                 var ibox = $element.closest('div.ibox');
                 ibox.remove();
             };
             // Function for full screen
-            $scope.fullscreen = function () {
+            $scope.fullscreen = function() {
                 var ibox = $element.closest('div.ibox');
                 var button = $element.find('i.fa-expand');
                 $('body')
@@ -297,7 +302,7 @@ function iboxToolsFullScreen($timeout) {
                 button.toggleClass('fa-expand')
                     .toggleClass('fa-compress');
                 ibox.toggleClass('fullscreen');
-                setTimeout(function () {
+                setTimeout(function() {
                     $(window)
                         .trigger('resize');
                 }, 100);
@@ -604,8 +609,11 @@ angular
 
         //Open stack detail view
         $scope.openStack = function(stack_name) {
+            console.log('clicked open stack', stack_name);
             dataStore.setStack(stack_name);
-            $state.go('/stack/' + stack_name);
+            $state.go('index.detail', {
+                stack_name: stack_name
+            });
         };
 
         //Delete stack but confirm first
@@ -679,6 +687,271 @@ angular
 
         //get initial data
         refresh();
+
+    });
+
+angular
+    .module('stacks')
+    .controller('stackController', function($scope, $stateParams, $http, $uibModal, $location, dataStore, _) {
+
+        $scope.stack_name = $stateParams.stack_name;
+
+        if (!$scope.stack_name) {
+            return;
+        }
+
+        function mergeEc2Objects(group1, group2) {
+            return _.each(group1, function(y) {
+                var obj = _.find(group2, function(x) {
+                    return (x.InstanceId === y.InstanceId);
+                });
+                y.PrivateIpAddress = obj.PrivateIpAddress;
+                y.PublicIpAddress = obj.PublicIpAddress;
+                y.KeyName = obj.KeyName;
+                y.InstanceType = obj.InstanceType;
+                y.LaunchTime = obj.LaunchTime;
+                y.ImageId = obj.ImageId;
+                return y;
+            });
+        }
+
+        function updateEc2(groups) {
+
+            return _.each(groups, function(group) {
+                if (group.Instances.length < 1) {
+                    return group;
+                }
+                var instances = _.pluck(group.Instances, 'InstanceId');
+                $http.get('/api/v1/ec2/' + instances)
+                    .success(function(data) {
+                        group.Instances = mergeEc2Objects(group.Instances, data);
+                        return group;
+                    })
+                    .error(function(err) {
+                        dataStore.addAlert('danger', err);
+                    });
+            });
+        }
+
+        function getEc2(instances) {
+            var instance_ids = _.pluck(instances, 'PhysicalResourceId');
+            $http.get('/api/ec2/' + instance_ids)
+                .success(function(data) {
+                    $scope.instances = data;
+                })
+                .error(function(err) {
+
+                });
+
+        }
+
+
+        function addTags(groups) {
+            return _.each(groups, function(group) {
+                group.version = _.find(group.Tags, function(tag) {
+                        return tag.Key === 'version';
+                    })
+                    .Value;
+                group.app_name = _.find(group.Tags, function(tag) {
+                        return tag.Key === 'app_name';
+                    })
+                    .Value;
+            });
+        }
+
+        function updateElb(groups) {
+
+            return _.each(groups, function(group) {
+                if (group.LoadBalancerNames.length < 1) {
+                    return group;
+                }
+                $http.get('/api/v1/elb/' + group.LoadBalancerNames)
+                    .success(function(data) {
+                        group.LoadBalancerNames = data.LoadBalancerDescriptions;
+                        return group;
+                    })
+                    .error(function(err) {});
+            });
+        }
+
+        //setup functions
+        function updateScaleGroups(scaleGroups) {
+            var groups = _.pluck(scaleGroups, 'PhysicalResourceId');
+            $http.get('/api/v1/asg/describe/' + groups)
+                .success(function(data) {
+                    console.log('asg', data);
+                    var groups = data.AutoScalingGroups;
+                    $scope.scaleGroups = updateEc2(groups);
+                    $scope.scaleGroups = updateElb(groups);
+                    $scope.scaleGroups = addTags(groups);
+                });
+        }
+
+
+
+        $scope.adjustSize = function(app_name, version) {
+            $uibModal.open({
+                animation: $scope.animationsEnabled,
+                templateUrl: 'partials/modals/adjust_size_form.html',
+                controller: 'adjust_size_modal',
+                size: 'md',
+                resolve: {
+                    stack_name: function() {
+                        return $scope.stack_name;
+                    },
+                    app_name: function() {
+                        return app_name;
+                    },
+                    version: function() {
+                        return version;
+                    }
+                }
+            });
+        };
+
+        $scope.isHappy = function(status) {
+            if (status === 'Healthy') {
+                return 'fa fa-smile-o';
+            }
+            return 'fa fa-frown-o';
+        };
+
+        $scope.inService = function(status) {
+            switch (status) {
+                case 'InService':
+                    return 'fa  fa-thumbs-up';
+                default:
+                    return 'fa fa-circle-o-notch fa-spin';
+            }
+        };
+
+        $scope.logColor = function(status) {
+            if (status.includes('FAILED')) {
+                return 'danger';
+            }
+        };
+
+        $scope.rowColor = function(health, state) {
+            if (health === 'Healthy' && state === 'InService') {
+                return;
+            } else if (health === 'Unhealthy') {
+                return 'danger';
+            } else {
+                return 'warning';
+            }
+        };
+
+        $scope.detachElb = function(scale_group, elb_name) {
+            bootbox.confirm('Are you sure you want to detach this elb?', function(result) {
+                if (result) {
+                    $http.patch('/api/v1/elb/disconnect', {
+                        scale_group: scale_group,
+                        elb: elb_name
+                    });
+                }
+            });
+        };
+
+        $scope.removeAsg = function(app_name, version) {
+
+            var params = {
+                app_name: app_name,
+                version: version,
+                stack_name: $scope.stack_name
+            };
+
+            $http.patch('/api/v1/delete_asg', params);
+        };
+
+        $scope.availableElbs = function(scale_group) {
+
+            $http.get('/api/v1/available_elbs/' + $scope.stack_name)
+                .success(function(response) {
+                    $uibModal.open({
+                        animation: $scope.animationsEnabled,
+                        templateUrl: 'partials/modals/available_elbs.html',
+                        controller: 'elb_modal',
+                        size: 'md',
+                        resolve: {
+                            elbs: function() {
+                                return response;
+                            },
+                            scale_group: function() {
+                                return scale_group;
+                            }
+                        }
+                    });
+                });
+        };
+
+        $scope.status_label = function(status) {
+            if (status !== 'READY') {
+                return 'label label-warning';
+            } else {
+                return 'label label-success';
+            }
+        };
+
+        $scope.status_fa_label = function(status) {
+            if (status !== 'READY') {
+                return 'fa fa-circle-o-notch fa-spin';
+            } else {
+                return 'fa fa-check-circle';
+            }
+        };
+
+        $scope.stack_status_label = function(status) {
+            if (status === 'UPDATE_COMPLETE' || status === 'CREATE_COMPLETE') {
+                return 'label label-success';
+            }
+            return 'label label-warning';
+        };
+
+        $scope.stack_status_fa_label = function(status) {
+            if (status && status.includes('COMPLETE')) {
+                return 'fa fa-check-circle';
+            }
+            return 'fa fa-circle-o-notch fa-spin';
+        };
+
+        $http.get('/api/v1/stacks/status/' + $scope.stack_name)
+            .success(function(response) {
+                $scope.stack_status = response;
+            });
+
+
+
+        $http.get('/api/v1/stacks/' + $scope.stack_name)
+            .success(function(data) {
+                $scope.resources = data.StackResources;
+                var instances = _.filter(data.StackResources, function(x) {
+                    return x.ResourceType === 'AWS::EC2::Instance';
+                });
+                var scaleGroups = _.filter(data.StackResources, function(x) {
+                    return x.ResourceType === 'AWS::AutoScaling::AutoScalingGroup';
+                });
+                $scope.scaleGroupSize = scaleGroups.length;
+                if (scaleGroups.length > 0) {
+                    updateScaleGroups(scaleGroups);
+                } else if (instances.length > 0) {
+                    getEc2(instances);
+                }
+            });
+
+        $http.get('/api/v1/stacks/describeEvents/' + $scope.stack_name)
+            .success(function(response) {
+                $scope.stack_logs = response;
+            });
+
+        $http.get('/api/v1/chef/environments/' + $scope.stack_name)
+            .success(function(response) {
+                var defaults = response.default_attributes;
+                if (defaults) {
+                    $scope.chef_status = defaults.status;
+                    $scope.rollback_available = defaults.rollback_available;
+                    $scope.chef = defaults.concord_params;
+                }
+            });
 
     });
 
@@ -832,7 +1105,7 @@ angular
 
 angular
     .module('stacks')
-    .controller('createStack', function ($scope, $http, $state, $uibModalInstance, dataStore, _) {
+    .controller('createStack', function($scope, $http, $state, $uibModalInstance, dataStore, _) {
 
         $scope.alerts = [];
         $scope.sgs = [];
@@ -841,7 +1114,6 @@ angular
         $scope.stack.instance_store = false;
         $scope.stack.ebs_volume = false;
         $scope.stack.multi_az = false;
-        $scope.stack.elb = {};
         $scope.stack.type = 'create';
         $scope.stack.ebs_root_size = 30;
         $scope.showSpinner = false;
@@ -850,42 +1122,42 @@ angular
         $scope.stack.update_list = [];
 
         $http.get('/api/v1/ec2/sample/images')
-            .success(function (response) {
+            .success(function(response) {
                 $scope.images = response;
             });
 
         $http.get('/api/v1/ec2/sizes')
-            .success(function (res) {
+            .success(function(res) {
                 $scope.instanceSizes = res;
             });
 
 
         $http.get('/api/v1/iam/ssl')
-            .success(function (res) {
+            .success(function(res) {
                 $scope.ssls = res;
             });
 
         $http.get('/api/v1/ec2/keys')
-            .success(function (res) {
+            .success(function(res) {
                 $scope.keys = res;
             });
 
         $http.get('/api/v1/iam/roles')
-            .success(function (res) {
+            .success(function(res) {
                 $scope.roles = res;
             });
 
         $http.get('/api/v1/region_map')
-            .success(function (response) {
+            .success(function(response) {
                 $scope.regions = response;
             });
 
         $http.get('/api/v1/ec2/security_groups')
-            .success(function (response) {
+            .success(function(response) {
                 $scope.security_groups = response;
             });
 
-        $scope.createStack = function () {
+        $scope.createStack = function() {
             $scope.showSpinner = true;
 
             // check for alphas
@@ -929,11 +1201,11 @@ angular
             var url = ['/api/v1/stacks', $scope.stack.stack_name].join('/');
             // create new stack
             $http.post(url, $scope.stack)
-                .success(function (res) {
+                .success(function(res) {
                     $scope.showSpinner = false;
                     $uibModalInstance.close('created new stack');
                 })
-                .error(function (err) {
+                .error(function(err) {
                     $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
@@ -943,17 +1215,17 @@ angular
         };
 
         // close modal instance
-        $scope.cancel = function () {
+        $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
         };
 
         // close alert
-        $scope.closeAlert = function (index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
 
         // adds volume from the form
-        $scope.addVolume = function () {
+        $scope.addVolume = function() {
             $scope.stack.volumes.push({
                 type: 'gp2',
                 size: 30
@@ -961,27 +1233,27 @@ angular
         };
 
         // removes a volume from the form
-        $scope.removeVolume = function (index) {
+        $scope.removeVolume = function(index) {
             $scope.stack.volumes.splice(index, 1);
         };
 
         // adds security group from the form
-        $scope.addSecurityGroup = function (group) {
+        $scope.addSecurityGroup = function(group) {
             $scope.sgs.push(group);
         };
 
         // removes a security group from the form
-        $scope.removeSecurityGroup = function (index) {
+        $scope.removeSecurityGroup = function(index) {
             $scope.sgs.splice(index, 1);
         };
 
         // adds elb security group from the form
-        $scope.addElbSecurityGroup = function (group) {
+        $scope.addElbSecurityGroup = function(group) {
             $scope.elb_sgs.push(group);
         };
 
         // removes an elb security group from the form
-        $scope.removeElbSecurityGroup = function (index) {
+        $scope.removeElbSecurityGroup = function(index) {
             $scope.elb_sgs.splice(index, 1);
         };
 

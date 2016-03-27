@@ -1,3 +1,18 @@
+@font-face {
+    font-family: 'SF-reg';
+    src: url('../fonts/sf-reg.woff') format('woff');
+}
+@font-face {
+    font-family: 'SF-thin';
+    src: url('../fonts/sf-thin.woff') format('woff');
+}
+@font-face {
+    font-family: 'SF-ultra-thin';
+    src: url('../fonts/sf-ultra-thin.woff') format('woff');
+}
+* {
+    font-family: 'SF-reg', Fallback, sans-serif;
+}
 .scrollable-menu {
     height: auto;
     max-height: 200px;

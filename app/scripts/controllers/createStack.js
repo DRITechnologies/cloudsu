@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('createStack', function ($scope, $http, $state, $uibModalInstance, dataStore, _) {
+    .controller('createStack', function($scope, $http, $state, $uibModalInstance, dataStore, _) {
 
         $scope.alerts = [];
         $scope.sgs = [];
@@ -9,7 +9,6 @@ angular
         $scope.stack.instance_store = false;
         $scope.stack.ebs_volume = false;
         $scope.stack.multi_az = false;
-        $scope.stack.elb = {};
         $scope.stack.type = 'create';
         $scope.stack.ebs_root_size = 30;
         $scope.showSpinner = false;
@@ -18,42 +17,42 @@ angular
         $scope.stack.update_list = [];
 
         $http.get('/api/v1/ec2/sample/images')
-            .success(function (response) {
+            .success(function(response) {
                 $scope.images = response;
             });
 
         $http.get('/api/v1/ec2/sizes')
-            .success(function (res) {
+            .success(function(res) {
                 $scope.instanceSizes = res;
             });
 
 
         $http.get('/api/v1/iam/ssl')
-            .success(function (res) {
+            .success(function(res) {
                 $scope.ssls = res;
             });
 
         $http.get('/api/v1/ec2/keys')
-            .success(function (res) {
+            .success(function(res) {
                 $scope.keys = res;
             });
 
         $http.get('/api/v1/iam/roles')
-            .success(function (res) {
+            .success(function(res) {
                 $scope.roles = res;
             });
 
         $http.get('/api/v1/region_map')
-            .success(function (response) {
+            .success(function(response) {
                 $scope.regions = response;
             });
 
         $http.get('/api/v1/ec2/security_groups')
-            .success(function (response) {
+            .success(function(response) {
                 $scope.security_groups = response;
             });
 
-        $scope.createStack = function () {
+        $scope.createStack = function() {
             $scope.showSpinner = true;
 
             // check for alphas
@@ -97,11 +96,11 @@ angular
             var url = ['/api/v1/stacks', $scope.stack.stack_name].join('/');
             // create new stack
             $http.post(url, $scope.stack)
-                .success(function (res) {
+                .success(function(res) {
                     $scope.showSpinner = false;
                     $uibModalInstance.close('created new stack');
                 })
-                .error(function (err) {
+                .error(function(err) {
                     $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
@@ -111,17 +110,17 @@ angular
         };
 
         // close modal instance
-        $scope.cancel = function () {
+        $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
         };
 
         // close alert
-        $scope.closeAlert = function (index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
 
         // adds volume from the form
-        $scope.addVolume = function () {
+        $scope.addVolume = function() {
             $scope.stack.volumes.push({
                 type: 'gp2',
                 size: 30
@@ -129,27 +128,27 @@ angular
         };
 
         // removes a volume from the form
-        $scope.removeVolume = function (index) {
+        $scope.removeVolume = function(index) {
             $scope.stack.volumes.splice(index, 1);
         };
 
         // adds security group from the form
-        $scope.addSecurityGroup = function (group) {
+        $scope.addSecurityGroup = function(group) {
             $scope.sgs.push(group);
         };
 
         // removes a security group from the form
-        $scope.removeSecurityGroup = function (index) {
+        $scope.removeSecurityGroup = function(index) {
             $scope.sgs.splice(index, 1);
         };
 
         // adds elb security group from the form
-        $scope.addElbSecurityGroup = function (group) {
+        $scope.addElbSecurityGroup = function(group) {
             $scope.elb_sgs.push(group);
         };
 
         // removes an elb security group from the form
-        $scope.removeElbSecurityGroup = function (index) {
+        $scope.removeElbSecurityGroup = function(index) {
             $scope.elb_sgs.splice(index, 1);
         };
 

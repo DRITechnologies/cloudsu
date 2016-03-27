@@ -23,7 +23,7 @@
                             <i class="fa fa-puzzle-piece fa-2x"></i>
                         </a>
                     </li>
-                    <li ng-show="stack.build_size == 'HA'">
+                    <li ng-show="stack.create_elb">
                         <a data-toggle="tab" href="#elb-tab">
                             <i class="fa fa-sitemap fa-2x"></i>
                         </a>
@@ -31,7 +31,6 @@
                 </ul>
                 <div class="tab-content">
 
-                    <br>
                     <br>
 
                     <!-- stack tab content -->
@@ -44,7 +43,7 @@
 
                         <div class="form-group">
                             <label>Build Size
-                                <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="(HA) Created with ELB and Auto Scaling Group. (Single) Created with a single EC2 instance."></i>
+                                <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="(HA) Created with Auto Scaling Group. (Single) Created with a single EC2 instance."></i>
                             </label>
                             <select ng-model="stack.build_size" class="form-control" id="select">
                                 <option value="HA">HA</option>
@@ -56,6 +55,13 @@
                             <label>
                                 <i></i>
                                 <input type="checkbox" ng-model="stack.route_53"> Create Route 53 DNS Record?
+                            </label>
+                        </div>
+
+                        <div ng-show="stack.build_size === 'HA'" class="i-checks form-group">
+                            <label>
+                                <i></i>
+                                <input type="checkbox" ng-model="stack.create_elb"> Create ELB?
                             </label>
                         </div>
 

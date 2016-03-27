@@ -18,6 +18,11 @@ function config($stateProvider, $urlRouterProvider) {
             url: '/index',
             templateUrl: 'views/common/content.html',
         })
+        .state('index.detail', {
+            url: '/stacks/:stack_name',
+            templateUrl: 'views/stack.html',
+            controller: 'stackController'
+        })
         .state('index.stacks', {
             url: '/stacks',
             templateUrl: 'views/stacks.html',
@@ -37,6 +42,6 @@ function config($stateProvider, $urlRouterProvider) {
 angular
     .module('stacks')
     .config(config)
-    .run(function ($rootScope, $state) {
+    .run(function($rootScope, $state) {
         $rootScope.$state = $state;
     });

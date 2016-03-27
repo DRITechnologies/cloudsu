@@ -177,31 +177,39 @@ class ConstructTemplate {
                     template.Resources[`WC${suffix}`] = JSON.parse(wc);
 
                     if (vars.type === 'create' || vars.type === 'add') {
-                        // elb
-                        vars.dns_ref = `ELB${vars.app_name}`;
-                        let elb = _.template(ELB);
-                        elb = JSON.parse(elb(vars));
-                        elb.Properties.SecurityGroups = vars.elb_security_groups;
 
-                        if (vars.multi_az) {
-                            elb.Properties.CrossZone = true;
-                            elb.Properties.AvailabilityZones = vars.regions;
-                        } else {
-                            elb.Properties.AvailabilityZones = vars.regions;
+                        //only create elb if it is requested
+                        if (vars.elb) {
+                            // elb
+                            vars.dns_ref = `ELB${vars.app_name}`;
+                            let elb = _.template(ELB);
+                            elb = JSON.parse(elb(vars));
+                            elb.Properties.SecurityGroups = vars.elb_security_groups;
+
+                            // multi az settings for ELB
+                            if (vars.multi_az) {
+                                elb.Properties.CrossZone = true;
+                                elb.Properties.AvailabilityZones = vars.regions;
+                            } else {
+                                elb.Properties.AvailabilityZones = vars.regions;
+                            }
+
+                            // add cert and listener for ssl
+                            if (vars.ssl_cert) {
+                                const https_config = {
+                                    LoadBalancerPort: '443',
+                                    InstanceProtocol: 'HTTPS',
+                                    InstancePort: '443',
+                                    Protocol: 'HTTPS',
+                                    SSLCertificateId: vars.ssl_cert
+                                };
+                                elb.Properties.Listeners.push(https_config);
+                            }
+
+                            // add to template
+                            template.Resources[`ELB${vars.app_name}`] = elb;
+
                         }
-
-                        if (vars.ssl_cert) {
-                            const https_config = {
-                                LoadBalancerPort: '443',
-                                InstanceProtocol: 'HTTPS',
-                                InstancePort: '443',
-                                Protocol: 'HTTPS',
-                                SSLCertificateId: vars.ssl_cert
-                            };
-                            elb.Properties.Listeners.push(https_config);
-                        }
-
-                        template.Resources[`ELB${vars.app_name}`] = elb;
                         //add route 53 to template
                         if (params.route_53) {
                             // dns
