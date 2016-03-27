@@ -220,7 +220,7 @@
                                     <tr ng-repeat="instance in scaleGroup.Instances" ng-class="rowColor(instance.HealthStatus, instance.LifecycleState)">
                                         <td class="fa fa-cube"></td>
                                         <td> {{ instance.InstanceId }} </td>
-                                        <td> {{ instance.PublicIpAddress }} </td>
+                                        <td> {{ instance.PublicIpAddress }} / {{ instance.PrivateIpAddress }} </td>
                                         <td><i ng-class="isHappy(instance.HealthStatus)"></i> {{ instance.HealthStatus }} </td>
                                         <td><i ng-class="inService(instance.LifecycleState)"></i> {{ instance.LifecycleState }} </td>
                                         <td> <span am-time-ago="instance.LaunchTime"></span> </td>

@@ -2919,7 +2919,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     font-family: 'SF-ultra-thin';
     src: url('../fonts/sf-ultra-thin.woff') format('woff');
 }
-* {
+body {
     font-family: 'SF-reg', Fallback, sans-serif;
 }
 #stack-info-left {

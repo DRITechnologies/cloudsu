@@ -829,7 +829,7 @@ angular
 
         //adjust the size of autoscale group
         $scope.adjustSize = function(app_name, version) {
-            $uibModal.open({
+            var modalInstance = $uibModal.open({
                 animation: true,
                 templateUrl: 'views/modals/groupResize.html',
                 controller: 'groupResize',
@@ -845,6 +845,11 @@ angular
                         return version;
                     }
                 }
+            });
+
+            modalInstance.result.then(function(selectedItem) {
+                //refresh service accounts
+                refresh();
             });
         };
 
@@ -1863,7 +1868,7 @@ angular
             params = _.extend(params, $scope.adjust);
             $http.patch('/api/v1/adjust_size', params)
                 .success(function(response) {
-                    $uibModalInstance.dismiss('cancel');
+                    $uibModalInstance.close(true);
                 })
                 .error(function(err) {
                     $scope.alerts.push({

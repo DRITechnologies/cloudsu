@@ -10,7 +10,7 @@
     font-family: 'SF-ultra-thin';
     src: url('../fonts/sf-ultra-thin.woff') format('woff');
 }
-* {
+body {
     font-family: 'SF-reg', Fallback, sans-serif;
 }
 #stack-info-left {
