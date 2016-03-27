@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('stackController', function($scope, $stateParams, $http, $uibModal, SweetAlert, $location, dataStore, _) {
+    .controller('stackController', function($scope, $q, $stateParams, $http, $uibModal, SweetAlert, $location, dataStore, _) {
 
         $scope.stack_name = $stateParams.stack_name;
 
@@ -25,19 +25,15 @@ angular
         }
 
         //get ec2 specific for autoscale groups
-        function updateEc2(groups) {
-            return _.each(groups, function(group) {
+        function updateEc2() {
+            _.each($scope.scaleGroups, function(group, index) {
                 if (group.Instances.length < 1) {
                     return group;
                 }
                 var instances = _.pluck(group.Instances, 'InstanceId');
                 $http.get('/api/v1/ec2/' + instances)
                     .success(function(data) {
-                        group.Instances = mergeEc2Objects(group.Instances, data);
-                        return group;
-                    })
-                    .error(function(err) {
-                        dataStore.addAlert('danger', err);
+                        $scope.scaleGroups[index].Instances = mergeEc2Objects(group.Instances, data);
                     });
             });
         }
@@ -48,21 +44,18 @@ angular
             $http.get('/api/ec2/' + instance_ids)
                 .success(function(data) {
                     $scope.instances = data;
-                })
-                .error(function(err) {
-
                 });
 
         }
 
         //get data from tags
-        function addTags(groups) {
-            return _.each(groups, function(group) {
-                group.version = _.find(group.Tags, function(tag) {
+        function addTags() {
+            _.each($scope.scaleGroups, function(group, index) {
+                $scope.scaleGroups[index].version = _.find(group.Tags, function(tag) {
                         return tag.Key === 'version';
                     })
                     .Value;
-                group.app_name = _.find(group.Tags, function(tag) {
+                $scope.scaleGroups[index].app_name = _.find(group.Tags, function(tag) {
                         return tag.Key === 'app_name';
                     })
                     .Value;
@@ -70,15 +63,14 @@ angular
         }
 
         //add more elb specific data
-        function updateElb(groups) {
-            return _.each(groups, function(group) {
+        function updateElb() {
+            _.each($scope.scaleGroups, function(group, index) {
                 if (group.LoadBalancerNames.length < 1) {
                     return group;
                 }
                 $http.get('/api/v1/elb/' + group.LoadBalancerNames)
                     .success(function(data) {
-                        group.LoadBalancerNames = data.LoadBalancerDescriptions;
-                        return group;
+                        $scope.scaleGroups[index].LoadBalancerNames = data.LoadBalancerDescriptions;
                     })
                     .error(function(err) {});
             });
@@ -88,12 +80,11 @@ angular
         function updateScaleGroups(scaleGroups) {
             var groups = _.pluck(scaleGroups, 'PhysicalResourceId');
             $http.get('/api/v1/asg/describe/' + groups)
-                .success(function(data) {
-                    console.log('asg', data);
-                    var groups = data.AutoScalingGroups;
-                    $scope.scaleGroups = updateEc2(groups);
-                    $scope.scaleGroups = updateElb(groups);
-                    $scope.scaleGroups = addTags(groups);
+                .success(function(response) {
+                    $scope.scaleGroups = response.AutoScalingGroups;
+                    updateEc2();
+                    updateElb();
+                    addTags();
                 });
         }
 
@@ -113,7 +104,7 @@ angular
                     var scaleGroups = _.filter(data.StackResources, function(x) {
                         return x.ResourceType === 'AWS::AutoScaling::AutoScalingGroup';
                     });
-                    $scope.scaleGroupSize = scaleGroups.length;
+
                     if (scaleGroups.length > 0) {
                         updateScaleGroups(scaleGroups);
                     } else if (instances.length > 0) {
@@ -379,8 +370,18 @@ angular
             return 'fa fa-circle-o-notch fa-spin';
         };
 
+        function refresher() {
+            // refresh every 10 seconds
+            setTimeout(function() {
+                console.log('auto refresh');
+                refresh();
+                refresher();
+            }, 15000);
+        }
 
         //get initial data
         refresh();
+        //start refresher
+        refresher();
 
     });

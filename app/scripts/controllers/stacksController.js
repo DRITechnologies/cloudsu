@@ -2,27 +2,21 @@ angular
     .module('stacks')
     .controller('stacksController', function($rootScope, $scope, $http, $state, $uibModal, SweetAlert, dataStore) {
 
-        // set refreshCount
-        var refreshCount = 0;
-
         //Get stacks from AWS
         function refresh() {
-            console.log('refreshing data');
             $http.get('/api/v1/stacks')
                 .success(function(res) {
                     $scope.stacks = res.StackSummaries;
                 });
         }
 
-        function refreshRetry(iterations) {
-            // refresh every 10 seconds for interval
+        function refresher() {
+            // refresh every 10 seconds
             setTimeout(function() {
-                if (refreshCount < iterations) {
-                    refresh();
-                    refreshRetry(iterations);
-                    refreshCount++;
-                }
-            }, 10000);
+                console.log('auto refresh');
+                refresh();
+                refresher();
+            }, 15000);
         }
 
         //catch alerts from parent to refresh
@@ -40,7 +34,7 @@ angular
 
             modalInstance.result.then(function(selectedItem) {
                 //refresh service accounts
-                refreshRetry(50);
+                refresh();
             }, function() {
                 console.log('Modal dismissed at: ' + new Date());
             });
@@ -73,7 +67,7 @@ angular
                         $http.delete('/api/v1/stacks/' + stack_name)
                             .success(function(res) {
                                 SweetAlert.swal('Success', stack_name + ' is being deprovisioned.', 'success');
-                                refreshRetry(30);
+                                refresh();
                             })
                             .error(function(err) {
                                 $scope.alerts.push({
@@ -126,5 +120,7 @@ angular
 
         //get initial data
         refresh();
+        //start refresher
+        refresher();
 
     });
