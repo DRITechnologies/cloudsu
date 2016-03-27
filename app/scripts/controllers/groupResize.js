@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('adjust_size_modal', function ($scope, $http, $modalInstance, stack_name,
+    .controller('groupResize', function($scope, $http, $uibModalInstance, stack_name,
         app_name, version, dataStore) {
         $scope.alerts_modal = [];
 
@@ -10,26 +10,25 @@ angular
             version: version
         };
 
-        $scope.adjustSize = function () {
+        $scope.adjustSize = function() {
             params = _.extend(params, $scope.adjust);
             $http.patch('/api/v1/adjust_size', params)
-                .success(function (response) {
-                    $modalInstance.dismiss('cancel');
-                    dataStore.addAlert('success', 'successfully adjusted scale group size');
+                .success(function(response) {
+                    $uibModalInstance.dismiss('cancel');
                 })
-                .error(function (err) {
-                    $scope.alerts_modal.push({
+                .error(function(err) {
+                    $scope.alerts.push({
                         type: 'danger',
                         msg: err
                     });
                 });
         };
 
-        $scope.cancel = function () {
-            $modalInstance.dismiss('cancel');
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function (index) {
+        $scope.close_alert_modal = function(index) {
             $scope.alerts_modal.splice(index, 1);
         };
 

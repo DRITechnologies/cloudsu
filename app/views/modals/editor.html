@@ -1,0 +1,13 @@
+<div class="modal-header">
+    <h3 class="modal-title">{{ name }}</h3>
+</div>
+<div class="modal-body">
+    <div ng-init="ready()" id="editor"></div>
+</div>
+<alerts></alerts>
+<div class="modal-footer">
+    <div class="btn-toobar pull-right">
+        <button class="btn btn-default" ng-click="cancel() ">Cancel</button>
+        <button ng-click="onDeploy()" class="btn btn-primary "><i class="fa fa-arrow-circle-o-up "></i> Deploy Changes</button>
+    </div>
+</div>

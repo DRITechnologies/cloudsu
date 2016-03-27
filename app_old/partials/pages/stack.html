@@ -7,7 +7,7 @@
             <div class="panel-body" id="stack-info-left">
                 <div class="col-md-4">
                     <div class="row">
-                        <table>
+                        <table class="table">
                             <tr ng-show="chef_status">
                                 <td><strong>Status:&nbsp;</strong></td>
                                 <td>
@@ -83,7 +83,7 @@
     <div class="col-md-8">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h5><i class="fa fa-terminal"></i> stack log
+                <h5><i class="fa fa-terminal"></i> Stack log
                 </h5>
             </div>
             <div class="panel-body" id="stack-info-middle">
@@ -128,8 +128,8 @@
                     <tr>
                         <td><strong>Status:</strong></td>
                         <td>
-                            <span ng-show="scaleGroup.LoadBalancerNames.length" class="label label-success"><i class="fa fa-check-circle"></i> CONNECTED</span>
-                            <span ng-show="!scaleGroup.LoadBalancerNames.length" class="label label-danger"><i class="fa fa-times-circle"></i> DISCONNECTED</span>
+                            <span ng-show="scaleGroup.LoadBalancerNames.length" class="badge badge-primary"><i class="fa fa-check-circle"></i> CONNECTED</span>
+                            <span ng-show="!scaleGroup.LoadBalancerNames.length" class="badge badge-danger"><i class="fa fa-times-circle"></i> DISCONNECTED</span>
                         </td>
                     </tr>
                     <tr>

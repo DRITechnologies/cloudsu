@@ -2922,6 +2922,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 * {
     font-family: 'SF-reg', Fallback, sans-serif;
 }
+#stack-info-left {
+    height: 290px;
+    min-height: 260px;
+}
+#stack-info-right {
+    height: 290px;
+    min-height: 260px;
+    overflow: scroll;
+}
 .scrollable-menu {
     height: auto;
     max-height: 200px;

@@ -360,9 +360,6 @@ angular
         $scope.activeAws = dataStore.getActiveAWS();
         $scope.activeRegion = dataStore.getActiveRegion();
 
-        //stacks array to be assinged in child controller
-        $scope.stacks = [];
-
         //send refesh to child controller
         function childRefresh() {
             $scope.$broadcast('refresh');
@@ -571,7 +568,6 @@ angular
             $http.get('/api/v1/stacks')
                 .success(function(res) {
                     $scope.stacks = res.StackSummaries;
-                    $scope.$parent.stacks = res.StackSummaries;
                 });
         }
 
@@ -692,7 +688,7 @@ angular
 
 angular
     .module('stacks')
-    .controller('stackController', function($scope, $stateParams, $http, $uibModal, $location, dataStore, _) {
+    .controller('stackController', function($scope, $stateParams, $http, $uibModal, SweetAlert, $location, dataStore, _) {
 
         $scope.stack_name = $stateParams.stack_name;
 
@@ -700,6 +696,7 @@ angular
             return;
         }
 
+        //merge more data into the ec2 objects
         function mergeEc2Objects(group1, group2) {
             return _.each(group1, function(y) {
                 var obj = _.find(group2, function(x) {
@@ -715,8 +712,8 @@ angular
             });
         }
 
+        //get ec2 specific for autoscale groups
         function updateEc2(groups) {
-
             return _.each(groups, function(group) {
                 if (group.Instances.length < 1) {
                     return group;
@@ -733,6 +730,7 @@ angular
             });
         }
 
+        //get ec2 specific data for single
         function getEc2(instances) {
             var instance_ids = _.pluck(instances, 'PhysicalResourceId');
             $http.get('/api/ec2/' + instance_ids)
@@ -745,7 +743,7 @@ angular
 
         }
 
-
+        //get data from tags
         function addTags(groups) {
             return _.each(groups, function(group) {
                 group.version = _.find(group.Tags, function(tag) {
@@ -759,8 +757,8 @@ angular
             });
         }
 
+        //add more elb specific data
         function updateElb(groups) {
-
             return _.each(groups, function(group) {
                 if (group.LoadBalancerNames.length < 1) {
                     return group;
@@ -787,13 +785,53 @@ angular
                 });
         }
 
+        function refresh() {
+            $http.get('/api/v1/stacks/status/' + $scope.stack_name)
+                .success(function(response) {
+                    $scope.stack_status = response;
+                });
 
 
+            $http.get('/api/v1/stacks/' + $scope.stack_name)
+                .success(function(data) {
+                    $scope.resources = data.StackResources;
+                    var instances = _.filter(data.StackResources, function(x) {
+                        return x.ResourceType === 'AWS::EC2::Instance';
+                    });
+                    var scaleGroups = _.filter(data.StackResources, function(x) {
+                        return x.ResourceType === 'AWS::AutoScaling::AutoScalingGroup';
+                    });
+                    $scope.scaleGroupSize = scaleGroups.length;
+                    if (scaleGroups.length > 0) {
+                        updateScaleGroups(scaleGroups);
+                    } else if (instances.length > 0) {
+                        getEc2(instances);
+                    }
+                });
+
+            $http.get('/api/v1/stacks/describeEvents/' + $scope.stack_name)
+                .success(function(response) {
+                    $scope.stack_logs = response;
+                });
+
+            $http.get('/api/v1/chef/environments/' + $scope.stack_name)
+                .success(function(response) {
+                    var defaults = response.default_attributes;
+                    if (defaults) {
+                        $scope.chef_status = defaults.status;
+                        $scope.rollback_available = defaults.rollback_available;
+                        $scope.chef = defaults.concord_params;
+                    }
+                });
+
+        }
+
+        //adjust the size of autoscale group
         $scope.adjustSize = function(app_name, version) {
             $uibModal.open({
-                animation: $scope.animationsEnabled,
-                templateUrl: 'partials/modals/adjust_size_form.html',
-                controller: 'adjust_size_modal',
+                animation: true,
+                templateUrl: 'views/modals/groupResize.html',
+                controller: 'groupResize',
                 size: 'md',
                 resolve: {
                     stack_name: function() {
@@ -842,35 +880,50 @@ angular
         };
 
         $scope.detachElb = function(scale_group, elb_name) {
-            bootbox.confirm('Are you sure you want to detach this elb?', function(result) {
-                if (result) {
-                    $http.patch('/api/v1/elb/disconnect', {
-                        scale_group: scale_group,
-                        elb: elb_name
-                    });
-                }
-            });
+            console.log('scale:', scale_group, 'elb:', elb_name);
+            SweetAlert.swal({
+                    title: '',
+                    text: 'Are you sure you want to detach this ELB?',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#1ab394',
+                    confirmButtonText: 'Yes',
+                    closeOnConfirm: false
+                },
+                function(isConfirm) {
+                    if (isConfirm) {
+                        $http.patch('/api/v1/elb/disconnect', {
+                                scale_group: scale_group,
+                                elb: elb_name
+                            })
+                            .success(function(response) {
+                                refresh();
+                                SweetAlert.swal('Success', elb_name + ' has been detached from scale group ' + scale_group, 'success');
+                            });
+                    }
+                });
         };
 
-        $scope.removeAsg = function(app_name, version) {
 
+        //remove one autoscale group
+        $scope.removeAsg = function(app_name, version) {
             var params = {
                 app_name: app_name,
                 version: version,
                 stack_name: $scope.stack_name
             };
-
             $http.patch('/api/v1/delete_asg', params);
         };
 
         $scope.availableElbs = function(scale_group) {
-
+            //get available ELBs
             $http.get('/api/v1/available_elbs/' + $scope.stack_name)
                 .success(function(response) {
-                    $uibModal.open({
-                        animation: $scope.animationsEnabled,
-                        templateUrl: 'partials/modals/available_elbs.html',
-                        controller: 'elb_modal',
+                    //open modal and give user a chance to connect ELB
+                    var modalInstance = $uibModal.open({
+                        animation: true,
+                        templateUrl: 'views/modals/connectElb.html',
+                        controller: 'connectElb',
                         size: 'md',
                         resolve: {
                             elbs: function() {
@@ -881,14 +934,109 @@ angular
                             }
                         }
                     });
+
+                    modalInstance.result.then(function(selectedItem) {
+                        //refresh service accounts
+                        refresh();
+                    }, function() {
+                        console.log('Modal dismissed at: ' + new Date());
+                    });
+                });
+        };
+
+        //open upgrade form
+        $scope.openUpgradeForm = function() {
+            $scope.stack_name = dataStore.getStack();
+            $uibModal.open({
+                animation: true,
+                templateUrl: 'views/modals/upgradeStack.html',
+                controller: 'upgradeStack',
+                size: 'lg',
+                resolve: {
+                    stack_name: function() {
+                        return $scope.stack_name;
+                    }
+                }
+            });
+        };
+
+        //open rollback modal
+        $scope.rollback = function() {
+            $uibModal.open({
+                animation: true,
+                templateUrl: 'views/modals/stackRollback.html',
+                controller: 'stackRollback',
+                size: 'md',
+                resolve: {
+                    stack_name: function() {
+                        return $scope.stack_name;
+                    }
+                }
+            });
+        };
+
+        //open check editor
+        $scope.openEnvEditor = function() {
+
+            $http.get('/api/v1/chef/environments/' + $scope.stack_name)
+                .success(function(response) {
+                    $uibModal.open({
+                        animation: true,
+                        templateUrl: 'views/modals/editor.html',
+                        controller: 'chefEditor',
+                        size: 'lg',
+                        resolve: {
+                            environment: function() {
+                                return response;
+                            },
+                            stack_name: function() {
+                                return $scope.stack_name;
+                            }
+                        }
+                    });
+                })
+                .error(function(err) {
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
+                });
+        };
+
+        //open
+        $scope.openStackEditor = function() {
+
+            $http.get('/api/v1/stacks/template/' + $scope.stack_name)
+                .success(function(response) {
+                    $scope.template = response;
+                    $uibModal.open({
+                        animation: true,
+                        templateUrl: 'partials/modals/editor.html',
+                        controller: 'templateEditor',
+                        size: 'lg',
+                        resolve: {
+                            template: function() {
+                                return $scope.template;
+                            },
+                            stack_name: function() {
+                                return $scope.stack_name;
+                            }
+                        }
+                    });
+                })
+                .error(function(err) {
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
                 });
         };
 
         $scope.status_label = function(status) {
             if (status !== 'READY') {
-                return 'label label-warning';
+                return 'badge badge-warning';
             } else {
-                return 'label label-success';
+                return 'badge badge-primary';
             }
         };
 
@@ -902,9 +1050,9 @@ angular
 
         $scope.stack_status_label = function(status) {
             if (status === 'UPDATE_COMPLETE' || status === 'CREATE_COMPLETE') {
-                return 'label label-success';
+                return 'badge badge-primary';
             }
-            return 'label label-warning';
+            return 'badge badge-warning';
         };
 
         $scope.stack_status_fa_label = function(status) {
@@ -914,44 +1062,9 @@ angular
             return 'fa fa-circle-o-notch fa-spin';
         };
 
-        $http.get('/api/v1/stacks/status/' + $scope.stack_name)
-            .success(function(response) {
-                $scope.stack_status = response;
-            });
 
-
-
-        $http.get('/api/v1/stacks/' + $scope.stack_name)
-            .success(function(data) {
-                $scope.resources = data.StackResources;
-                var instances = _.filter(data.StackResources, function(x) {
-                    return x.ResourceType === 'AWS::EC2::Instance';
-                });
-                var scaleGroups = _.filter(data.StackResources, function(x) {
-                    return x.ResourceType === 'AWS::AutoScaling::AutoScalingGroup';
-                });
-                $scope.scaleGroupSize = scaleGroups.length;
-                if (scaleGroups.length > 0) {
-                    updateScaleGroups(scaleGroups);
-                } else if (instances.length > 0) {
-                    getEc2(instances);
-                }
-            });
-
-        $http.get('/api/v1/stacks/describeEvents/' + $scope.stack_name)
-            .success(function(response) {
-                $scope.stack_logs = response;
-            });
-
-        $http.get('/api/v1/chef/environments/' + $scope.stack_name)
-            .success(function(response) {
-                var defaults = response.default_attributes;
-                if (defaults) {
-                    $scope.chef_status = defaults.status;
-                    $scope.rollback_available = defaults.rollback_available;
-                    $scope.chef = defaults.concord_params;
-                }
-            });
+        //get initial data
+        refresh();
 
     });
 
@@ -1571,20 +1684,193 @@ angular
 
 angular
     .module('stacks')
-    .controller('serviceAccount', function($scope, $http, $uibModalInstance, dataStore, _, account, type) {
+    .controller('upgradeStack', function($scope, $http, $uibModalInstance, stack_name, dataStore) {
 
-        $scope.alerts = [];
+        $scope.alerts_modal = [];
+        $scope.advanced = false;
+        $scope.stack = {};
+        $scope.stack.apps = [];
+        $scope.stack.type = 'upgrade';
+        $scope.stack.stack_name = stack_name;
+        $scope.build_size = dataStore.getBuildSize();
+        $scope.showSpinner = false;
+        $scope.upgrade_options = true;
 
-        console.log(type);
 
-        $scope.account = account || {};
-        $scope.account.type = type;
+        $http.get('/api/v1/ec2/sizes')
+            .success(function(response) {
+                $scope.instanceSizes = response;
+            });
 
-        $scope.saveServiceAccount = function() {
+        $http.get('/api/v1/chef/environments/' + stack_name)
+            .success(function(response) {
 
-            $http.post('/api/v1/services/save_account', $scope.account)
-                .success(function(res) {
-                    $uibModalInstance.close(true);
+                var defaults = response.default_attributes;
+                if (defaults) {
+                    var chef = defaults.concord_params;
+                    $scope.stack.min_size = chef.min_size;
+                    $scope.stack.max_size = chef.max_size;
+                    $scope.current_version = chef.app_version;
+                    $scope.stack.ami = chef.ami;
+                    $scope.stack.instance_size = chef.instance_size;
+                    $scope.stack.app_name = chef.app_name;
+                    $scope.stack.update_list = chef.update_list;
+                }
+
+            });
+
+        $scope.upgrade = function() {
+
+            $scope.stack.update_list = [{
+                app_name: $scope.stack.app_name,
+                version: $scope.stack.app_version
+            }];
+
+            $scope.showSpinner = true;
+            $http.patch('/api/v1/upgrade', $scope.stack)
+                .success(function(data) {
+                    $scope.showSpinner = false;
+                    $uibModalInstance.dismiss();
+                    dataStore.addAlert('success', 'successfully started upgrade');
+                })
+                .error(function(err) {
+                    $scope.showSpinner = false;
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
+                });
+        };
+
+
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.close_alert_modal = function(index) {
+            $scope.alerts.splice(index, 1);
+        };
+    });
+
+// model editor view
+angular
+    .module('stacks')
+    .controller('templateEditor', function($scope, $http, $uibModalInstance, template, stack_name,
+        dataStore) {
+        $scope.alerts_modal = [];
+        $scope.name = stack_name;
+        var templateBody;
+
+        $scope.ready = function() {
+            var editor = ace.edit('editor');
+            editor.getSession()
+                .setMode('ace/mode/json');
+            editor.setTheme('ace/theme/solarized_dark');
+            var _session = editor.getSession();
+            var o = JSON.parse(template);
+            var val = JSON.stringify(o, null, 4);
+            editor.$blockScrolling = Infinity;
+            editor.getSession()
+                .setTabSize(4);
+            editor.setValue(val, 1);
+            editor.setOption('showPrintMargin', false);
+            _session.on('change', function() {
+                templateBody = _session.getValue();
+            });
+        };
+
+        $scope.onDeploy = function() {
+            $http.put('/api/v1/stacks/' + stack_name, {
+                    'template': templateBody,
+                    'stack_name': stack_name
+                })
+                .success(function(data) {
+                    $uibModalInstance.close();
+                    dataStore.addAlert('success', 'successfully updated stack');
+                })
+                .error(function(err) {
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
+                });
+        };
+
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.close_alert_modal = function(index) {
+            $scope.alerts.splice(index, 1);
+        };
+    });
+
+angular
+    .module('stacks')
+    .controller('stackRollback', function($scope, $http, $uibModalInstance, stack_name, dataStore) {
+        $scope.alerts_modal = [];
+        $scope.stack_name = stack_name;
+
+
+        $http.get('/api/v1/chef/rollback_check/' + $scope.stack_name)
+            .success(function(response) {
+                $scope.rollback_available = response;
+            })
+            .error(function(err) {
+                $scope.alerts.push({
+                    type: 'danger',
+                    msg: err
+                });
+            });
+
+        $scope.rollback = function() {
+            $scope.showSpinner = true;
+            $http.patch('/api/v1/upgrade/rollback', {
+                    stack_name: $scope.stack_name
+                })
+                .success(function(response) {
+                    $scope.showSpinner = false;
+                    $uibModalInstance.dismiss('cancel');
+                })
+                .error(function(err) {
+                    $scope.showSpinner = false;
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
+                });
+        };
+
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.close_alert_modal = function(index) {
+            $scope.alerts.splice(index, 1);
+        };
+
+
+
+
+    });
+
+angular
+    .module('stacks')
+    .controller('groupResize', function($scope, $http, $uibModalInstance, stack_name,
+        app_name, version, dataStore) {
+        $scope.alerts_modal = [];
+
+        var params = {
+            stack_name: stack_name,
+            app_name: app_name,
+            version: version
+        };
+
+        $scope.adjustSize = function() {
+            params = _.extend(params, $scope.adjust);
+            $http.patch('/api/v1/adjust_size', params)
+                .success(function(response) {
+                    $uibModalInstance.dismiss('cancel');
                 })
                 .error(function(err) {
                     $scope.alerts.push({
@@ -1602,4 +1888,93 @@ angular
             $scope.alerts_modal.splice(index, 1);
         };
 
+
+
+    });
+
+angular
+    .module('stacks')
+    .controller('connectElb', function($scope, $http, $uibModalInstance, elbs, scale_group, dataStore) {
+
+        $scope.alerts = [];
+        $scope.elbs = elbs;
+
+
+        $scope.connect = function() {
+            $http.patch('/api/v1/elb/connect', {
+                    scale_group: scale_group,
+                    elb: $scope.elb_name
+                })
+                .success(function(data) {
+                    $uibModalInstance.close(true);
+                })
+                .error(function(err) {
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
+                });
+        };
+
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.close_alert_modal = function(index) {
+            $scope.alerts.splice(index, 1);
+        };
+
+    });
+
+// model editor view
+angular
+    .module('stacks')
+    .controller('env_editor_modal', function ($scope, $http, $modalInstance, environment,
+        dataStore) {
+        $scope.alerts_modal = [];
+
+        var environmentBody;
+        $scope.name = environment.name;
+
+        $scope.ready = function () {
+            var editor = ace.edit('editor');
+            editor.getSession()
+                .setMode('ace/mode/json');
+            editor.setTheme('ace/theme/solarized_dark');
+            var _session = editor.getSession();
+            var o = environment;
+            var val = JSON.stringify(o, null, 4);
+            editor.$blockScrolling = Infinity;
+            editor.getSession()
+                .setTabSize(4);
+            editor.setValue(val, 1);
+            editor.setOption('showPrintMargin', false);
+            _session.on('change', function () {
+                environmentBody = _session.getValue();
+            });
+        };
+
+
+
+        $scope.onDeploy = function () {
+            $http.put('/api/v1/chef/environments/update', environmentBody)
+                .success(function (data) {
+                    $modalInstance.dismiss();
+                    dataStore.addAlert('success', 'successfully updated environment');
+                })
+                .error(function (err) {
+                    $scope.alerts_modal.push({
+                        type: 'danger',
+                        msg: err
+                    });
+                });
+        };
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss('cancel');
+        };
+
+        $scope.close_alert_modal = function (index) {
+            $scope.alerts_modal.splice(index, 1);
+        };
     });

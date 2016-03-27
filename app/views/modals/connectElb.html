@@ -3,21 +3,18 @@
         <legend> Connect ELB</legend>
         <div class="form-group">
             <label for="select" class="col-lg-2 control-label">Available ELB's</label>
-            <div class="col-lg-10">
-                <select class="form-control" id="select" ng-model="elb_name">
-                    <option ng-repeat="elb in elbs" value="{{ elb.PhysicalResourceId }}">{{ elb.LogicalResourceId }} ({{ elb.PhysicalResourceId }})</option>
-                </select>
-            </div>
+            <select class="form-control" ng-model="elb_name">
+                <option ng-repeat="elb in elbs" value="{{ elb.PhysicalResourceId }}">{{ elb.LogicalResourceId }} ({{ elb.PhysicalResourceId }})</option>
+            </select>
         </div>
         <br>
         <br>
-        <alertsmodal></alertsmodal>
+        <alerts></alerts>
         <div class="form-group">
-            <div class="col-lg-10 col-lg-offset-2">
+            <div class="btn-toolbar pull-right">
                 <button ng-click="cancel()" class="btn btn-default">Cancel</button>
                 <button ng-click="connect()" type="connect" class="btn btn-primary">Connect</button>
             </div>
         </div>
-        {{ elb }}
     </fieldset>
 </div>

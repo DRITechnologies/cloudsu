@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('upgrade_modal', function ($scope, $http, $modalInstance, stack_name, dataStore) {
+    .controller('upgradeStack', function($scope, $http, $uibModalInstance, stack_name, dataStore) {
 
         $scope.alerts_modal = [];
         $scope.advanced = false;
@@ -14,12 +14,12 @@ angular
 
 
         $http.get('/api/v1/ec2/sizes')
-            .success(function (response) {
+            .success(function(response) {
                 $scope.instanceSizes = response;
             });
 
         $http.get('/api/v1/chef/environments/' + stack_name)
-            .success(function (response) {
+            .success(function(response) {
 
                 var defaults = response.default_attributes;
                 if (defaults) {
@@ -35,23 +35,23 @@ angular
 
             });
 
-        $scope.upgrade = function () {
+        $scope.upgrade = function() {
 
             $scope.stack.update_list = [{
                 app_name: $scope.stack.app_name,
                 version: $scope.stack.app_version
-        }];
+            }];
 
             $scope.showSpinner = true;
             $http.patch('/api/v1/upgrade', $scope.stack)
-                .success(function (data) {
+                .success(function(data) {
                     $scope.showSpinner = false;
-                    $modalInstance.dismiss();
+                    $uibModalInstance.dismiss();
                     dataStore.addAlert('success', 'successfully started upgrade');
                 })
-                .error(function (err) {
+                .error(function(err) {
                     $scope.showSpinner = false;
-                    $scope.alerts_modal.push({
+                    $scope.alerts.push({
                         type: 'danger',
                         msg: err
                     });
@@ -59,11 +59,11 @@ angular
         };
 
 
-        $scope.cancel = function () {
-            $modalInstance.dismiss('cancel');
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function (index) {
-            $scope.alerts_modal.splice(index, 1);
+        $scope.close_alert_modal = function(index) {
+            $scope.alerts.splice(index, 1);
         };
     });

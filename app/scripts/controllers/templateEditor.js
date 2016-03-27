@@ -1,13 +1,13 @@
 // model editor view
 angular
     .module('stacks')
-    .controller('stack_editor_modal', function ($scope, $http, $modalInstance, template, stack_name,
+    .controller('templateEditor', function($scope, $http, $uibModalInstance, template, stack_name,
         dataStore) {
         $scope.alerts_modal = [];
         $scope.name = stack_name;
         var templateBody;
 
-        $scope.ready = function () {
+        $scope.ready = function() {
             var editor = ace.edit('editor');
             editor.getSession()
                 .setMode('ace/mode/json');
@@ -20,33 +20,33 @@ angular
                 .setTabSize(4);
             editor.setValue(val, 1);
             editor.setOption('showPrintMargin', false);
-            _session.on('change', function () {
+            _session.on('change', function() {
                 templateBody = _session.getValue();
             });
         };
 
-        $scope.onDeploy = function () {
+        $scope.onDeploy = function() {
             $http.put('/api/v1/stacks/' + stack_name, {
                     'template': templateBody,
                     'stack_name': stack_name
                 })
-                .success(function (data) {
-                    $modalInstance.dismiss();
+                .success(function(data) {
+                    $uibModalInstance.close();
                     dataStore.addAlert('success', 'successfully updated stack');
                 })
-                .error(function (err) {
-                    $scope.alerts_modal.push({
+                .error(function(err) {
+                    $scope.alerts.push({
                         type: 'danger',
                         msg: err
                     });
                 });
         };
 
-        $scope.cancel = function () {
-            $modalInstance.dismiss('cancel');
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function (index) {
-            $scope.alerts_modal.splice(index, 1);
+        $scope.close_alert_modal = function(index) {
+            $scope.alerts.splice(index, 1);
         };
     });

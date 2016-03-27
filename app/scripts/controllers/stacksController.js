@@ -11,7 +11,6 @@ angular
             $http.get('/api/v1/stacks')
                 .success(function(res) {
                     $scope.stacks = res.StackSummaries;
-                    $scope.$parent.stacks = res.StackSummaries;
                 });
         }
 

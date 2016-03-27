@@ -24,18 +24,16 @@
         <div class="col-lg-4" ng-repeat="stack in stacks">
             <div ng-class="panelColor(stack.StackStatus)" ng-click="openStack(stack.StackName)">
                 <div class="panel-heading clearfix">
-                    <span class="verticle-align">
-                       <h3 class="panel-title pull-left" style="padding-top: 7.5px;">
+                    <h3 class="panel-title pull-left" style="padding-top: 7.5px;">
                            <i class="fa fa-server"></i>
                             {{ stack.StackName }}
                        </h3>
-                       <div class="btn-toolbar pull-right">
-                           <a ng-show="!isUpdating(stack.StackStatus)" class="btn btn-default btn-outline btn-circle" ng-click="deleteStack($event, stack.StackName)">
-                               <i class="fa fa-times"></i>
-                           </a>
-                           <i ng-show="isUpdating(stack.StackStatus)" class="fa fa-circle-o-notch fa-spin fa-2x"></i>
-                       </div>
-                   </span>
+                    <div class="btn-toolbar pull-right">
+                        <a ng-show="!isUpdating(stack.StackStatus)" class="btn btn-default btn-outline btn-circle" ng-click="deleteStack($event, stack.StackName)">
+                            <i class="fa fa-times"></i>
+                        </a>
+                        <i ng-show="isUpdating(stack.StackStatus)" class="fa fa-circle-o-notch fa-spin fa-2x"></i>
+                    </div>
                 </div>
                 <div class="panel-body">
                     <table>

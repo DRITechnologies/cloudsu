@@ -11,9 +11,6 @@ angular
         $scope.activeAws = dataStore.getActiveAWS();
         $scope.activeRegion = dataStore.getActiveRegion();
 
-        //stacks array to be assinged in child controller
-        $scope.stacks = [];
-
         //send refesh to child controller
         function childRefresh() {
             $scope.$broadcast('refresh');

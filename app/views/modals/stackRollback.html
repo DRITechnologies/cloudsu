@@ -5,7 +5,8 @@
             <p>Are you sure you want to rollback: {{ stack_name }}</p>
         </div>
         <div ng-show="!rollback_available">
-            <p>Rollback is not available for this stack</p>
+            <p>Rollback is not available for this stack.</p>
+            <small>Make sure to use the tag feature when upgrading to enable this function.</small>
         </div>
         <br>
         <br>
