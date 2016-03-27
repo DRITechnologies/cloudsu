@@ -25,6 +25,7 @@ angular
                 if (defaults) {
                     var chef = defaults.concord_params;
                     $scope.stack.min_size = chef.min_size;
+                    $scope.stack.desired_size = chef.desired_size;
                     $scope.stack.max_size = chef.max_size;
                     $scope.current_version = chef.app_version;
                     $scope.stack.ami = chef.ami;
@@ -46,8 +47,7 @@ angular
             $http.patch('/api/v1/upgrade', $scope.stack)
                 .success(function(data) {
                     $scope.showSpinner = false;
-                    $uibModalInstance.dismiss();
-                    dataStore.addAlert('success', 'successfully started upgrade');
+                    $uibModalInstance.close(true);
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;

@@ -5,6 +5,7 @@
         'ngStorage', //NG Storage
         'angularMoment', //MomentJS
         'underscore', //Underscore
-        'oitozero.ngSweetAlert' //sweet alert
+        'oitozero.ngSweetAlert', //sweet alert
+        'ace' //ace editor
     ]);
 })();

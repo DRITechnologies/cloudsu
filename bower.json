@@ -30,7 +30,8 @@
         "angular-moment": "latest",
         "angular-underscore-module": "latest",
         "angular-ladda": "latest",
-        "angular-sweetalert": "latest"
+        "angular-sweetalert": "latest",
+        "angular-ace": "latest"
     },
     "resolutions": {
         "jquery": "~2.1.4",

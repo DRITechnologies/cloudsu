@@ -3,7 +3,7 @@
         <fieldset>
             <legend> Upgrade Stack</legend>
             <div class="form-group">
-                <label for="input" class="col-lg-2 control-label">Upgrade Type <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="(Simple) Changes version and runs CMS on each instance. (Advanced) Launches new instances and places them behind the ELB once provisioning is complete."></i></label>
+                <label for="input" class="col-lg-2 control-label">Upgrade Type <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="(Simple) Changes version and runs chef client on each instance. (Advanced) Launches new instances and places them behind the ELB once provisioning is complete."></i></label>
                 <select ng-model="stack.upgrade_type" class="form-control" required>
                     <option>Simple</option>
                     <option>Advanced</option>
@@ -26,27 +26,29 @@
                 <input type="text" class="form-control" ng-model="stack.ami">
             </div>
             <div ng-show="stack.upgrade_type === 'Advanced'" class="form-group">
-                <label>Min Size</label>
+                <label>Min Scale Group Size</label>
                 <input type="number" class="form-control" ng-model="stack.min_size">
             </div>
             <div ng-show="stack.upgrade_type === 'Advanced'" class="form-group">
-                <label for="input" class="col-lg-2 control-label">Desired Size</label>
+                <label>Desired Scale Group Size</label>
                 <input type="number" class="form-control" ng-model="stack.desired_size">
             </div>
             <div ng-show="stack.upgrade_type === 'Advanced'" class="form-group">
-                <label>Max Size</label>
+                <label>Max Scale Group Size</label>
                 <input type="number" class="form-control" ng-model="stack.max_size">
             </div>
             <div ng-show="stack.upgrade_type === 'Advanced'" class="form-group">
-                <label>cleanup type <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="(tag) adds a group_terminate_date aws tag to the scale group. This option allows for rollback if needed. (delete) removes the old scale groups as soon as they are disconnected from the ELB."></i></label>
+                <label>Cleanup Type <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="(tag) adds a group_terminate_date aws tag to the scale group. This option allows for rollback if needed. (delete) removes the old scale groups as soon as they are disconnected from the ELB."></i></label>
                 <select ng-model="stack.cleanup_type" class="form-control" required>
                     <option>Tag</option>
                     <option>Delete</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label>Force Upgrade? <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="This option forces upgrade when chef environment is not in a READY state"></i></label>
-                <input type="checkbox" class="form-control" ng-model="stack.force_upgrade">
+            <div class="i-checks form-group">
+                <label>
+                    <i></i>
+                    <input type="checkbox" ng-model="stack.force_upgrade"> Force Upgrade?<i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="This option forces upgrade when chef environment is not in a READY state"></i>
+                </label>
             </div>
             <alerts></alerts>
             <div class="form-group">

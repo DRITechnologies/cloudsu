@@ -323,7 +323,7 @@ angular
                     $scope.template = response;
                     $uibModal.open({
                         animation: true,
-                        templateUrl: 'partials/modals/editor.html',
+                        templateUrl: 'views/modals/editor.html',
                         controller: 'templateEditor',
                         size: 'lg',
                         resolve: {

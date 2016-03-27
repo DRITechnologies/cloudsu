@@ -2,7 +2,7 @@
     <h3 class="modal-title">{{ name }}</h3>
 </div>
 <div class="modal-body">
-    <div ng-init="ready()" id="editor"></div>
+    <div class="ace-editor" ace="myInitCallback" ng-model="editorData"></div>
 </div>
 <alerts></alerts>
 <div class="modal-footer">

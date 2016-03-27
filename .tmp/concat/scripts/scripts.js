@@ -98,7 +98,8 @@ $(function () {
         'ngStorage', //NG Storage
         'angularMoment', //MomentJS
         'underscore', //Underscore
-        'oitozero.ngSweetAlert' //sweet alert
+        'oitozero.ngSweetAlert', //sweet alert
+        'ace' //ace editor
     ]);
 })();
 
@@ -1011,7 +1012,7 @@ angular
                     $scope.template = response;
                     $uibModal.open({
                         animation: true,
-                        templateUrl: 'partials/modals/editor.html',
+                        templateUrl: 'views/modals/editor.html',
                         controller: 'templateEditor',
                         size: 'lg',
                         resolve: {
@@ -1709,6 +1710,7 @@ angular
                 if (defaults) {
                     var chef = defaults.concord_params;
                     $scope.stack.min_size = chef.min_size;
+                    $scope.stack.desired_size = chef.desired_size;
                     $scope.stack.max_size = chef.max_size;
                     $scope.current_version = chef.app_version;
                     $scope.stack.ami = chef.ami;
@@ -1730,8 +1732,7 @@ angular
             $http.patch('/api/v1/upgrade', $scope.stack)
                 .success(function(data) {
                     $scope.showSpinner = false;
-                    $uibModalInstance.dismiss();
-                    dataStore.addAlert('success', 'successfully started upgrade');
+                    $uibModalInstance.close(true);
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
@@ -1757,36 +1758,28 @@ angular
     .module('stacks')
     .controller('templateEditor', function($scope, $http, $uibModalInstance, template, stack_name,
         dataStore) {
-        $scope.alerts_modal = [];
-        $scope.name = stack_name;
-        var templateBody;
 
-        $scope.ready = function() {
-            var editor = ace.edit('editor');
-            editor.getSession()
-                .setMode('ace/mode/json');
-            editor.setTheme('ace/theme/solarized_dark');
-            var _session = editor.getSession();
+        $scope.alerts = [];
+        $scope.name = stack_name;
+
+        $scope.myInitCallback = function(editor) {
             var o = JSON.parse(template);
-            var val = JSON.stringify(o, null, 4);
+            $scope.editorData = JSON.stringify(o, null, 4);
             editor.$blockScrolling = Infinity;
+            editor.session.setMode('ace/mode/json');
+            editor.setOption('showPrintMargin', false);
             editor.getSession()
                 .setTabSize(4);
-            editor.setValue(val, 1);
-            editor.setOption('showPrintMargin', false);
-            _session.on('change', function() {
-                templateBody = _session.getValue();
-            });
+
         };
 
         $scope.onDeploy = function() {
             $http.put('/api/v1/stacks/' + stack_name, {
-                    'template': templateBody,
+                    'template': $scope.editorData,
                     'stack_name': stack_name
                 })
                 .success(function(data) {
                     $uibModalInstance.close();
-                    dataStore.addAlert('success', 'successfully updated stack');
                 })
                 .error(function(err) {
                     $scope.alerts.push({
@@ -1800,7 +1793,7 @@ angular
             $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function(index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
     });
@@ -1929,52 +1922,42 @@ angular
 // model editor view
 angular
     .module('stacks')
-    .controller('env_editor_modal', function ($scope, $http, $modalInstance, environment,
+    .controller('chefEditor', function($scope, $http, $uibModalInstance, environment,
         dataStore) {
-        $scope.alerts_modal = [];
+
+        $scope.alerts = [];
 
         var environmentBody;
         $scope.name = environment.name;
 
-        $scope.ready = function () {
-            var editor = ace.edit('editor');
-            editor.getSession()
-                .setMode('ace/mode/json');
-            editor.setTheme('ace/theme/solarized_dark');
-            var _session = editor.getSession();
-            var o = environment;
-            var val = JSON.stringify(o, null, 4);
+        $scope.myInitCallback = function(editor) {
+            var string = JSON.stringify(environment, null, 4);
+            $scope.editorData = string;
             editor.$blockScrolling = Infinity;
-            editor.getSession()
-                .setTabSize(4);
-            editor.setValue(val, 1);
+            editor.session.setMode('ace/mode/json');
+            editor.getSession().setTabSize(4);
             editor.setOption('showPrintMargin', false);
-            _session.on('change', function () {
-                environmentBody = _session.getValue();
-            });
+
         };
 
-
-
-        $scope.onDeploy = function () {
+        $scope.onDeploy = function() {
             $http.put('/api/v1/chef/environments/update', environmentBody)
-                .success(function (data) {
-                    $modalInstance.dismiss();
-                    dataStore.addAlert('success', 'successfully updated environment');
+                .success(function(data) {
+                    $uibModalInstance.dismiss();
                 })
-                .error(function (err) {
-                    $scope.alerts_modal.push({
+                .error(function(err) {
+                    $scope.alerts.push({
                         type: 'danger',
                         msg: err
                     });
                 });
         };
 
-        $scope.cancel = function () {
-            $modalInstance.dismiss('cancel');
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function (index) {
-            $scope.alerts_modal.splice(index, 1);
+        $scope.closeAlert = function(index) {
+            $scope.alerts.splice(index, 1);
         };
     });
