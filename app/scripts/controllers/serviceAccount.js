@@ -3,9 +3,6 @@ angular
     .controller('serviceAccount', function($scope, $http, $uibModalInstance, dataStore, _, account, type) {
 
         $scope.alerts = [];
-
-        console.log(type);
-
         $scope.account = account || {};
         $scope.account.type = type;
 
@@ -28,7 +25,7 @@ angular
         };
 
         $scope.close_alert_modal = function(index) {
-            $scope.alerts_modal.splice(index, 1);
+            $scope.alerts.splice(index, 1);
         };
 
     });

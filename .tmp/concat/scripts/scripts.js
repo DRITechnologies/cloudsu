@@ -537,14 +537,14 @@ angular
 
 angular
     .module('stacks')
-    .factory('httpResponseInterceptor', function(dataStore, $location) {
+    .factory('httpResponseInterceptor', function($location, $q) {
         return {
             responseError: function(err) {
                 console.log(err);
                 if (err.status === 401) {
-                    $location.path('/login');
+                    return $location.path('/login');
                 }
-                return [];
+                return $q.reject(err);
             }
         };
     });
@@ -571,10 +571,9 @@ angular
         function refresher() {
             // refresh every 10 seconds
             setTimeout(function() {
-                console.log('auto refresh');
                 refresh();
                 refresher();
-            }, 10000);
+            }, 15000);
         }
 
         //catch alerts from parent to refresh
@@ -593,14 +592,11 @@ angular
             modalInstance.result.then(function(selectedItem) {
                 //refresh service accounts
                 refresh();
-            }, function() {
-                console.log('Modal dismissed at: ' + new Date());
             });
         };
 
         //Open stack detail view
         $scope.openStack = function(stack_name) {
-            console.log('clicked open stack', stack_name);
             dataStore.setStack(stack_name);
             $state.go('index.detail', {
                 stack_name: stack_name
@@ -873,7 +869,7 @@ angular
         };
 
         $scope.detachElb = function(scale_group, elb_name) {
-            console.log('scale:', scale_group, 'elb:', elb_name);
+
             SweetAlert.swal({
                     title: '',
                     text: 'Are you sure you want to detach this ELB?',
@@ -931,8 +927,6 @@ angular
                     modalInstance.result.then(function(selectedItem) {
                         //refresh service accounts
                         refresh();
-                    }, function() {
-                        console.log('Modal dismissed at: ' + new Date());
                     });
                 });
         };
@@ -944,7 +938,7 @@ angular
                 animation: true,
                 templateUrl: 'views/modals/upgradeStack.html',
                 controller: 'upgradeStack',
-                size: 'lg',
+                size: 'md',
                 resolve: {
                     stack_name: function() {
                         return $scope.stack_name;
@@ -1058,7 +1052,6 @@ angular
         function refresher() {
             // refresh every 10 seconds
             setTimeout(function() {
-                console.log('auto refresh');
                 refresh();
                 refresher();
             }, 15000);
@@ -1131,11 +1124,6 @@ angular
 
         };
 
-        $scope.closeAlert = function(index) {
-            //remove alert at index
-            $scope.alerts.splice(index, 1);
-        };
-
         $scope.setup = function() {
             //only show setup modal if it has not run before
             $http.get('/api/v1/ping/' + dataStore.getToken())
@@ -1163,21 +1151,25 @@ angular
                 });
         };
 
+        $scope.closeAlert = function(index) {
+            $scope.alerts.splice(index, 1);
+        };
+
 
     });
 
 angular
     .module('stacks')
-    .controller('setup', function ($scope, $http, $state, dataStore) {
+    .controller('setup', function($scope, $http, $state, dataStore) {
         $scope.showSpinner = false;
         $scope.alerts = [];
 
         $http.get('/api/v1/regions')
-            .success(function (regions) {
+            .success(function(regions) {
                 $scope.regions = regions;
             });
 
-        $scope.create = function () {
+        $scope.create = function() {
             $scope.account.aws.type = 'AWS';
             $scope.account.aws.name = 'DEFAULT';
             $scope.account.cms.type = 'CMS';
@@ -1193,18 +1185,16 @@ angular
                 return;
             }
 
-            console.log($scope.account);
-
             $scope.showSpinner = true;
             $http.post('/api/v1/setup/' + $scope.account.aws.name, $scope.account)
-                .success(function (response) {
+                .success(function(response) {
                     $scope.showSpinner = false;
                     dataStore.setToken(response.token);
                     dataStore.setActiveAWS($scope.account.aws.name);
                     dataStore.setActiveRegion($scope.account.aws.region);
                     $state.go('/login');
                 })
-                .error(function (err) {
+                .error(function(err) {
                     $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
@@ -1213,7 +1203,7 @@ angular
                 });
         };
 
-        $scope.close_alert = function (index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
 
@@ -1319,7 +1309,7 @@ angular
             $http.post(url, $scope.stack)
                 .success(function(res) {
                     $scope.showSpinner = false;
-                    $uibModalInstance.close('created new stack');
+                    $uibModalInstance.close(true);
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
@@ -1406,8 +1396,6 @@ angular
             modalInstance.result.then(function() {
                 //refresh user to show new
                 refresh();
-            }, function() {
-                console.log('Modal dismissed at: ' + new Date());
             });
         };
 
@@ -1455,16 +1443,14 @@ angular
                 });
         };
 
-
-
-
         //load initial
         refresh();
+
     });
 
 angular
     .module('stacks')
-    .controller('createUser', function ($scope, $http, $state, $uibModalInstance, dataStore, _) {
+    .controller('createUser', function($scope, $http, $state, $uibModalInstance, dataStore, _) {
 
         // setup defaults
         $scope.alerts = [];
@@ -1474,7 +1460,7 @@ angular
         $scope.user.email_pass = false;
         $scope.showSpinner = false;
 
-        $scope.create = function () {
+        $scope.create = function() {
 
             //ensure password match
             if ($scope.user.password !== $scope.user.confirm &&
@@ -1485,7 +1471,7 @@ angular
                     msg: 'Passwords do not match'
                 });
                 // ensure password is at least 8 characters
-            } else if ($scope.user.user_type === 'Service') {
+            } else if ($scope.user.user_type === 'Service' || ($scope.user.email_pass && $scope.user.user_type === 'User')) {
                 //stub so password length is not hit when it is not used
             } else if ($scope.user.password.length < 8 &&
                 $scope.user.user_type === 'User' &&
@@ -1501,16 +1487,15 @@ angular
 
             // send create request
             $http.post('/api/v1/accounts', $scope.user)
-                .success(function (response) {
+                .success(function(response) {
                     $scope.showSpinner = false;
-                    console.log(response);
                     if (response.service_token) {
                         $scope.token = response.service_token;
                     } else {
                         $uibModalInstance.close('success');
                     }
                 })
-                .error(function (err) {
+                .error(function(err) {
                     $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
@@ -1519,12 +1504,12 @@ angular
                 });
         };
 
-        $scope.closeAlert = function (index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
 
 
-        $scope.cancel = function () {
+        $scope.cancel = function() {
             $uibModalInstance.close('success');
         };
 
@@ -1532,21 +1517,12 @@ angular
 
 angular
     .module('stacks')
-    .controller('editUser', function ($scope, $http, $state, $uibModalInstance, dataStore, _, user) {
-        console.log('opened edit user modal');
-
-
-
-    });
-
-angular
-    .module('stacks')
-    .controller('resetPassword', function ($scope, $http, $state, $uibModalInstance) {
+    .controller('resetPassword', function($scope, $http, $state, $uibModalInstance) {
 
         $scope.alerts = [];
 
 
-        $scope.save = function () {
+        $scope.save = function() {
             if ($scope.user.password !== $scope.user.confirm) {
                 return $scope.alerts.push({
                     type: 'danger',
@@ -1560,10 +1536,10 @@ angular
             }
 
             $http.put('/api/v1/accounts/reset', $scope.user)
-                .success(function (response) {
+                .success(function(response) {
                     $uibModalInstance.dismiss('cancel');
                 })
-                .error(function (err) {
+                .error(function(err) {
                     $scope.alerts.push({
                         type: 'danger',
                         msg: err
@@ -1571,12 +1547,11 @@ angular
                 });
         };
 
-        $scope.closeAlert = function (index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
 
-
-        $scope.cancel = function () {
+        $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
         };
 
@@ -1643,10 +1618,8 @@ angular
             });
 
             modalInstance.result.then(function(selectedItem) {
-                //refresh stacks to the new stack just created
+                //refresh stacks to show newly created stack
                 refresh();
-            }, function() {
-                console.log('Modal dismissed at: ' + new Date());
             });
         };
 
@@ -1689,13 +1662,12 @@ angular
     .module('stacks')
     .controller('upgradeStack', function($scope, $http, $uibModalInstance, stack_name, dataStore) {
 
-        $scope.alerts_modal = [];
+        $scope.alerts = [];
         $scope.advanced = false;
         $scope.stack = {};
         $scope.stack.apps = [];
         $scope.stack.type = 'upgrade';
         $scope.stack.stack_name = stack_name;
-        $scope.build_size = dataStore.getBuildSize();
         $scope.showSpinner = false;
         $scope.upgrade_options = true;
 
@@ -1750,7 +1722,7 @@ angular
             $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function(index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
     });
@@ -1798,12 +1770,14 @@ angular
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
+
     });
 
 angular
     .module('stacks')
     .controller('stackRollback', function($scope, $http, $uibModalInstance, stack_name, dataStore) {
-        $scope.alerts_modal = [];
+
+        $scope.alerts = [];
         $scope.stack_name = stack_name;
 
 
@@ -1840,7 +1814,7 @@ angular
             $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function(index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
 
@@ -1853,7 +1827,8 @@ angular
     .module('stacks')
     .controller('groupResize', function($scope, $http, $uibModalInstance, stack_name,
         app_name, version, dataStore) {
-        $scope.alerts_modal = [];
+
+        $scope.alerts = [];
 
         var params = {
             stack_name: stack_name,
@@ -1879,11 +1854,9 @@ angular
             $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function(index) {
-            $scope.alerts_modal.splice(index, 1);
+        $scope.closeAlert = function(index) {
+            $scope.alerts.splice(index, 1);
         };
-
-
 
     });
 
@@ -1915,7 +1888,7 @@ angular
             $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function(index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
 
@@ -1929,7 +1902,6 @@ angular
 
         $scope.alerts = [];
 
-        var environmentBody;
         $scope.name = environment.name;
 
         $scope.myInitCallback = function(editor) {
@@ -1943,7 +1915,7 @@ angular
         };
 
         $scope.onDeploy = function() {
-            $http.put('/api/v1/chef/environments/update', environmentBody)
+            $http.put('/api/v1/chef/environments/update', $scope.editorData)
                 .success(function(data) {
                     $uibModalInstance.dismiss();
                 })

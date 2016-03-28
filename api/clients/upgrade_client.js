@@ -10,13 +10,14 @@ const stacks_client = require('./stacks_client.js');
 const template_client = require('./template_client.js');
 const autoscale_client = require('./autoscale_client.js');
 const elb_client = require('./elb_client.js');
+const logger = require('../../utls/logger.js');
 
 const utls = require('../../utls/utilities.js');
 
 class UpgradeClient {
-    constructor () {}
+    constructor() {}
 
-    init (params) {
+    init(params) {
 
         chef_client.init(params.cms);
         stacks_client.init(params.aws_account);
@@ -25,16 +26,18 @@ class UpgradeClient {
 
     }
 
-    run (params) {
+    run(params) {
         //determine upgrade type
         if (params.upgrade_type === 'Simple') {
+            logger.info('simple upgrade initiated');
             return this.simpleUpgrade(params);
         }
+        logger.info('advanced upgrade initiated');
         return this.advancedUpgrade(params);
 
     }
 
-    rollback (params) {
+    rollback(params) {
 
         let env;
         const self = this;
@@ -42,11 +45,9 @@ class UpgradeClient {
         return chef_client.getEnvironment(params.stack_name)
             .then(environment => {
                 env = environment;
-                let update_list = env.default_attributes.concord_params.update_list;
-                let last_update_list = env.default_attributes.concord_params.last_update_list;
-                params.last_update_list = update_list;
-                params.update_list = last_update_list;
-                env.default_attributes.concord_params.update_list = last_update_list;
+                params.update_list = env.default_attributes.concord_params.update_list;
+                params.last_update_list = env.default_attributes.concord_params.last_update_list;
+                env.default_attributes.concord_params.update_list = params.last_update_list;
                 env.default_attributes.rollback_available = false;
                 return self.connectELB(params);
             })
@@ -55,7 +56,7 @@ class UpgradeClient {
             });
     }
 
-    simpleUpgrade (params) {
+    simpleUpgrade(params) {
 
         const self = this;
         let env;
@@ -66,15 +67,32 @@ class UpgradeClient {
                 return self.updateEnvVersion(env, params);
             })
             .then(() => {
-                return self.upgradedFinished(env);
+                return self.updateVersionTags(params);
+            })
+            .then(() => {
+                return self.upgradeFinished(env, params);
             });
 
     }
 
-    advancedUpgrade (params) {
+    advancedUpgrade(params) {
 
         const self = this;
         let env;
+
+        function verifyStack() {
+            return stacks_client.waitForStack(params.stack_name, 20, 500)
+                .then(() => {
+                    console.log('updatelist', params.update_list, 'lastupdatelist', params.last_update_list);
+                    return self.connectELBs(params);
+                })
+                .then(() => {
+                    return self.cleanup(params);
+                })
+                .then(() => {
+                    return self.upgradeFinished(env, params);
+                });
+        }
 
         return this.checkEnv(params)
             .then(environment => {
@@ -82,29 +100,26 @@ class UpgradeClient {
                 return self.upgradeStartSetup(env, params);
             })
             .then(() => {
+                console.log('lastupdatelist', params.last_update_list);
                 return self.lockNodes(env, params);
             })
             .then(() => {
+                console.log('lastupdatelist', params.last_update_list);
                 return self.updateEnvVersion(env, params);
             })
             .then(() => {
+                console.log('lastupdatelist', params.last_update_list);
                 return self.launchServers(env, params);
             })
             .then(() => {
-                return stacks_client.waitForStack(params.stack_name, 20, 500);
-            })
-            .then(() => {
-                return self.connectELBs(params);
-            })
-            .then(() => {
-                return self.cleanup(params);
-            })
-            .then(() => {
-                return self.upgradedFinished(env, params);
+                console.log('lastupdatelist', params.last_update_list);
+                verifyStack();
+                return 'sucessfully started upgrade';
             });
+
     }
 
-    checkEnv (params) {
+    checkEnv(params) {
 
         let environment;
 
@@ -140,7 +155,8 @@ class UpgradeClient {
 
     }
 
-    upgradeStartSetup (environment, params) {
+    upgradeStartSetup(environment, params) {
+
         const options = _.omit(_.clone(params), ['aws', 'cms', 'aws_account']);
 
         let concord_params = _.clone(environment.default_attributes.concord_params);
@@ -152,8 +168,7 @@ class UpgradeClient {
         return chef_client.updateEnvironment(environment);
     }
 
-    lockNodes (environment, params) {
-
+    lockNodes(environment, params) {
         let concord_params = environment.default_attributes.concord_params;
 
         return chef_client.getEnvironmentNodes(params.stack_name)
@@ -172,10 +187,10 @@ class UpgradeClient {
             });
     }
 
-    launchServers (environment, params) {
+    launchServers(environment, params) {
 
         const concord_params = environment.default_attributes.concord_params;
-        const launch_params = _.extend(params, concord_params);
+        const launch_params = _.extend(_.clone(params), concord_params);
 
         return stacks_client.getTemplate(params.stack_name)
             .then(template => {
@@ -187,7 +202,7 @@ class UpgradeClient {
 
     }
 
-    cleanup (params) {
+    cleanup(params) {
 
         if (params.cleanup_type === 'Delete') {
             return this.removeOldServers(params);
@@ -195,7 +210,7 @@ class UpgradeClient {
         return this.tagOldServers(params);
     }
 
-    removeOldServers (params) {
+    removeOldServers(params) {
 
         return stacks_client.getTemplate(params.stack_name)
             .then(template_body => {
@@ -220,7 +235,7 @@ class UpgradeClient {
             });
     }
 
-    tagOldServers (params) {
+    tagOldServers(params) {
 
         const terminate_date = params.tag_date || moment().add(24, 'hours').format('YYYYMMDDHHmm');
 
@@ -239,7 +254,7 @@ class UpgradeClient {
             });
     }
 
-    connectELBs (params) {
+    connectELBs(params) {
 
         return elb_client.connectElbs(params)
             .delay(15000)
@@ -249,23 +264,35 @@ class UpgradeClient {
 
     }
 
-    upgradedFinished (environment, params) {
+    upgradeFinished(environment, params) {
+
         if (params.cleanup_type === 'Tag') {
             environment.default_attributes.rollback_available = true;
         }
+
         environment.default_attributes.concord_params.last_update_list = params.last_update_list;
         environment.default_attributes.concord_params.upgrade_time = Math.round(+new Date() / 1000);
         environment.default_attributes.status = 'READY';
         return chef_client.updateEnvironment(environment);
     }
 
-    updateEnvVersion (environment, params) {
+    updateEnvVersion(environment, params) {
 
         environment.default_attributes.concord_params.app_version = params.app_version;
         environment.default_attributes.concord_params.last_upgrade_type = params.build_type;
 
         return chef_client.updateEnvironment(environment);
 
+    }
+
+    updateVersionTags(params) {
+        return stacks_client.stack(params.stack_name)
+            .then(stack => {
+                const as_group = _.find(stack.StackResources, x => {
+                    return x.ResourceType === 'AWS::AutoScaling::AutoScalingGroup';
+                });
+                return autoscale_client.addTags(as_group, 'version', params.app_version);
+            });
     }
 }
 

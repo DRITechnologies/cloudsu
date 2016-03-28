@@ -1,15 +1,15 @@
 angular
     .module('stacks')
-    .controller('setup', function ($scope, $http, $state, dataStore) {
+    .controller('setup', function($scope, $http, $state, dataStore) {
         $scope.showSpinner = false;
         $scope.alerts = [];
 
         $http.get('/api/v1/regions')
-            .success(function (regions) {
+            .success(function(regions) {
                 $scope.regions = regions;
             });
 
-        $scope.create = function () {
+        $scope.create = function() {
             $scope.account.aws.type = 'AWS';
             $scope.account.aws.name = 'DEFAULT';
             $scope.account.cms.type = 'CMS';
@@ -25,18 +25,16 @@ angular
                 return;
             }
 
-            console.log($scope.account);
-
             $scope.showSpinner = true;
             $http.post('/api/v1/setup/' + $scope.account.aws.name, $scope.account)
-                .success(function (response) {
+                .success(function(response) {
                     $scope.showSpinner = false;
                     dataStore.setToken(response.token);
                     dataStore.setActiveAWS($scope.account.aws.name);
                     dataStore.setActiveRegion($scope.account.aws.region);
                     $state.go('/login');
                 })
-                .error(function (err) {
+                .error(function(err) {
                     $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
@@ -45,7 +43,7 @@ angular
                 });
         };
 
-        $scope.close_alert = function (index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
 

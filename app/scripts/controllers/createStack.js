@@ -98,7 +98,7 @@ angular
             $http.post(url, $scope.stack)
                 .success(function(res) {
                     $scope.showSpinner = false;
-                    $uibModalInstance.close('created new stack');
+                    $uibModalInstance.close(true);
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;

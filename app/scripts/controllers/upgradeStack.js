@@ -2,13 +2,12 @@ angular
     .module('stacks')
     .controller('upgradeStack', function($scope, $http, $uibModalInstance, stack_name, dataStore) {
 
-        $scope.alerts_modal = [];
+        $scope.alerts = [];
         $scope.advanced = false;
         $scope.stack = {};
         $scope.stack.apps = [];
         $scope.stack.type = 'upgrade';
         $scope.stack.stack_name = stack_name;
-        $scope.build_size = dataStore.getBuildSize();
         $scope.showSpinner = false;
         $scope.upgrade_options = true;
 
@@ -63,7 +62,7 @@ angular
             $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function(index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
     });

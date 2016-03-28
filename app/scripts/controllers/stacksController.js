@@ -13,7 +13,6 @@ angular
         function refresher() {
             // refresh every 10 seconds
             setTimeout(function() {
-                console.log('auto refresh');
                 refresh();
                 refresher();
             }, 15000);
@@ -35,14 +34,11 @@ angular
             modalInstance.result.then(function(selectedItem) {
                 //refresh service accounts
                 refresh();
-            }, function() {
-                console.log('Modal dismissed at: ' + new Date());
             });
         };
 
         //Open stack detail view
         $scope.openStack = function(stack_name) {
-            console.log('clicked open stack', stack_name);
             dataStore.setStack(stack_name);
             $state.go('index.detail', {
                 stack_name: stack_name

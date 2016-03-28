@@ -28,8 +28,6 @@ angular
             modalInstance.result.then(function() {
                 //refresh user to show new
                 refresh();
-            }, function() {
-                console.log('Modal dismissed at: ' + new Date());
             });
         };
 
@@ -77,9 +75,7 @@ angular
                 });
         };
 
-
-
-
         //load initial
         refresh();
+
     });

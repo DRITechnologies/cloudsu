@@ -39,10 +39,13 @@ class ElbClient {
                     return x.LogicalResourceId === elb_name;
                 });
                 logger.info('Connecting ASG:', as_name, 'to ELB:', elb_name);
-                return self.autoscaling.attachLoadBalancersAsync({
-                    AutoScalingGroupName: as_group.PhysicalResourceId,
-                    LoadBalancerNames: [elb.PhysicalResourceId]
-                });
+                if (elb && as_group) {
+                    return self.autoscaling.attachLoadBalancersAsync({
+                        AutoScalingGroupName: as_group.PhysicalResourceId,
+                        LoadBalancerNames: [elb.PhysicalResourceId]
+                    });
+                }
+                logger.error('Not able to find appropriate data to disconnect elb');
             });
         });
     }
@@ -58,17 +61,22 @@ class ElbClient {
                 const service = utls.remove_non_alpha(_.clone(app));
                 const as_name = ['ASG', service.app_name, service.version].join('');
                 const elb_name = ['ELB', service.app_name].join('');
+
                 const as_group = _.find(stack.StackResources, x => {
                     return x.LogicalResourceId === as_name;
                 });
                 const elb = _.find(stack.StackResources, x => {
                     return x.LogicalResourceId === elb_name;
                 });
+
                 logger.info('Disconnecting ASG:', as_name, 'from ELB:', elb_name);
-                return self.autoscaling.detachLoadBalancersAsync({
-                    AutoScalingGroupName: as_group.PhysicalResourceId,
-                    LoadBalancerNames: [elb.PhysicalResourceId]
-                });
+                if (elb && as_group) {
+                    return self.autoscaling.detachLoadBalancersAsync({
+                        AutoScalingGroupName: as_group.PhysicalResourceId,
+                        LoadBalancerNames: [elb.PhysicalResourceId]
+                    });
+                }
+                logger.error('Not able to find appropriate data to disconnect elb');
             });
         });
     }

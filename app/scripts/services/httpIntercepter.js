@@ -13,14 +13,14 @@ angular
 
 angular
     .module('stacks')
-    .factory('httpResponseInterceptor', function(dataStore, $location) {
+    .factory('httpResponseInterceptor', function($location, $q) {
         return {
             responseError: function(err) {
                 console.log(err);
                 if (err.status === 401) {
-                    $location.path('/login');
+                    return $location.path('/login');
                 }
-                return [];
+                return $q.reject(err);
             }
         };
     });

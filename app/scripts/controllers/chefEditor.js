@@ -6,7 +6,6 @@ angular
 
         $scope.alerts = [];
 
-        var environmentBody;
         $scope.name = environment.name;
 
         $scope.myInitCallback = function(editor) {
@@ -20,7 +19,7 @@ angular
         };
 
         $scope.onDeploy = function() {
-            $http.put('/api/v1/chef/environments/update', environmentBody)
+            $http.put('/api/v1/chef/environments/update', $scope.editorData)
                 .success(function(data) {
                     $uibModalInstance.dismiss();
                 })

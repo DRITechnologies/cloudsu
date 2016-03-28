@@ -6,9 +6,9 @@ const Promise = require('bluebird');
 
 
 class AutoscaleClient {
-    constructor () {}
+    constructor() {}
 
-    init (account) {
+    init(account) {
 
         this.autoscaling = Promise.promisifyAll(new AWS.AutoScaling(
             account
@@ -16,20 +16,21 @@ class AutoscaleClient {
 
     }
 
-    describeAutoScalingGroups (groups) {
+    describeAutoScalingGroups(groups) {
 
         return this.autoscaling.describeAutoScalingGroupsAsync({
             AutoScalingGroupNames: groups
         });
     }
 
-    addTags (as_group, terminate_date) {
+    addTags(as_group, key, value) {
+        // addTags(autoscale group name, key, value)
 
         return this.autoscaling.createOrUpdateTagsAsync({
             Tags: [{
                 ResourceId: as_group.PhysicalResourceId,
-                Key: 'terminate_date',
-                Value: terminate_date,
+                Key: key,
+                Value: value,
                 PropagateAtLaunch: true,
                 ResourceType: 'auto-scaling-group'
             }]

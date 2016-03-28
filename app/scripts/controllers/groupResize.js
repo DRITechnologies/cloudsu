@@ -2,7 +2,8 @@ angular
     .module('stacks')
     .controller('groupResize', function($scope, $http, $uibModalInstance, stack_name,
         app_name, version, dataStore) {
-        $scope.alerts_modal = [];
+
+        $scope.alerts = [];
 
         var params = {
             stack_name: stack_name,
@@ -28,10 +29,8 @@ angular
             $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function(index) {
-            $scope.alerts_modal.splice(index, 1);
+        $scope.closeAlert = function(index) {
+            $scope.alerts.splice(index, 1);
         };
-
-
 
     });

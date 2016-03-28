@@ -97,7 +97,15 @@ class Config {
         let secret = crypto_client.encrypt_string(params[key]);
         params[key] = secret;
 
-        return db.insert(params);
+        return db.find({
+            hash: params.type,
+            range: params.name
+        }).then(response => {
+            if (!response) {
+                return db.insert(params);
+            }
+            throw new Error(`Service account ${params.name} already exists`);
+        });
 
     }
 
@@ -259,7 +267,15 @@ class Config {
 
         logger.info('created user account', params.type, params.name);
 
-        return db.insert(params);
+        return db.find({
+            hash: params.type,
+            range: params.name
+        }).then(response => {
+            if (!response) {
+                return db.insert(params);
+            }
+            throw new Error(`User ${params.name} already exists`);
+        });
     }
 
     deleteUser(name) {

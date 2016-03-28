@@ -188,7 +188,7 @@ angular
         };
 
         $scope.detachElb = function(scale_group, elb_name) {
-            console.log('scale:', scale_group, 'elb:', elb_name);
+
             SweetAlert.swal({
                     title: '',
                     text: 'Are you sure you want to detach this ELB?',
@@ -246,8 +246,6 @@ angular
                     modalInstance.result.then(function(selectedItem) {
                         //refresh service accounts
                         refresh();
-                    }, function() {
-                        console.log('Modal dismissed at: ' + new Date());
                     });
                 });
         };
@@ -259,7 +257,7 @@ angular
                 animation: true,
                 templateUrl: 'views/modals/upgradeStack.html',
                 controller: 'upgradeStack',
-                size: 'lg',
+                size: 'md',
                 resolve: {
                     stack_name: function() {
                         return $scope.stack_name;
@@ -373,7 +371,6 @@ angular
         function refresher() {
             // refresh every 10 seconds
             setTimeout(function() {
-                console.log('auto refresh');
                 refresh();
                 refresher();
             }, 15000);

@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('createUser', function ($scope, $http, $state, $uibModalInstance, dataStore, _) {
+    .controller('createUser', function($scope, $http, $state, $uibModalInstance, dataStore, _) {
 
         // setup defaults
         $scope.alerts = [];
@@ -10,7 +10,7 @@ angular
         $scope.user.email_pass = false;
         $scope.showSpinner = false;
 
-        $scope.create = function () {
+        $scope.create = function() {
 
             //ensure password match
             if ($scope.user.password !== $scope.user.confirm &&
@@ -21,7 +21,7 @@ angular
                     msg: 'Passwords do not match'
                 });
                 // ensure password is at least 8 characters
-            } else if ($scope.user.user_type === 'Service') {
+            } else if ($scope.user.user_type === 'Service' || ($scope.user.email_pass && $scope.user.user_type === 'User')) {
                 //stub so password length is not hit when it is not used
             } else if ($scope.user.password.length < 8 &&
                 $scope.user.user_type === 'User' &&
@@ -37,16 +37,15 @@ angular
 
             // send create request
             $http.post('/api/v1/accounts', $scope.user)
-                .success(function (response) {
+                .success(function(response) {
                     $scope.showSpinner = false;
-                    console.log(response);
                     if (response.service_token) {
                         $scope.token = response.service_token;
                     } else {
                         $uibModalInstance.close('success');
                     }
                 })
-                .error(function (err) {
+                .error(function(err) {
                     $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
@@ -55,12 +54,12 @@ angular
                 });
         };
 
-        $scope.closeAlert = function (index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
 
 
-        $scope.cancel = function () {
+        $scope.cancel = function() {
             $uibModalInstance.close('success');
         };
 

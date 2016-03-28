@@ -41,4 +41,5 @@ angular
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
+
     });

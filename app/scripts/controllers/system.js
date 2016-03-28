@@ -59,10 +59,8 @@ angular
             });
 
             modalInstance.result.then(function(selectedItem) {
-                //refresh stacks to the new stack just created
+                //refresh stacks to show newly created stack
                 refresh();
-            }, function() {
-                console.log('Modal dismissed at: ' + new Date());
             });
         };
 

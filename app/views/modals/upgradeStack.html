@@ -3,7 +3,7 @@
         <fieldset>
             <legend> Upgrade Stack</legend>
             <div class="form-group">
-                <label for="input" class="col-lg-2 control-label">Upgrade Type <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="(Simple) Changes version and runs chef client on each instance. (Advanced) Launches new instances and places them behind the ELB once provisioning is complete."></i></label>
+                <label for="input" class="col-lg-2 control-label">Upgrade Type <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="(Simple) Changes version in chef and waits for chef to run to pick up changes. (Advanced) Launches a new scale group and places it behind the ELB once provisioning is complete."></i></label>
                 <select ng-model="stack.upgrade_type" class="form-control" required>
                     <option>Simple</option>
                     <option>Advanced</option>
@@ -47,7 +47,7 @@
             <div class="i-checks form-group">
                 <label>
                     <i></i>
-                    <input type="checkbox" ng-model="stack.force_upgrade"> Force Upgrade?<i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="This option forces upgrade when chef environment is not in a READY state"></i>
+                    <input type="checkbox" ng-model="stack.force_upgrade"> Force Upgrade? <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="This option forces upgrade when chef environment is not in a READY state"></i>
                 </label>
             </div>
             <alerts></alerts>

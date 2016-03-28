@@ -206,7 +206,7 @@ class StacksClient {
                         return successMsg;
                     } else if (stack.StackStatus === 'UPDATE_IN_PROGRESS' || stack.StackStatus === 'CREATE_IN_PROGRESS') {
                         throw new Error(`Stack is not ready: ${stack.StackStatus}`);
-                    } else {
+                    } else if (stack.StackStatus.includes('ROLLBACK')) {
                         throw new retry.StopError(`Stack in unexexpected state: ${stack.StackStatus}`);
                     }
                 });

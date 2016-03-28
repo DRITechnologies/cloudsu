@@ -58,11 +58,6 @@ angular
 
         };
 
-        $scope.closeAlert = function(index) {
-            //remove alert at index
-            $scope.alerts.splice(index, 1);
-        };
-
         $scope.setup = function() {
             //only show setup modal if it has not run before
             $http.get('/api/v1/ping/' + dataStore.getToken())
@@ -88,6 +83,10 @@ angular
                         });
                     }
                 });
+        };
+
+        $scope.closeAlert = function(index) {
+            $scope.alerts.splice(index, 1);
         };
 
 
