@@ -1,7 +1,6 @@
 /*jshint esversion: 6 */
 'use strict';
 
-const _ = require('underscore');
 const accounts_client = require('../clients/accounts_client.js');
 const logger = require('../../utls/logger.js');
 const err_handler = require('../../utls/error_handler.js');
@@ -47,8 +46,10 @@ class Accounts {
             return;
         }
 
-        const params = _.extend(req.user, req.body);
-        return config.updateUser(params)
+        //not sure why this was set so commenting for now
+        //const params = _.extend(req.user, req.body);
+
+        return config.updateUser(req.body)
             .then(user => {
                 res.status(200)
                     .json(user);
@@ -95,8 +96,6 @@ class Accounts {
                 .json(req.user.name + ' is not in the admin group');
             return;
         }
-
-        console.log('in accounts', name);
 
         return accounts_client.delete(name)
             .then(response => {

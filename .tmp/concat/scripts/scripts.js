@@ -540,7 +540,7 @@ angular
     .factory('httpResponseInterceptor', function($location, $q) {
         return {
             responseError: function(err) {
-                console.log(err);
+
                 if (err.status === 401) {
                     return $location.path('/login');
                 }
@@ -558,7 +558,7 @@ angular
 
 angular
     .module('stacks')
-    .controller('stacksController', function($rootScope, $scope, $http, $state, $uibModal, SweetAlert, dataStore) {
+    .controller('stacksController', function($rootScope, $interval, $scope, $http, $state, $uibModal, SweetAlert, dataStore) {
 
         //Get stacks from AWS
         function refresh() {
@@ -566,14 +566,6 @@ angular
                 .success(function(res) {
                     $scope.stacks = res.StackSummaries;
                 });
-        }
-
-        function refresher() {
-            // refresh every 10 seconds
-            setTimeout(function() {
-                refresh();
-                refresher();
-            }, 15000);
         }
 
         //catch alerts from parent to refresh
@@ -672,6 +664,22 @@ angular
             }
         };
 
+        // created outside function so it can be removed
+        var intervalPromise;
+
+        function refresher() {
+            // refresh every 10 seconds
+            intervalPromise = $interval(function() {
+                refresh();
+            }, 15000);
+        }
+
+        //stop refresher when the screen is changed
+        $scope.$on('$destroy', function() {
+            console.log('Trying to remove interval');
+            $interval.cancel(intervalPromise);
+        });
+
         //get initial data
         refresh();
         //start refresher
@@ -681,7 +689,7 @@ angular
 
 angular
     .module('stacks')
-    .controller('stackController', function($scope, $q, $stateParams, $http, $uibModal, SweetAlert, $location, dataStore, _) {
+    .controller('stackController', function($scope, $q, $interval, $stateParams, $http, $uibModal, SweetAlert, dataStore, _) {
 
         $scope.stack_name = $stateParams.stack_name;
 
@@ -834,38 +842,6 @@ angular
                 //refresh service accounts
                 refresh();
             });
-        };
-
-        $scope.isHappy = function(status) {
-            if (status === 'Healthy') {
-                return 'fa fa-smile-o';
-            }
-            return 'fa fa-frown-o';
-        };
-
-        $scope.inService = function(status) {
-            switch (status) {
-                case 'InService':
-                    return 'fa  fa-thumbs-up';
-                default:
-                    return 'fa fa-circle-o-notch fa-spin';
-            }
-        };
-
-        $scope.logColor = function(status) {
-            if (status.includes('FAILED')) {
-                return 'danger';
-            }
-        };
-
-        $scope.rowColor = function(health, state) {
-            if (health === 'Healthy' && state === 'InService') {
-                return;
-            } else if (health === 'Unhealthy') {
-                return 'danger';
-            } else {
-                return 'warning';
-            }
         };
 
         $scope.detachElb = function(scale_group, elb_name) {
@@ -1043,19 +1019,59 @@ angular
         };
 
         $scope.stack_status_fa_label = function(status) {
-            if (status && status.includes('COMPLETE')) {
-                return 'fa fa-check-circle';
+
+            if (status && status.includes('PROGRESS')) {
+                return 'fa fa-circle-o-notch fa-spin';
+            }
+            return 'fa fa-check-circle';
+
+        };
+
+        $scope.isHappy = function(status) {
+            if (status === 'Healthy') {
+                return 'fa fa-smile-o';
+            }
+            return 'fa fa-frown-o';
+        };
+
+        $scope.inService = function(status) {
+            if (status === 'InService') {
+                return 'fa  fa-thumbs-up';
             }
             return 'fa fa-circle-o-notch fa-spin';
+
         };
+
+        $scope.logColor = function(status) {
+            if (status.includes('FAILED')) {
+                return 'danger';
+            }
+        };
+
+        $scope.rowColor = function(health, state) {
+            if (health === 'Healthy' && state === 'InService') {
+                return;
+            } else if (health === 'Unhealthy') {
+                return 'danger';
+            } else {
+                return 'warning';
+            }
+        };
+
+        var intervalPromise;
 
         function refresher() {
             // refresh every 10 seconds
-            setTimeout(function() {
+            intervalPromise = $interval(function() {
                 refresh();
-                refresher();
             }, 15000);
         }
+
+        //stop refresher when the screen is changed
+        $scope.$on('$destroy', function() {
+            console.log('Trying to remove interval');
+            $interval.cancel(intervalPromise);
+        });
 
         //get initial data
         refresh();
@@ -1303,6 +1319,10 @@ angular
             //pluck just the sg id
             $scope.stack.elb_security_groups = _.pluck($scope.elb_sgs, 'GroupId');
             $scope.stack.security_groups = _.pluck($scope.sgs, 'GroupId');
+
+            if ($scope.stack.create_elb) {
+                $scope.stack = _.omit($scope.stack, ['elb', 'elb_security_groups']);
+            }
 
             var url = ['/api/v1/stacks', $scope.stack.stack_name].join('/');
             // create new stack
@@ -1655,6 +1675,38 @@ angular
         // load initial data
         refresh();
 
+
+    });
+
+angular
+    .module('stacks')
+    .controller('serviceAccount', function($scope, $http, $uibModalInstance, dataStore, _, account, type) {
+
+        $scope.alerts = [];
+        $scope.account = account || {};
+        $scope.account.type = type;
+
+        $scope.saveServiceAccount = function() {
+
+            $http.post('/api/v1/services/save_account', $scope.account)
+                .success(function(res) {
+                    $uibModalInstance.close(true);
+                })
+                .error(function(err) {
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
+                });
+        };
+
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.close_alert_modal = function(index) {
+            $scope.alerts.splice(index, 1);
+        };
 
     });
 

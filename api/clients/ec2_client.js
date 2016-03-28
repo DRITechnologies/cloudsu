@@ -56,7 +56,6 @@ class Ec2Client {
                 Owners: ['self', 'amazon']
             })
             .then(response => {
-                console.log(response);
                 return response.Images;
             });
     }

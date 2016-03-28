@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('stacksController', function($rootScope, $scope, $http, $state, $uibModal, SweetAlert, dataStore) {
+    .controller('stacksController', function($rootScope, $interval, $scope, $http, $state, $uibModal, SweetAlert, dataStore) {
 
         //Get stacks from AWS
         function refresh() {
@@ -8,14 +8,6 @@ angular
                 .success(function(res) {
                     $scope.stacks = res.StackSummaries;
                 });
-        }
-
-        function refresher() {
-            // refresh every 10 seconds
-            setTimeout(function() {
-                refresh();
-                refresher();
-            }, 15000);
         }
 
         //catch alerts from parent to refresh
@@ -113,6 +105,22 @@ angular
                 return false;
             }
         };
+
+        // created outside function so it can be removed
+        var intervalPromise;
+
+        function refresher() {
+            // refresh every 10 seconds
+            intervalPromise = $interval(function() {
+                refresh();
+            }, 15000);
+        }
+
+        //stop refresher when the screen is changed
+        $scope.$on('$destroy', function() {
+            console.log('Trying to remove interval');
+            $interval.cancel(intervalPromise);
+        });
 
         //get initial data
         refresh();

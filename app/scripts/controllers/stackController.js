@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('stackController', function($scope, $q, $stateParams, $http, $uibModal, SweetAlert, $location, dataStore, _) {
+    .controller('stackController', function($scope, $q, $interval, $stateParams, $http, $uibModal, SweetAlert, dataStore, _) {
 
         $scope.stack_name = $stateParams.stack_name;
 
@@ -153,38 +153,6 @@ angular
                 //refresh service accounts
                 refresh();
             });
-        };
-
-        $scope.isHappy = function(status) {
-            if (status === 'Healthy') {
-                return 'fa fa-smile-o';
-            }
-            return 'fa fa-frown-o';
-        };
-
-        $scope.inService = function(status) {
-            switch (status) {
-                case 'InService':
-                    return 'fa  fa-thumbs-up';
-                default:
-                    return 'fa fa-circle-o-notch fa-spin';
-            }
-        };
-
-        $scope.logColor = function(status) {
-            if (status.includes('FAILED')) {
-                return 'danger';
-            }
-        };
-
-        $scope.rowColor = function(health, state) {
-            if (health === 'Healthy' && state === 'InService') {
-                return;
-            } else if (health === 'Unhealthy') {
-                return 'danger';
-            } else {
-                return 'warning';
-            }
         };
 
         $scope.detachElb = function(scale_group, elb_name) {
@@ -362,19 +330,59 @@ angular
         };
 
         $scope.stack_status_fa_label = function(status) {
-            if (status && status.includes('COMPLETE')) {
-                return 'fa fa-check-circle';
+
+            if (status && status.includes('PROGRESS')) {
+                return 'fa fa-circle-o-notch fa-spin';
+            }
+            return 'fa fa-check-circle';
+
+        };
+
+        $scope.isHappy = function(status) {
+            if (status === 'Healthy') {
+                return 'fa fa-smile-o';
+            }
+            return 'fa fa-frown-o';
+        };
+
+        $scope.inService = function(status) {
+            if (status === 'InService') {
+                return 'fa  fa-thumbs-up';
             }
             return 'fa fa-circle-o-notch fa-spin';
+
         };
+
+        $scope.logColor = function(status) {
+            if (status.includes('FAILED')) {
+                return 'danger';
+            }
+        };
+
+        $scope.rowColor = function(health, state) {
+            if (health === 'Healthy' && state === 'InService') {
+                return;
+            } else if (health === 'Unhealthy') {
+                return 'danger';
+            } else {
+                return 'warning';
+            }
+        };
+
+        var intervalPromise;
 
         function refresher() {
             // refresh every 10 seconds
-            setTimeout(function() {
+            intervalPromise = $interval(function() {
                 refresh();
-                refresher();
             }, 15000);
         }
+
+        //stop refresher when the screen is changed
+        $scope.$on('$destroy', function() {
+            console.log('Trying to remove interval');
+            $interval.cancel(intervalPromise);
+        });
 
         //get initial data
         refresh();

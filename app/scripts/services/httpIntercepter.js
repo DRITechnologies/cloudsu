@@ -16,7 +16,7 @@ angular
     .factory('httpResponseInterceptor', function($location, $q) {
         return {
             responseError: function(err) {
-                console.log(err);
+
                 if (err.status === 401) {
                     return $location.path('/login');
                 }

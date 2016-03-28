@@ -83,8 +83,9 @@ class UpgradeClient {
         function verifyStack() {
             return stacks_client.waitForStack(params.stack_name, 20, 500)
                 .then(() => {
-                    console.log('updatelist', params.update_list, 'lastupdatelist', params.last_update_list);
-                    return self.connectELBs(params);
+                    if (params.elb) {
+                        return self.connectELBs(params);
+                    }
                 })
                 .then(() => {
                     return self.cleanup(params);
@@ -100,19 +101,15 @@ class UpgradeClient {
                 return self.upgradeStartSetup(env, params);
             })
             .then(() => {
-                console.log('lastupdatelist', params.last_update_list);
                 return self.lockNodes(env, params);
             })
             .then(() => {
-                console.log('lastupdatelist', params.last_update_list);
                 return self.updateEnvVersion(env, params);
             })
             .then(() => {
-                console.log('lastupdatelist', params.last_update_list);
                 return self.launchServers(env, params);
             })
             .then(() => {
-                console.log('lastupdatelist', params.last_update_list);
                 verifyStack();
                 return 'sucessfully started upgrade';
             });

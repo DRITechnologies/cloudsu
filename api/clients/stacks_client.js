@@ -74,7 +74,6 @@ class StacksClient {
 
         //allows api to return while backend verifies
         function verifyStack(params) {
-            console.log('verifying stack completes');
             return self.waitForStack(params.stack_name, 15, 50)
                 .then(result => {
                     if (params.build_size === 'HA') {
@@ -141,8 +140,6 @@ class StacksClient {
     adjustSize(params) {
 
         const self = this;
-
-        console.log('this');
 
         return this.getTemplate(params.stack_name)
             .then(template_body => {

@@ -29,7 +29,7 @@
                 <div class="panel-body" id="stack-info-left">
                     <table class="table">
                         <tr ng-show="chef_status">
-                            <td><strong>Status:&nbsp;</strong></td>
+                            <td><strong>Chef Status:&nbsp;</strong></td>
                             <td>
                                 <span ng-class="status_label(chef_status)"><i ng-class="status_fa_label(chef_status)"></i> {{ chef_status }}</span>
                             </td>
@@ -137,13 +137,6 @@
                         <div class="col-md-4">
                             <table>
                                 <tr>
-                                    <td><strong>Status:</strong></td>
-                                    <td>
-                                        <span ng-show="scaleGroup.LoadBalancerNames.length" class="badge badge-primary"><i class="fa fa-check-circle"></i> CONNECTED</span>
-                                        <span ng-show="!scaleGroup.LoadBalancerNames.length" class="badge badge-danger"><i class="fa fa-times-circle"></i> DISCONNECTED</span>
-                                    </td>
-                                </tr>
-                                <tr>
                                     <td><strong>Min:&nbsp;</strong></td>
                                     <td>{{ scaleGroup.MinSize }}</td>
                                 </tr>
@@ -228,6 +221,49 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-show="instances.length">
+        <div class="panel panel-default" ng-repeat="instance in instances">
+            <div class="panel-heading">
+                <h3> <i class="fa fa-hdd-o"></i> {{ instance.InstanceId }} </h3>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td>
+                                ID
+                            </td>
+                            <td>
+                                IP
+                            </td>
+                            <td>
+                                Launched
+                            </td>
+                            <td>
+                                AMI
+                            </td>
+                            <td>
+                                Node Name
+                            </td>
+                            <td>
+                                Run List
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td> {{ instance.InstanceId }} </td>
+                            <td> {{ instance.PrivateIpAddress }} </td>
+                            <td> <span am-time-ago="instance.LaunchTime"></span> </td>
+                            <td> {{ instance.ImageId }} </td>
+                            <td> {{ instance.node_name }} </td>
+                            <td> {{ instance.run_list }} </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
