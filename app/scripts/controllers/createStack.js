@@ -80,24 +80,27 @@ angular
 
             if ($scope.stack.build_size === 'HA') {
                 $scope.stack.update_list.push(app_obj);
+                //add all az's from region if true
+                if ($scope.stack.multi_az) {
+                    $scope.stack.regions = $scope.regions;
+                } else {
+                    $scope.stack.regions = [$scope.stack.region];
+                }
+            } else {
+                $scope.stack.regions = $scope.stack.region;
             }
 
-            //add all az's from region if true
-            if ($scope.stack.multi_az) {
-                $scope.stack.regions = $scope.regions;
-            } else {
-                $scope.stack.regions = [$scope.stack.regions];
-            }
 
             //pluck just the sg id
             $scope.stack.elb_security_groups = _.pluck($scope.elb_sgs, 'GroupId');
             $scope.stack.security_groups = _.pluck($scope.sgs, 'GroupId');
 
-            if ($scope.stack.create_elb) {
+            if (!$scope.stack.create_elb) {
                 $scope.stack = _.omit($scope.stack, ['elb', 'elb_security_groups']);
             }
 
             var url = ['/api/v1/stacks', $scope.stack.stack_name].join('/');
+
             // create new stack
             $http.post(url, $scope.stack)
                 .success(function(res) {
@@ -111,6 +114,7 @@ angular
                         msg: err
                     });
                 });
+
         };
 
         // close modal instance

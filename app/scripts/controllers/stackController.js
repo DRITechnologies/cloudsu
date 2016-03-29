@@ -41,7 +41,7 @@ angular
         //get ec2 specific data for single
         function getEc2(instances) {
             var instance_ids = _.pluck(instances, 'PhysicalResourceId');
-            $http.get('/api/ec2/' + instance_ids)
+            $http.get('/api/v1/ec2/' + instance_ids)
                 .success(function(data) {
                     $scope.instances = data;
                 });
@@ -380,7 +380,6 @@ angular
 
         //stop refresher when the screen is changed
         $scope.$on('$destroy', function() {
-            console.log('Trying to remove interval');
             $interval.cancel(intervalPromise);
         });
 

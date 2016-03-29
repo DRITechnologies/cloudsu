@@ -118,7 +118,6 @@ angular
 
         //stop refresher when the screen is changed
         $scope.$on('$destroy', function() {
-            console.log('Trying to remove interval');
             $interval.cancel(intervalPromise);
         });
 

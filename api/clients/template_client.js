@@ -10,6 +10,7 @@ const secure = require('../../config/secure_config');
 
 //clients
 const ec2_client = require('./ec2_client.js');
+const chef_client = require('./chef_client.js');
 
 
 // templates
@@ -28,6 +29,7 @@ const CPU_LOW = fs.readFileSync(path.resolve(__dirname, '../../templates/CPU/low
 const SP_DOWN = fs.readFileSync(path.resolve(__dirname, '../../templates/ScalePolicy/ScaleDown.json'), 'utf8');
 const SP_UP = fs.readFileSync(path.resolve(__dirname, '../../templates/ScalePolicy/ScaleUp.json'), 'utf8');
 const BOOTSTRAP = fs.readFileSync(path.resolve(__dirname, '../../templates/Scripts/bootstrap.py'), 'utf8');
+const BOOTSTRAP_HA = fs.readFileSync(path.resolve(__dirname, '../../templates/Scripts/bootstrap_ha.py'), 'utf8');
 
 // utls
 const utls = require('../../utls/utilities.js');
@@ -98,7 +100,7 @@ class ConstructTemplate {
                     vars.dns_type = 'DNSName';
 
                     //add client db creds
-                    let bootstrap = _.template(BOOTSTRAP);
+                    let bootstrap = _.template(BOOTSTRAP_HA);
                     bootstrap = bootstrap(client_db);
 
                     // push asg params into template
@@ -231,10 +233,27 @@ class ConstructTemplate {
     get_single_template(template, params) {
 
         const client_db = secure.get('db_client');
+        chef_client.init(params.cms);
+        const client_body = {
+            'name': `${params.stack_name}-instance`,
+            'admin': false,
+            'create_key': true
+        };
+
         //load templates
         const self = this;
         return this.build_volumes(params)
             .then(volumes => {
+                params.volumes = volumes;
+                return chef_client.createClient(client_body);
+            })
+            .then(client_key => {
+
+                //check if key is empty
+                if (!client_key.private_key) {
+                    throw new Error('client key could not be created ' + client_body.name);
+                }
+
                 let bootstrap = _.template(BOOTSTRAP);
                 let wc = _.template(WC);
                 let userdata = _.template(USER_DATA);
@@ -251,12 +270,10 @@ class ConstructTemplate {
                     template.Resources[`DNS${params.wc_ref}`] = JSON.parse(route_53);
                 }
 
-                params.node_name = params.stack_name;
-
+                params.node_name = `${params.stack_name}-instance`;
                 params.wc_ref = 'instance';
                 params.dns_ref = 'instance';
                 params.wh_name = ['WH', params.wc_ref].join('');
-                params.first_boot = {};
 
                 params.first_boot = {
                     service_proxy: {
@@ -267,15 +284,21 @@ class ConstructTemplate {
 
                 params.first_boot = self.get_first_boot(params.first_boot, params.app_name, params.dns, params.port);
                 ec2 = JSON.parse(ec2(params));
-                ec2.Properties.AvailabilityZone = _.first(params.regions);
-                ec2.Properties.BlockDeviceMappings = volumes;
+                ec2.Properties.AvailabilityZone = params.regions;
+                ec2.Properties.BlockDeviceMappings = params.volumes;
 
                 if (params.iam_profile) {
                     ec2.Properties.IamInstanceProfile = params.iam_profile;
                 }
 
                 //boot strap params
-                bootstrap = bootstrap(client_db);
+                const bootstrap_params = _.extend(client_db, params.cms, {
+                    environment: params.stack_name,
+                    node_name: params.node_name,
+                    private_key: JSON.stringify(client_key.private_key)
+                });
+                bootstrap = bootstrap(bootstrap_params);
+
 
                 // wc
                 wc = wc(params);
@@ -287,7 +310,7 @@ class ConstructTemplate {
 
                 // add metadata
                 metadata = JSON.parse(metadata(params));
-                metadata['AWS::CloudFormation::Init']['chef_register']['files']['/etc/chef/validation.pem'].content = params.cms_validator;
+                metadata['AWS::CloudFormation::Init']['chef_register']['files']['/etc/chef/first-boot.json'].content = params.first_boot;
                 metadata['AWS::CloudFormation::Init']['chef_register']['files']['/tmp/bootstrap.py'].content = String(bootstrap);
                 ec2.Metadata = metadata;
                 template.Resources[params.wc_ref] = ec2;
@@ -297,7 +320,6 @@ class ConstructTemplate {
                 template.Resources[`WC${params.wc_ref}`] = JSON.parse(wc);
 
                 logger.info('addiing stack with resources:', _.keys(template.Resources));
-
                 return JSON.stringify(template);
 
             });

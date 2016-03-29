@@ -1,25 +1,8 @@
 #!/usr/bin/python
-
-import boto3
-import urllib2
-import time
 import os
-
-# setup boto
-instance_id = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
-session = boto3.session.Session(aws_access_key_id='<%= AccessKeyId %>',
-                        aws_secret_access_key='<%= SecretAccessKey %>',
-                        region_name='<%= region %>')
-dynamodb = session.resource("dynamodb")
-table = dynamodb.Table('concord_servers')
-timeout = time.time() + 60*5   # 5 minutes from now
-
-# print instance id for debug purposes
-print 'bootstrapping instance ' + instance_id
 
 # setup chef config files
 def setup_chef(item):
-
     # make sure chef config dir is ready
     chef_config_dir = '/etc/chef'
     if not os.path.exists(chef_config_dir):
@@ -38,15 +21,11 @@ def setup_chef(item):
     target.write('client_key  "/etc/chef/key.pem"\n')
     target.close()
 
-# pull setup info from dynamodb
-while True:
-    if time.time() > timeout:
-        break
-    response = table.get_item(
-    Key={
-     'instance_id': instance_id
-    })
-    if 'Item' in response:
-        setup_chef(response['Item'])
-        break
-    time.sleep(5)
+item = {
+    'environment': '<%= environment %>',
+    'chef_url': '<%= url %>',
+    'node_name': '<%= node_name %>',
+    'key': <%= private_key %>}
+
+#run chef setup
+setup_chef(item)
