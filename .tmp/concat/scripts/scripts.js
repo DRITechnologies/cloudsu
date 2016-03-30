@@ -101,7 +101,8 @@ $(function () {
         'oitozero.ngSweetAlert', //sweet alert
         'ace', //ace editor
         'toastr', //toastr library
-        'ngAnimate' // animate for toastr
+        'ngAnimate', // animate for toastr
+        'angular-ladda' //ladda buttons library
     ]);
 })();
 
@@ -109,12 +110,6 @@ function config($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise('/index/stacks');
 
     $stateProvider
-
-        .state('setup', {
-            url: '/setup',
-            templateUrl: 'views/setup.html',
-            controller: 'setup'
-        })
         .state('login', {
             url: '/login',
             templateUrl: 'views/login.html',
@@ -473,6 +468,15 @@ angular
             positionClass: 'toast-top-right',
             preventDuplicates: false,
             preventOpenDuplicates: false,
+        });
+    });
+
+angular.module('stacks')
+    .config(function(laddaProvider) {
+        laddaProvider.setOption({
+            style: 'expand-left',
+            spinnerSize: 20,
+            spinnerColor: '#ffffff'
         });
     });
 
@@ -1599,6 +1603,7 @@ angular
     .controller('resetPassword', function($scope, $http, $state, $uibModalInstance) {
 
         $scope.alerts = [];
+        $scope.showSpinner = false;
 
 
         $scope.save = function() {
@@ -1614,11 +1619,16 @@ angular
                 });
             }
 
+            //start show spinner
+            $scope.showSpinner = true;
+
             $http.put('/api/v1/accounts/reset', $scope.user)
                 .success(function(response) {
+                    $scope.showSpinner = false;
                     $uibModalInstance.dismiss('cancel');
                 })
                 .error(function(err) {
+                    $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
                         msg: err
@@ -1744,14 +1754,20 @@ angular
         $scope.alerts = [];
         $scope.account = account || {};
         $scope.account.type = type;
+        $scope.showSpinner = false;
 
         $scope.saveServiceAccount = function() {
 
+            //show show spinner
+            $scope.showSpinner = true;
+
             $http.post('/api/v1/services/save_account', $scope.account)
                 .success(function(res) {
+                    $scope.showSpinner = false;
                     $uibModalInstance.close(true);
                 })
                 .error(function(err) {
+                    $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
                         msg: err
@@ -1813,7 +1829,9 @@ angular
                 version: $scope.stack.app_version
             }];
 
+            //show spinner
             $scope.showSpinner = true;
+
             $http.patch('/api/v1/upgrade', $scope.stack)
                 .success(function(data) {
                     $scope.showSpinner = false;
@@ -1846,6 +1864,7 @@ angular
 
         $scope.alerts = [];
         $scope.name = stack_name;
+        $scope.showSpinner = false;
 
         $scope.myInitCallback = function(editor) {
             var o = JSON.parse(template);
@@ -1859,14 +1878,20 @@ angular
         };
 
         $scope.onDeploy = function() {
+
+            //start spinner
+            $scope.showSpinner = true;
+
             $http.put('/api/v1/stacks/' + stack_name, {
                     'template': $scope.editorData,
                     'stack_name': stack_name
                 })
                 .success(function(data) {
+                    $scope.showSpinner = false;
                     $uibModalInstance.close();
                 })
                 .error(function(err) {
+                    $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
                         msg: err
@@ -1890,6 +1915,7 @@ angular
 
         $scope.alerts = [];
         $scope.stack_name = stack_name;
+        $scope.showSpinner = false;
 
 
         $http.get('/api/v1/chef/rollback_check/' + $scope.stack_name)
@@ -1940,6 +1966,7 @@ angular
         app_name, version, dataStore) {
 
         $scope.alerts = [];
+        $scope.showSpinner = false;
 
         var params = {
             stack_name: stack_name,
@@ -1948,12 +1975,15 @@ angular
         };
 
         $scope.adjustSize = function() {
+            $scope.showSpinner = true;
             params = _.extend(params, $scope.adjust);
             $http.patch('/api/v1/adjust_size', params)
                 .success(function(response) {
+                    $scope.showSpinner = false;
                     $uibModalInstance.close(true);
                 })
                 .error(function(err) {
+                    $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
                         msg: err
@@ -1977,17 +2007,21 @@ angular
 
         $scope.alerts = [];
         $scope.elbs = elbs;
+        $scope.showSpinner = false;
 
 
         $scope.connect = function() {
+            $scope.showSpinner = true;
             $http.patch('/api/v1/elb/connect', {
                     scale_group: scale_group,
                     elb: $scope.elb_name
                 })
                 .success(function(data) {
+                    $scope.showSpinner = false;
                     $uibModalInstance.close(true);
                 })
                 .error(function(err) {
+                    $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
                         msg: err
@@ -2012,7 +2046,7 @@ angular
         dataStore) {
 
         $scope.alerts = [];
-
+        $scope.showSpinner = false;
         $scope.name = environment.name;
 
         $scope.myInitCallback = function(editor) {
@@ -2026,11 +2060,14 @@ angular
         };
 
         $scope.onDeploy = function() {
+            $scope.showSpinner = true;
             $http.put('/api/v1/chef/environments/update', $scope.editorData)
                 .success(function(data) {
+                    $scope.showSpinner = false;
                     $uibModalInstance.dismiss();
                 })
                 .error(function(err) {
+                    $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
                         msg: err

@@ -3,6 +3,7 @@ angular
     .controller('resetPassword', function($scope, $http, $state, $uibModalInstance) {
 
         $scope.alerts = [];
+        $scope.showSpinner = false;
 
 
         $scope.save = function() {
@@ -18,11 +19,16 @@ angular
                 });
             }
 
+            //start show spinner
+            $scope.showSpinner = true;
+
             $http.put('/api/v1/accounts/reset', $scope.user)
                 .success(function(response) {
+                    $scope.showSpinner = false;
                     $uibModalInstance.dismiss('cancel');
                 })
                 .error(function(err) {
+                    $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
                         msg: err

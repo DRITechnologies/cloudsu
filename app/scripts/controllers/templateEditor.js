@@ -6,6 +6,7 @@ angular
 
         $scope.alerts = [];
         $scope.name = stack_name;
+        $scope.showSpinner = false;
 
         $scope.myInitCallback = function(editor) {
             var o = JSON.parse(template);
@@ -19,14 +20,20 @@ angular
         };
 
         $scope.onDeploy = function() {
+
+            //start spinner
+            $scope.showSpinner = true;
+
             $http.put('/api/v1/stacks/' + stack_name, {
                     'template': $scope.editorData,
                     'stack_name': stack_name
                 })
                 .success(function(data) {
+                    $scope.showSpinner = false;
                     $uibModalInstance.close();
                 })
                 .error(function(err) {
+                    $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
                         msg: err

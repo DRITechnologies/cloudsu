@@ -2,12 +2,6 @@ function config($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise('/index/stacks');
 
     $stateProvider
-
-        .state('setup', {
-            url: '/setup',
-            templateUrl: 'views/setup.html',
-            controller: 'setup'
-        })
         .state('login', {
             url: '/login',
             templateUrl: 'views/login.html',

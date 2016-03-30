@@ -5,7 +5,7 @@ angular
         dataStore) {
 
         $scope.alerts = [];
-
+        $scope.showSpinner = false;
         $scope.name = environment.name;
 
         $scope.myInitCallback = function(editor) {
@@ -19,11 +19,14 @@ angular
         };
 
         $scope.onDeploy = function() {
+            $scope.showSpinner = true;
             $http.put('/api/v1/chef/environments/update', $scope.editorData)
                 .success(function(data) {
+                    $scope.showSpinner = false;
                     $uibModalInstance.dismiss();
                 })
                 .error(function(err) {
+                    $scope.showSpinner = false;
                     $scope.alerts.push({
                         type: 'danger',
                         msg: err

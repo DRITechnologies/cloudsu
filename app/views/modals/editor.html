@@ -8,6 +8,8 @@
 <div class="modal-footer">
     <div class="btn-toobar pull-right">
         <button class="btn btn-default" ng-click="cancel() ">Cancel</button>
-        <button ng-click="onDeploy()" class="btn btn-primary "><i class="fa fa-arrow-circle-o-up "></i> Deploy Changes</button>
+        <button ladda="showSpinner" class="btn btn-primary" ng-click="onDeploy()">
+            Deploy Changes
+        </button>
     </div>
 </div>

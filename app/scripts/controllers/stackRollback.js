@@ -4,6 +4,7 @@ angular
 
         $scope.alerts = [];
         $scope.stack_name = stack_name;
+        $scope.showSpinner = false;
 
 
         $http.get('/api/v1/chef/rollback_check/' + $scope.stack_name)

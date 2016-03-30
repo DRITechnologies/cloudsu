@@ -19,3 +19,12 @@ angular
             preventOpenDuplicates: false,
         });
     });
+
+angular.module('stacks')
+    .config(function(laddaProvider) {
+        laddaProvider.setOption({
+            style: 'expand-left',
+            spinnerSize: 20,
+            spinnerColor: '#ffffff'
+        });
+    });

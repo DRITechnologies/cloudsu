@@ -8,6 +8,7 @@
         'oitozero.ngSweetAlert', //sweet alert
         'ace', //ace editor
         'toastr', //toastr library
-        'ngAnimate' // animate for toastr
+        'ngAnimate', // animate for toastr
+        'angular-ladda' //ladda buttons library
     ]);
 })();

@@ -17,10 +17,10 @@
                 <div class="form-group">
                     <input type="password" class="form-control" placeholder="Password" ng-model="user.password" required>
                 </div>
-                <button type="submit" ng-click="attemptLogin()" class="btn btn-primary block full-width m-b">
-                    <i ng-show="showSpinner" class="fa fa-circle-o-notch fa-spin"></i> Login
-                </button>
-
+                <a ng-click="attemptLogin()" ladda="showSpinner" data-spinner-size="35" class="btn btn-primary btn-lg block full-width m-b ladda-button">
+                    Login
+                </span>
+                </a>
                 <p class="text-muted text-center">
                     <small>Do not have an account?</small>
                 </p>

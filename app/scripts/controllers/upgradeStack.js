@@ -42,7 +42,9 @@ angular
                 version: $scope.stack.app_version
             }];
 
+            //show spinner
             $scope.showSpinner = true;
+
             $http.patch('/api/v1/upgrade', $scope.stack)
                 .success(function(data) {
                     $scope.showSpinner = false;
