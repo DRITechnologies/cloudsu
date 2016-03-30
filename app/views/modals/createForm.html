@@ -327,13 +327,9 @@
 
                     <!-- button group -->
                     <div class="form-group">
-                        <div class="col-lg-10 col-lg-offset-2">
-                            <div class="btn-toolbar">
-                                <button ladda="showSpinner" class="btn btn-primary" ng-click="createStack()">
-                                    Create Stack
-                                </button>
-                                <button ng-click="cancel()" type="reset" class="ladda-button btn btn-default pull-right">Cancel</button>
-                            </div>
+                        <div class="btn-toolbar pull-right">
+                            <button ng-click="cancel()" type="reset" class="ladda-button btn btn-default">Cancel</button>
+                            <button ladda="showSpinner" class="btn btn-primary" ng-click="createStack()">Create Stack</button>
                         </div>
                     </div>
                     <!-- end of button group -->
