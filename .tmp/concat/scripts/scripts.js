@@ -1779,7 +1779,7 @@ angular
             $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.close_alert_modal = function(index) {
+        $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
 

@@ -97,15 +97,7 @@ class Config {
         let secret = crypto_client.encrypt_string(params[key]);
         params[key] = secret;
 
-        return db.find({
-            hash: params.type,
-            range: params.name
-        }).then(response => {
-            if (!response) {
-                return db.insert(params);
-            }
-            throw new Error(`Service account ${params.name} already exists`);
-        });
+        return db.insert(params);
 
     }
 
