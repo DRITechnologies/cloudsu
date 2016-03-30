@@ -15,6 +15,6 @@ const logger = require('./logger.js');
 
 //setup table connection
 const db = dynasty.table('concord_servers');
-logger.info('setup DynamoDB servers connection:', db_cred.region);
+logger.debug(`setup DynamoDB servers connection: ${db_cred.region}`);
 
 module.exports = db;

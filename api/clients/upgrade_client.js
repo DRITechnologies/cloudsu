@@ -29,10 +29,10 @@ class UpgradeClient {
     run(params) {
         //determine upgrade type
         if (params.upgrade_type === 'Simple') {
-            logger.info('simple upgrade initiated');
+            logger.info('Simple upgrade initiated');
             return this.simpleUpgrade(params);
         }
-        logger.info('advanced upgrade initiated');
+        logger.info('Advanced upgrade initiated');
         return this.advancedUpgrade(params);
 
     }
@@ -111,7 +111,7 @@ class UpgradeClient {
             })
             .then(() => {
                 verifyStack();
-                return 'sucessfully started upgrade';
+                return 'Sucessfully started upgrade';
             });
 
     }
@@ -129,9 +129,9 @@ class UpgradeClient {
                 return stacks_client.stackStatus(params.stack_name);
             })
             .then(status => {
-
+                //return if stack is already in a progress state
                 if (status.includes('PROGRESS')) {
-                    throw new Error('Stack in a PROGRESS state');
+                    throw new Error(`Stack in a PROGRESS state: ${status}`);
                 }
                 return;
             })
@@ -143,7 +143,7 @@ class UpgradeClient {
                     });
 
                     if (old_app.version === app.version) {
-                        throw new Error(`Update version is already live: ${app.version}`);
+                        throw new Error(`Upgrade version is already live: ${app.version}`);
                     }
                 });
 
@@ -186,6 +186,8 @@ class UpgradeClient {
 
     launchServers(environment, params) {
 
+        logger.info(`Launching servers for stack: ${params.stack_name}`);
+
         const concord_params = environment.default_attributes.concord_params;
         const launch_params = _.extend(_.clone(params), concord_params);
 
@@ -201,6 +203,8 @@ class UpgradeClient {
 
     cleanup(params) {
 
+        logger.info(`Running cleanup job: ${params.stack_name}`);
+
         if (params.cleanup_type === 'Delete') {
             return this.removeOldServers(params);
         }
@@ -208,6 +212,8 @@ class UpgradeClient {
     }
 
     removeOldServers(params) {
+
+        logger.info(`Removing old servers: ${params.stack_name}`);
 
         return stacks_client.getTemplate(params.stack_name)
             .then(template_body => {
@@ -236,6 +242,8 @@ class UpgradeClient {
 
         const terminate_date = params.tag_date || moment().add(24, 'hours').format('YYYYMMDDHHmm');
 
+        logger.info(`Tagging old servers with date: ${terminate_date}`);
+
         return stacks_client.stack(params.stack_name)
             .then(stack => {
                 return Promise.map(params.last_update_list, app => {
@@ -253,6 +261,10 @@ class UpgradeClient {
 
     connectELBs(params) {
 
+        logger.info(`Connecting ELB's for stack: ${params.stack_name}`);
+
+        //connect elb and wait 15 sec to disconnect old stack_name
+        //this delay give the elb time to put those new servers inService
         return elb_client.connectElbs(params)
             .delay(15000)
             .then(() => {
@@ -262,6 +274,8 @@ class UpgradeClient {
     }
 
     upgradeFinished(environment, params) {
+
+        logger.info(`Finished upgrade for stack: ${params.stack_name}`);
 
         if (params.cleanup_type === 'Tag') {
             environment.default_attributes.rollback_available = true;
@@ -275,6 +289,8 @@ class UpgradeClient {
 
     updateEnvVersion(environment, params) {
 
+        logger.info(`Updating environment version: ${params.app_version} stack: ${params.stack_name}`);
+
         environment.default_attributes.concord_params.app_version = params.app_version;
         environment.default_attributes.concord_params.last_upgrade_type = params.build_type;
 
@@ -283,6 +299,9 @@ class UpgradeClient {
     }
 
     updateVersionTags(params) {
+
+        logger.info(`Updating tag version ${params.stack_name}`);
+
         return stacks_client.stack(params.stack_name)
             .then(stack => {
                 const as_group = _.find(stack.StackResources, x => {

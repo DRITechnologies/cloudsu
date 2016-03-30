@@ -93,6 +93,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
 
@@ -109,6 +110,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
 
@@ -125,6 +127,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
 
@@ -141,6 +144,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
 
@@ -157,6 +161,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }
@@ -173,6 +178,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }
@@ -188,6 +194,7 @@ class Stacks {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }

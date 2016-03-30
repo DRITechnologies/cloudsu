@@ -225,6 +225,7 @@ class ConstructTemplate {
                     }
 
                 });
+                logger.info(`Addiing stack with resources: ${_.keys(template.Resources)}`);
                 return JSON.stringify(template);
             });
 
@@ -251,7 +252,7 @@ class ConstructTemplate {
 
                 //check if key is empty
                 if (!client_key.private_key) {
-                    throw new Error('client key could not be created ' + client_body.name);
+                    throw new Error(`client key could not be created ${client_body.name}`);
                 }
 
                 let bootstrap = _.template(BOOTSTRAP);
@@ -319,7 +320,7 @@ class ConstructTemplate {
                 template.Resources[params.wh_name] = JSON.parse(WH);
                 template.Resources[`WC${params.wc_ref}`] = JSON.parse(wc);
 
-                logger.info('addiing stack with resources:', _.keys(template.Resources));
+                logger.info(`Addiing stack with resources: ${_.keys(template.Resources)}`);
                 return JSON.stringify(template);
 
             });

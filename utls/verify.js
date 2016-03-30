@@ -35,14 +35,14 @@ class Verify {
 
         return Promise.map(create_stack_keys, key => {
                 if (!_.has(params, key)) {
-                    throw new Error('Missing parameter: ' + key);
+                    throw new Error(`Missing parameter: ${key}`);
                 }
             })
             .then(() => {
                 if (params.elb) {
                     return Promise.map(elb_verify_keys, key => {
                         if (!_.has(params.elb, key)) {
-                            throw new Error('Missing parameter: ' + key);
+                            throw new Error(`Missing parameter: ${key}`);
                         }
                     });
                 }

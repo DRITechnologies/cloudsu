@@ -17,7 +17,7 @@ class Main {
     }
 
     regions(req, res) {
-        const region = [
+        res.status(200).json([
             'us-east-1',
             'us-west-2',
             'us-west-1',
@@ -27,17 +27,12 @@ class Main {
             'ap-northeast-1',
             'ap-southeast-2',
             'ap-northeast-2'
-        ];
-
-        if (region) {
-            res.status(200).json(region);
-        } else {
-            res.status(500).json('not found');
-        }
+        ]);
     }
 
     regionMap(req, res) {
 
+        //get az's in region
         const region = req.headers.aws_region;
 
         return config.get('region_map')
@@ -48,7 +43,7 @@ class Main {
     }
 
     bucketRegions(req, res) {
-        const bucket_region = [
+        res.status(200).json([
             'us-east-1',
             'us-west-1',
             'us-west-2',
@@ -57,10 +52,7 @@ class Main {
             'ap-southeast-2',
             'ap-northeast-1',
             'sa-east-1'
-        ];
-
-        res.status(200).json(bucket_region);
-
+        ]);
     }
 
     listServerCertificates(req, res) {
@@ -74,6 +66,7 @@ class Main {
                 res.status(200).json(certs);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }
@@ -105,6 +98,7 @@ class Main {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err);
             });
     }
@@ -128,6 +122,7 @@ class Main {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }
@@ -151,6 +146,7 @@ class Main {
                 res.status(200).json(_.pluck(response, 'name'));
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err);
             });
     }

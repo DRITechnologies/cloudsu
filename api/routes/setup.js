@@ -260,7 +260,7 @@ class Setup {
             .delay(5000)
             .then(response => {
                 config_db_arn = response.TableDescription.TableArn;
-                logger.info('created DynamoDB', response.TableDescription.TableArn);
+                logger.info(`Created DynamoDB ${response.TableDescription.TableArn}`);
                 db = dynasty.table(config_db_name);
                 return dynasty.create(servers_db_name, {
                     key_schema: {
@@ -274,30 +274,30 @@ class Setup {
             })
             .then(response => {
                 servers_db_arn = response.TableDescription.TableArn;
-                logger.info('created DynamoDB', response.TableDescription.TableArn);
+                logger.info(`Created DynamoDB ${response.TableDescription.TableArn}`);
                 return db.insert(initial_data);
             })
             .then(() => {
-                logger.info('added initial config data to DynamoDB');
+                logger.info('Added initial config data to DynamoDB');
                 let aws_account = _.clone(params.aws);
                 aws_account.secret = crypto_client.encrypt_string(aws_account.secret);
                 return db.insert(aws_account);
             })
             .then(() => {
-                logger.info('added AWS data to DynamoDB');
+                logger.info('Added AWS data to DynamoDB');
                 return setupQueue(params, db);
             })
             .then(() => {
-                logger.info('created SQS queue');
+                logger.info('Created SQS queue');
                 return createServerIam(params, db, config_db_arn, servers_db_arn);
             })
             .then(() => {
 
-                logger.info('created server IAM user');
+                logger.info('Created server IAM user');
                 return createClientIam(params, db, servers_db_arn);
             })
             .then(() => {
-                logger.info('created client IAM user');
+                logger.info('Created client IAM user');
                 return createUser(params, db);
             })
             .then(response => {
@@ -306,7 +306,7 @@ class Setup {
                 return db.insert(chef_account);
             })
             .then(response => {
-                logger.info('added chef account account');
+                logger.info('Added chef account account');
                 res.status(200).json({
                     info: 'Successful setup',
                     token: response

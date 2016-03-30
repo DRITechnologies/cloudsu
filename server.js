@@ -34,7 +34,7 @@ require('./api/router.js')(app)
 
 
 if (cluster.isMaster) {
-  
+
     //init functions that only run on master
     //queue rider (looks for new server messages in sqs)
     require('./utls/queue_rider.js');

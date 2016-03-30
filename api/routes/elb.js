@@ -5,9 +5,9 @@ const logger = require('../../utls/logger.js');
 const err_handler = require('../../utls/error_handler.js');
 
 class Elb {
-    constructor () {}
+    constructor() {}
 
-    connectElbs (req, res) {
+    connectElbs(req, res) {
 
         const aws_account = req.aws_account;
         const elb_client = require('../clients/elb_client.js');
@@ -23,7 +23,7 @@ class Elb {
             });
     }
 
-    disconnectElbs (req, res) {
+    disconnectElbs(req, res) {
 
         const aws_account = req.aws_account;
         const elb_client = require('../clients/elb_client.js');
@@ -40,7 +40,7 @@ class Elb {
 
     }
 
-    connectElb (req, res) {
+    connectElb(req, res) {
 
         const aws_account = req.aws_account;
         const elb_client = require('../clients/elb_client.js');
@@ -51,12 +51,13 @@ class Elb {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
 
     }
 
-    disconnectElb (req, res) {
+    disconnectElb(req, res) {
 
         const aws_account = req.aws_account;
         const elb_client = require('../clients/elb_client.js');
@@ -67,11 +68,12 @@ class Elb {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }
 
-    getAvailableElbs (req, res) {
+    getAvailableElbs(req, res) {
 
         const aws_account = req.aws_account;
         const elb_client = require('../clients/elb_client.js');
@@ -82,12 +84,13 @@ class Elb {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
 
     }
 
-    getElbs (req, res) {
+    getElbs(req, res) {
 
         const aws_account = req.aws_account;
         const elb_client = require('../clients/elb_client.js');

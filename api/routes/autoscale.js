@@ -2,11 +2,12 @@
 'use strict';
 
 const err_handler = require('../../utls/error_handler.js');
+const logger = require('../../utls/logger.js');
 
 class Autoscale {
-    constructor () {}
+    constructor() {}
 
-    adjustSize (req, res) {
+    adjustSize(req, res) {
 
         const params = req.body;
         const aws_account = req.aws_account;
@@ -18,11 +19,12 @@ class Autoscale {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.info(err);
                 res.status(500).json(err_handler(err));
             });
     }
 
-    describeAutoScalingGroups (req, res) {
+    describeAutoScalingGroups(req, res) {
 
         const groups = req.params.groups.split(',');
         const aws_account = req.aws_account;
@@ -34,6 +36,7 @@ class Autoscale {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }

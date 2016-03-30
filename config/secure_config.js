@@ -29,7 +29,7 @@ class SecureConfig {
         if (!value) {
             value = nconf.get(key);
             if (_.isUndefined(value)) {
-                logger.error('key not found:', key);
+                logger.error(`Key not found: ${key}`);
                 return false;
             }
             cache.set(key, value);

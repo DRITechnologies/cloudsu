@@ -27,7 +27,7 @@ class StacksClient {
     }
 
     listStacks() {
-        logger.info('getting list of stacks');
+        logger.info('Getting list of stacks');
         return this.cloudformation.listStacksAsync({
             StackStatusFilter: [
                 'CREATE_IN_PROGRESS',
@@ -57,7 +57,7 @@ class StacksClient {
     }
 
     stackStatus(stack_name) {
-        logger.info('getting stack status:', stack_name);
+        logger.info(`Getting stack status: ${stack_name}`);
         return this.cloudformation.describeStacksAsync({
                 StackName: stack_name
             })
@@ -71,6 +71,7 @@ class StacksClient {
     createStack(params) {
 
         const self = this;
+        logger.info(`Creating stack: ${params.stack_name}`);
 
         //allows api to return while backend verifies
         function verifyStack(params) {
@@ -104,11 +105,12 @@ class StacksClient {
             })
             .then(() => {
                 //create chef environment with params
-                logger.info('creating chef environment');
                 return chef_client.createEnvironment(params);
             })
-            .tap(verifyStack(params))
             .then(() => {
+                //verify stack
+                verifyStack(params);
+
                 //return success message
                 return 'success';
             });
@@ -150,9 +152,6 @@ class StacksClient {
                 template.Resources[`ASG${cf_name}`].Properties.DesiredCapacity = params.desired;
                 template.Resources[`ASG${cf_name}`].Properties.MaxSize = params.max_size;
                 return self.updateStack(JSON.stringify(template), params.stack_name);
-            })
-            .catch(err => {
-                console.error(err);
             });
     }
 
@@ -160,6 +159,8 @@ class StacksClient {
 
         const chef_client = require('./chef_client.js');
         chef_client.init(params.cms);
+
+        logger.info(`Deleting stack: ${params.stack_name}`);
 
         return this.cloudformation.deleteStackAsync({
                 StackName: params.stack_name
@@ -176,6 +177,7 @@ class StacksClient {
     }
 
     waitForStack(stack_name, timeout, max_attempts) {
+        //wait for stack success message
         const self = this;
         let count = 0;
 
@@ -191,7 +193,7 @@ class StacksClient {
                     const stack = _.find(response.Stacks, x => {
                         return x.StackName === stack_name;
                     });
-                    logger.info('Polling for stack success: ', stack_name, stack.StackStatus);
+                    logger.info(`Polling for stack success: ${stack_name} status: ${stack.StackStatus}`);
                     if (!stack && count > 3) {
                         throw new retry.StopError('Stack not found');
                     } else if (count > max_attempts) {
@@ -216,7 +218,6 @@ class StacksClient {
     }
 
     describe(stack_name) {
-
         return this.cloudformation.describeStacksAsync({
                 StackName: stack_name
             })
@@ -226,6 +227,8 @@ class StacksClient {
     }
 
     getTemplate(stack_name) {
+
+        logger.info(`Getting stack template: ${stack_name}`);
 
         return this.cloudformation.getTemplateAsync({
                 StackName: stack_name
@@ -237,7 +240,7 @@ class StacksClient {
 
     updateStack(template, stack_name) {
 
-        logger.info('updating stack:', stack_name);
+        logger.info(`Updating stack: ${stack_name}`);
 
         return this.cloudformation.updateStackAsync({
             StackName: stack_name,
@@ -246,7 +249,6 @@ class StacksClient {
     }
 
     describeEvents(stack_name) {
-
         return this.cloudformation.describeStackEventsAsync({
                 StackName: stack_name
             })

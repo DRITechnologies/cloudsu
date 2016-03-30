@@ -7,15 +7,15 @@ const AWS = require('aws-sdk');
 const logger = require('../../utls/logger.js');
 
 class SqsClient {
-    constructor () {}
+    constructor() {}
 
-    init (account) {
+    init(account) {
         this.sqs = Promise.promisifyAll(new AWS.SQS(account));
     }
 
-    createQueue (QueueName) {
+    createQueue(QueueName) {
 
-        logger.info('Creating new queue', QueueName);
+        logger.info(`Creating new queue: ${QueueName}`);
 
         return this.sqs.createQueueAsync({
                 QueueName: QueueName
@@ -25,15 +25,13 @@ class SqsClient {
             });
     }
 
-    getQueueUrl (QueueName) {
-
+    getQueueUrl(QueueName) {
         return this.sqs.getQueueUrlAsync({
             QueueName: QueueName
         });
     }
 
-    getQueueArn (queue_url) {
-
+    getQueueArn(queue_url) {
         return this.sqs.getQueueAttributesAsync({
                 QueueUrl: queue_url,
                 AttributeNames: ['QueueArn']
@@ -43,7 +41,7 @@ class SqsClient {
             });
     }
 
-    getMessage (queue_url) {
+    getMessage(queue_url) {
         return this.sqs.receiveMessageAsync({
                 QueueUrl: queue_url,
                 WaitTimeSeconds: 20,
@@ -56,7 +54,7 @@ class SqsClient {
             });
     }
 
-    deleteMessage (params) {
+    deleteMessage(params) {
         return this.sqs.deleteMessageAsync(params);
     }
 }

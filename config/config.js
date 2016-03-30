@@ -19,7 +19,7 @@ class Config {
         // save settings to global
         const obj = {};
         obj[key] = value;
-        logger.info('Saving key to database:', key);
+        logger.info(`Saving key to database: ${key}`);
 
         return db.update({
             hash: 'SETTINGS',
@@ -43,7 +43,7 @@ class Config {
                 }
             }
 
-            logger.info('Getting data from db for key:', key);
+            logger.info(`Getting data from db for key: ${key}`);
             // get settings from globals
             return db.find({
                     hash: 'SETTINGS',
@@ -86,7 +86,7 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        logger.info('Saving service account:', params.name);
+        logger.info(`Saving service account: ${params.name}`);
 
         //determine what key to encrypt
         var key = 'key';
@@ -112,7 +112,7 @@ class Config {
                 return resolve(val);
             }
 
-            logger.info('Getting service accounts:', type);
+            logger.info(`Getting service accounts: ${type}`);
 
             return db.findAll(type)
                 .then(response => {
@@ -130,12 +130,12 @@ class Config {
 
             //return value if not undef
             if (val) {
-                logger.debug('using cache for account', params.name);
+                logger.debug(`Using cache for account: ${params.name}`);
                 return resolve(val);
             }
 
             let account;
-            logger.info('Getting service account:', params.type, params.name);
+            logger.info(`Getting service account: ${params.type} ${params.name}`);
 
             return db.find({
                     hash: params.type,
@@ -179,7 +179,7 @@ class Config {
 
         //return value if not undef
         if (val) {
-            logger.debug('using cache for account', query.range);
+            logger.debug(`Using cache for account ${query.range}`);
             return val;
         }
 
@@ -205,7 +205,7 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        logger.info('Deleting service account:', params.type, params.name);
+        logger.info(`Deleting service account: ${params.type} ${params.name}`);
 
         return db.remove({
             hash: params.type,
@@ -241,7 +241,7 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        logger.info('updating user account', params.type, params.name);
+        logger.info(`Updating user account ${params.type} ${params.name}`);
 
         const obj = _.omit(params, ['name', 'type']);
 
@@ -257,7 +257,7 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        logger.info('created user account', params.type, params.name);
+        logger.info(`Created user account ${params.type} ${params.name}`);
 
         return db.find({
             hash: params.type,
@@ -275,7 +275,7 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        logger.info('deleting user account', name);
+        logger.info(`Deleting user account ${name}`);
 
         return db.remove({
             hash: 'USER',

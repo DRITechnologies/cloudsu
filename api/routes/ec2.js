@@ -17,6 +17,7 @@ class Ec2 {
                     .json(size_array);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -35,6 +36,7 @@ class Ec2 {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -52,6 +54,7 @@ class Ec2 {
                     .json(images);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -69,6 +72,7 @@ class Ec2 {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -123,6 +127,7 @@ class Ec2 {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -140,6 +145,7 @@ class Ec2 {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });

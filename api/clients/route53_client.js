@@ -6,12 +6,10 @@ const Promise = require('bluebird');
 
 
 class Route53Client {
-    constructor () {}
+    constructor() {}
 
-    init (account) {
-
+    init(account) {
         this.route53_client = Promise.promisifyAll(new AWS.Route53(account));
-
     }
 }
 

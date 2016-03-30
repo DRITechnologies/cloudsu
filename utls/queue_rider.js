@@ -16,7 +16,7 @@ function shutdown(message) {
     const servers_db = require('./servers_db.js');
     let group_name = message.AutoScalingGroupName.split('-');
     let node_name = [group_name[0], group_name[1], message.EC2InstanceId].join('-');
-    logger.debug('terminating instance:', node_name);
+    logger.info(`Terminating instance: ${node_name}`);
 
     return config_client.getServiceAccount({
             name: 'DEFAULT',
@@ -35,7 +35,6 @@ function startup(message) {
     const servers_db = require('./servers_db.js');
     let group_name = message.AutoScalingGroupName.split('-');
     let node_name = [group_name[0], group_name[1], message.EC2InstanceId].join('-');
-    logger.debug('launching instance', node_name);
 
     var client_body = {
         'name': node_name,
@@ -43,6 +42,8 @@ function startup(message) {
         'create_key': true
     };
     var chef_url;
+
+    logger.debug(`Launching instance: ${node_name}`);
 
 
     return config_client.getServiceAccount({
@@ -105,7 +106,7 @@ function parseMessages(messages, sqs_url) {
                     ReceiptHandle: handle
                 })
                 .then(response => {
-                    logger.debug('unrecognized command', message.Event);
+                    logger.debug(`Unrecognized message event: ${message.Event}`);
                 });
         }
 
@@ -117,10 +118,10 @@ function poll() {
     // needs to be assigned inside the repeating function
     // because of cached db connection info
     const config_client = require('../config/config.js');
-    logger.debug('polling sqs for new messages');
+    logger.debug('Polling sqs for new messages');
 
     if (!fs.existsSync(secrets_path)) {
-        logger.debug('initial setup has not been completed (secrets.json missing)');
+        logger.error('Initial setup has not been completed (secrets.json missing)');
         return;
     }
 
@@ -137,7 +138,7 @@ function poll() {
                 logger.debug(`found ${messages.length} SQS messages`);
                 parseMessages(messages, sqs_url);
             } else {
-                throw 'found 0 SQS messages';
+                throw 'Found 0 SQS messages';
             }
         })
         .catch(err => {

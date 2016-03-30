@@ -2,11 +2,12 @@
 'use strict';
 
 const err_handler = require('../../utls/error_handler.js');
+const logger = require('../../utls/logger.js');
 
 class Sns {
-    constructor () {}
+    constructor() {}
 
-    createTopic (req, res) {
+    createTopic(req, res) {
 
         const aws_account = req.params.aws_account;
         const sns_client = require('../clients/sns_client.js');
@@ -17,11 +18,12 @@ class Sns {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }
 
-    confirmSubscription (req, res) {
+    confirmSubscription(req, res) {
 
         const aws_account = req.aws_account;
         const sns_client = require('../clients/sns_client.js');
@@ -32,11 +34,12 @@ class Sns {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }
 
-    subscribe (req, res) {
+    subscribe(req, res) {
 
         const aws_account = req.aws_account;
         const sns_client = require('../clients/sns_client.js');
@@ -47,6 +50,7 @@ class Sns {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }

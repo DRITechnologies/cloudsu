@@ -23,11 +23,11 @@ class AccountsClient {
                 if (!user) {
                     throw new Error('Incorrect email and password combination');
                 } else if (crypto_client.check_password(user.hash, password)) {
-                    logger.info('Successful login attempt:', name);
+                    logger.info(`Successful login attempt: ${name}`);
                     user.token = token_client.sign(user.name);
                     return user;
                 } else {
-                    logger.error('failed login attempt:', name);
+                    logger.error(`Failed login attempt: ${name}`);
                     throw new Error('Incorrect email and password combination');
                 }
 
@@ -68,7 +68,6 @@ class AccountsClient {
     }
 
     delete(name) {
-
         // remove account name variable should be an email
         return config.deleteUser(name);
     }

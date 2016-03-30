@@ -9,9 +9,7 @@ class IamClient {
     constructor() {}
 
     init(account) {
-
         this.iam = Promise.promisifyAll(new AWS.IAM(account));
-
     }
 
     listServerCertificates() {

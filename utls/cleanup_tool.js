@@ -81,15 +81,12 @@ function remove_scale_group(params) {
             });
         })
         .then(() => {
-            logger.info(
-                'removed items because of their group_terminate_date tag',
-                params.omit_list
-            );
+            logger.info(`Removed items because of group_terminate_date tag ${params.omit_list}`);
         });
 }
 
 function check_scale_groups() {
-    logger.info('polling for stale scale-groups');
+    logger.info('Polling for stale scale-groups');
     return autoscaling.describeAutoScalingGroupsAsync()
         .then(response => {
             const omit_list = {};
@@ -166,7 +163,7 @@ function parse_tags(Tags) {
 }
 
 function start_polling() {
-    logger.info('starting cleanup tool');
+    logger.info('Starting stack cleanup tool');
     repeat(check_scale_groups)
         .every(15, 'm')
         .start.in(Math.floor(Math.random() * 10) + 1, 'sec');

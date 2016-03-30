@@ -22,11 +22,11 @@ class EmailClient {
     fire(email, msg) {
         mailOptions.to = email;
         mailOptions.text = msg;
-        transporter.sendMail(mailOptions, function (error, info) {
+        transporter.sendMail(mailOptions, function(error, info) {
             if (error) {
                 return logger.error(error);
             }
-            logger.info('New user message sent: ' + email);
+            logger.info(`New user message sent: ${email}`);
         });
 
     }

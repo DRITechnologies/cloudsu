@@ -12,14 +12,13 @@ class ChefClient {
     constructor() {}
 
     init(account) {
-
         const _client = chef.createClient(account.username, account.key, account.url);
         this.client = Promise.promisifyAll(_client);
-
     }
 
     createEnvironment(params) {
 
+        logger.info(`Creating chef environment: ${params.stack_name}`);
         let concord_params = _.clone(params);
 
         concord_params = _.omit(concord_params, [
@@ -33,8 +32,6 @@ class ChefClient {
             'cms',
             'aws'
         ]);
-
-        logger.info('creating chef environment', concord_params);
 
         const default_attributes = {};
         default_attributes.status = 'READY';
@@ -59,37 +56,27 @@ class ChefClient {
     }
 
     getEnvironment(environment) {
-
         return this.client.getAsync(`/environments/${environment}`)
             .then(result => {
                 return result.body;
             });
-
     }
 
     getEnvironments() {
-
         return this.client.getAsync('/environments')
             .then(result => {
                 return result.body;
             });
-
     }
 
     getEnvironmentNodes(environment) {
-
         return this.client.getAsync(`/environments/${environment}/nodes`)
             .then(result => {
                 return _.keys(result.body);
-            })
-            .catch(err => {
-                logger.error(err);
             });
-
     }
 
     updateEnvironment(params) {
-
         return this.client.putAsync(`/environments/${params.name}`, params)
             .then(result => {
                 return result.body;
@@ -97,7 +84,7 @@ class ChefClient {
     }
 
     deleteEnvironment(environment) {
-        logger.info('deleting chef environment:', environment);
+        logger.info(`Deleting chef environment: ${environment}`);
         return this.client.deleteAsync(`/environments/${environment}`)
             .then(result => {
                 return result.body;
@@ -106,8 +93,7 @@ class ChefClient {
 
     deleteEnvironmentNodes(environment) {
 
-        logger.info('removing all chef nodes in environment:', environment);
-
+        logger.info(`Removing all chef nodes in environment: ${environment}`);
         const self = this;
 
         return this.getEnvironmentNodes(environment)
@@ -124,7 +110,6 @@ class ChefClient {
     }
 
     rollbackCheck(environment) {
-
         return this.getEnvironment(environment)
             .then(response => {
                 return response.default_attributes.rollback_available;
@@ -132,7 +117,7 @@ class ChefClient {
     }
 
     createNode(params) {
-
+        logger.info(`Creating chef node: ${params.name}`);
         return this.client.postAsync(`/nodes/${params.name}`, params)
             .then(result => {
                 return result.body;
@@ -140,37 +125,35 @@ class ChefClient {
     }
 
     getNode(node) {
-
         return this.client.getAsync(`/nodes/${node}`)
             .then(result => {
                 return result.body;
             });
-
     }
 
     updateNode(node) {
-
         return this.client.putAsync(`/nodes/${node.name}`, node)
             .then(result => {
                 return result.body;
             });
-
     }
 
     deleteNode(node) {
+
+        logger.info(`Deleting chef node: ${node}`);
         const self = this;
-        logger.info('deleting chef node:', node);
+
         return this.client.deleteAsync(`/nodes/${node}`)
             .then(result => {
                 return self.deleteClient(node);
             })
-            .catch(err => {
+            .catch(function(err) {
                 logger.error(err);
             });
     }
 
     createClient(params) {
-
+        logger.info(`Creating chef client: ${params.name}`);
         return this.client.postAsync('/clients', params)
             .then(result => {
                 return result.body;
@@ -178,7 +161,6 @@ class ChefClient {
     }
 
     getClient(client) {
-
         return this.client.getAsync(`/clients/${client}`)
             .then(result => {
                 return result.body;
@@ -186,7 +168,7 @@ class ChefClient {
     }
 
     deleteClient(client) {
-        logger.debug('deleting chef client', client);
+        logger.debug(`Deleting chef client: ${client}`);
         return this.client.deleteAsync(`/clients/${client}`)
             .then(result => {
                 return result.body;

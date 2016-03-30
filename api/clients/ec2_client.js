@@ -17,7 +17,6 @@ class Ec2Client {
     }
 
     instances(instance_array) {
-
         return this.ec2.describeInstancesAsync({
                 InstanceIds: instance_array
             })
@@ -26,32 +25,25 @@ class Ec2Client {
                     .pluck('Instances')
                     .flatten();
             });
-
     }
 
     instancesByStack(stack_name) {
-
         return this.ec2.describeInstancesAsync({
             Filters: [{
-
                 Name: 'tag:aws:cloudformation:stack-name',
                 Values: [stack_name]
             }]
         });
-
     }
 
     describeKeyPairs() {
-
         return this.ec2.describeKeyPairsAsync()
             .then(keys => {
                 return keys.KeyPairs;
             });
-
     }
 
     describeImages() {
-
         return this.ec2.describeImagesAsync({
                 Owners: ['self', 'amazon']
             })
@@ -61,7 +53,6 @@ class Ec2Client {
     }
 
     sampleImages() {
-
         return config.get('aws_default_images')
             .then(images => {
                 return images;
@@ -69,7 +60,6 @@ class Ec2Client {
     }
 
     instanceStoreMap() {
-
         return config.get('aws_instancestore_map')
             .then(stores => {
                 return stores;
@@ -77,7 +67,6 @@ class Ec2Client {
     }
 
     describeSecurityGroups() {
-
         return this.ec2.describeSecurityGroupsAsync()
             .then(response => {
                 return response.SecurityGroups;

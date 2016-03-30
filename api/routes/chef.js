@@ -2,6 +2,7 @@
 'use strict';
 
 const err_handler = require('../../utls/error_handler.js');
+const logger = require('../../utls/logger.js');
 
 class Chef {
     constructor() {}
@@ -18,6 +19,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -36,6 +38,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -53,6 +56,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -70,6 +74,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -88,6 +93,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -105,6 +111,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -122,6 +129,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -140,6 +148,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -157,6 +166,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -174,6 +184,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -191,6 +202,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -208,6 +220,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -225,6 +238,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -242,6 +256,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -259,6 +274,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -276,6 +292,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -293,6 +310,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -310,6 +328,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err_handler(err));
             });
@@ -327,6 +346,7 @@ class Chef {
                     .json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500)
                     .json(err);
             });

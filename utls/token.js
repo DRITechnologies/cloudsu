@@ -11,7 +11,7 @@ class Token {
     constructor() {}
 
     sign(name) {
-        logger.info('signing token for:', name);
+        logger.info(`signing token for: ${name}`);
         return jwt.sign({
             name: name
         }, key, {
@@ -21,11 +21,10 @@ class Token {
 
     verify(token) {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
 
                 jwt.verify(token, key, (err, decoded) => {
                     if (err) {
-                        logger.error(err);
                         return reject(err);
                     }
                     return resolve(decoded);
@@ -33,16 +32,17 @@ class Token {
 
             })
             .catch(err => {
-                throw new Error('verifying token');
+                throw new Error('Verifying token');
             });
 
     }
 
     create(user) {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
 
-            logger.info('creating token for:', user.name);
+            logger.info(`Creating token for: ${user.name}`);
+
             const token = jwt.sign({
                 name: user.name
             }, key);

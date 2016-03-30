@@ -9,15 +9,12 @@ class AutoscaleClient {
     constructor() {}
 
     init(account) {
-
         this.autoscaling = Promise.promisifyAll(new AWS.AutoScaling(
             account
         ));
-
     }
 
     describeAutoScalingGroups(groups) {
-
         return this.autoscaling.describeAutoScalingGroupsAsync({
             AutoScalingGroupNames: groups
         });
@@ -25,7 +22,6 @@ class AutoscaleClient {
 
     addTags(as_group, key, value) {
         // addTags(autoscale group name, key, value)
-
         return this.autoscaling.createOrUpdateTagsAsync({
             Tags: [{
                 ResourceId: as_group.PhysicalResourceId,

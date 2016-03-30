@@ -5,9 +5,9 @@ const logger = require('../../utls/logger.js');
 const err_handler = require('../../utls/error_handler.js');
 
 class Upgrade {
-    constructor () {}
+    constructor() {}
 
-    run (req, res) {
+    run(req, res) {
 
         const params = req.body;
         params.aws_account = req.aws_account;
@@ -29,7 +29,7 @@ class Upgrade {
 
     }
 
-    rollback (req, res) {
+    rollback(req, res) {
 
         const params = req.body;
         params.aws_account = req.aws_account;

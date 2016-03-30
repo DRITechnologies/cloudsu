@@ -2,11 +2,12 @@
 'use strict';
 
 const err_handler = require('../../utls/error_handler.js');
+const logger = require('../../utls/logger.js');
 
 class Sqs {
-    constructor () {}
+    constructor() {}
 
-    createQueue (req, res) {
+    createQueue(req, res) {
 
         const aws_account = req.params.aws_account;
         const sqs_client = require('../clients/sqs_client.js');
@@ -17,11 +18,12 @@ class Sqs {
                 res.status(200).json(response);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }
 
-    initialSetup (req, res) {
+    initialSetup(req, res) {
 
         const aws_account = req.aws_account;
         const sqs_client = require('../clients/sqs_client.js');
@@ -32,6 +34,7 @@ class Sqs {
                 res.status(200).json('successful creation');
             })
             .catch(err => {
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }

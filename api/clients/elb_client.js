@@ -23,8 +23,6 @@ class ElbClient {
 
         const self = this;
 
-        logger.info('ELB connect with update list:', params.update_list);
-
         return this.cloudformation.describeStackResourcesAsync({
             StackName: params.stack_name
         }).then(stack => {
@@ -38,14 +36,14 @@ class ElbClient {
                 const elb = _.find(stack.StackResources, x => {
                     return x.LogicalResourceId === elb_name;
                 });
-                logger.info('Connecting ASG:', as_name, 'to ELB:', elb_name);
+                logger.info(`Connecting ASG: ${as_name} to ELB: ${elb_name}`);
                 if (elb && as_group) {
                     return self.autoscaling.attachLoadBalancersAsync({
                         AutoScalingGroupName: as_group.PhysicalResourceId,
                         LoadBalancerNames: [elb.PhysicalResourceId]
                     });
                 }
-                logger.error('Not able to find appropriate data to disconnect elb');
+                logger.error('Not able to find appropriate data to connect elb');
             });
         });
     }
@@ -69,7 +67,7 @@ class ElbClient {
                     return x.LogicalResourceId === elb_name;
                 });
 
-                logger.info('Disconnecting ASG:', as_name, 'from ELB:', elb_name);
+                logger.info(`Disconnecting ASG: ${as_name} from ELB: ${elb_name}`);
                 if (elb && as_group) {
                     return self.autoscaling.detachLoadBalancersAsync({
                         AutoScalingGroupName: as_group.PhysicalResourceId,
@@ -82,7 +80,7 @@ class ElbClient {
     }
 
     connectElb(params) {
-
+        logger.info(`Connecting ASG: ${params.scale_group} from ELB: ${params.elb}`);
         return this.autoscaling.attachLoadBalancersAsync({
             AutoScalingGroupName: params.scale_group,
             LoadBalancerNames: [params.elb]
@@ -90,7 +88,7 @@ class ElbClient {
     }
 
     disconnectElb(params) {
-
+        logger.info(`Connecting ASG: ${params.scale_group} from ELB: ${params.elb}`);
         return this.autoscaling.detachLoadBalancersAsync({
             AutoScalingGroupName: params.scale_group,
             LoadBalancerNames: [params.elb]
@@ -98,7 +96,6 @@ class ElbClient {
     }
 
     getAvailableElbs(stack_name) {
-
         return this.cloudformation.describeStackResourcesAsync({
                 StackName: stack_name
             })
@@ -111,11 +108,9 @@ class ElbClient {
     }
 
     getElbs(elbs) {
-
         return this.elb.describeLoadBalancersAsync({
             LoadBalancerNames: elbs
         });
-
     }
 }
 
