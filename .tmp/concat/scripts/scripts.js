@@ -566,7 +566,8 @@ angular
             responseError: function(err) {
 
                 if (err.status === 401) {
-                    return $location.path('/login');
+                    $location.path('/login');
+                    return $q.reject(err);
                 }
                 return $q.reject(err);
             }

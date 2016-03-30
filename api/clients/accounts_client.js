@@ -20,7 +20,9 @@ class AccountsClient {
         return config.getUser(name)
             .then(user => {
 
-                if (crypto_client.check_password(user.hash, password)) {
+                if (!user) {
+                    throw new Error('Incorrect email and password combination');
+                } else if (crypto_client.check_password(user.hash, password)) {
                     logger.info('Successful login attempt:', name);
                     user.token = token_client.sign(user.name);
                     return user;
@@ -78,7 +80,7 @@ class AccountsClient {
 
     checkToken(token) {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
 
             const db = secure_config.get('db');
 
@@ -114,7 +116,7 @@ class AccountsClient {
 
     getServiceToken(user) {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             //check if token already exists and return
             if (user.service_token) {
                 return resolve(user.service_token);
