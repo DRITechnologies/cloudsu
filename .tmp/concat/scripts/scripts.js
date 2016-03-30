@@ -99,7 +99,9 @@ $(function () {
         'angularMoment', //MomentJS
         'underscore', //Underscore
         'oitozero.ngSweetAlert', //sweet alert
-        'ace' //ace editor
+        'ace', //ace editor
+        'toastr', //toastr library
+        'ngAnimate' // animate for toastr
     ]);
 })();
 
@@ -452,6 +454,28 @@ angular
 
     });
 
+angular
+    .module('stacks')
+    .config(function(toastrConfig) {
+        angular.extend(toastrConfig, {
+            closeButton: true,
+            extendedTimeOut: 1000,
+            progressBar: true,
+            tapToDismiss: true,
+            timeOut: 5000,
+            toastClass: 'toast'
+        });
+
+        angular.extend(toastrConfig, {
+            containerId: 'toast-container',
+            maxOpened: 5,
+            newestOnTop: false,
+            positionClass: 'toast-top-right',
+            preventDuplicates: false,
+            preventOpenDuplicates: false,
+        });
+    });
+
 //factories
 angular
     .module('stacks')
@@ -558,13 +582,16 @@ angular
 
 angular
     .module('stacks')
-    .controller('stacksController', function($rootScope, $interval, $scope, $http, $state, $uibModal, SweetAlert, dataStore) {
+    .controller('stacksController', function($rootScope, $interval, $scope, $http, $state, $uibModal, SweetAlert, dataStore, toastr) {
 
         //Get stacks from AWS
         function refresh() {
             $http.get('/api/v1/stacks')
                 .success(function(res) {
                     $scope.stacks = res.StackSummaries;
+                })
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
                 });
         }
 
@@ -616,10 +643,7 @@ angular
                                 refresh();
                             })
                             .error(function(err) {
-                                $scope.alerts.push({
-                                    type: 'danger',
-                                    msg: err
-                                });
+                                toastr.error(err, 'AWS Error');
                             });
                     }
                 });
@@ -668,7 +692,7 @@ angular
         var intervalPromise;
 
         function refresher() {
-            // refresh every 10 seconds
+            // refresh every 15 seconds
             intervalPromise = $interval(function() {
                 refresh();
             }, 15000);
@@ -688,7 +712,7 @@ angular
 
 angular
     .module('stacks')
-    .controller('stackController', function($scope, $q, $interval, $stateParams, $http, $uibModal, SweetAlert, dataStore, _) {
+    .controller('stackController', function($scope, $q, $interval, $stateParams, $http, $uibModal, SweetAlert, dataStore, _, toastr) {
 
         $scope.stack_name = $stateParams.stack_name;
 
@@ -722,6 +746,9 @@ angular
                 $http.get('/api/v1/ec2/' + instances)
                     .success(function(data) {
                         $scope.scaleGroups[index].Instances = mergeEc2Objects(group.Instances, data);
+                    })
+                    .error(function(err) {
+                        toastr.error(err, 'AWS Error');
                     });
             });
         }
@@ -732,6 +759,9 @@ angular
             $http.get('/api/v1/ec2/' + instance_ids)
                 .success(function(data) {
                     $scope.instances = data;
+                })
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
                 });
 
         }
@@ -760,7 +790,9 @@ angular
                     .success(function(data) {
                         $scope.scaleGroups[index].LoadBalancerNames = data.LoadBalancerDescriptions;
                     })
-                    .error(function(err) {});
+                    .error(function(err) {
+                        toastr.error(err, 'AWS Error');
+                    });
             });
         }
 
@@ -773,6 +805,9 @@ angular
                     updateEc2();
                     updateElb();
                     addTags();
+                })
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
                 });
         }
 
@@ -780,6 +815,9 @@ angular
             $http.get('/api/v1/stacks/status/' + $scope.stack_name)
                 .success(function(response) {
                     $scope.stack_status = response;
+                })
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
                 });
 
 
@@ -798,11 +836,17 @@ angular
                     } else if (instances.length > 0) {
                         getEc2(instances);
                     }
+                })
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
                 });
 
             $http.get('/api/v1/stacks/describeEvents/' + $scope.stack_name)
                 .success(function(response) {
                     $scope.stack_logs = response;
+                })
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
                 });
 
             $http.get('/api/v1/chef/environments/' + $scope.stack_name)
@@ -813,6 +857,9 @@ angular
                         $scope.rollback_available = defaults.rollback_available;
                         $scope.chef = defaults.concord_params;
                     }
+                })
+                .error(function(err) {
+                    toastr.error(err, 'Chef Error');
                 });
 
         }
@@ -863,6 +910,9 @@ angular
                             .success(function(response) {
                                 refresh();
                                 SweetAlert.swal('Success', elb_name + ' has been detached from scale group ' + scale_group, 'success');
+                            })
+                            .error(function(err) {
+                                toastr.error(err, 'AWS Error');
                             });
                     }
                 });
@@ -876,7 +926,10 @@ angular
                 version: version,
                 stack_name: $scope.stack_name
             };
-            $http.patch('/api/v1/delete_asg', params);
+            $http.patch('/api/v1/delete_asg', params)
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
+                });
         };
 
         $scope.availableElbs = function(scale_group) {
@@ -885,19 +938,22 @@ angular
                 .success(function(response) {
                     //open modal and give user a chance to connect ELB
                     var modalInstance = $uibModal.open({
-                        animation: true,
-                        templateUrl: 'views/modals/connectElb.html',
-                        controller: 'connectElb',
-                        size: 'md',
-                        resolve: {
-                            elbs: function() {
-                                return response;
-                            },
-                            scale_group: function() {
-                                return scale_group;
+                            animation: true,
+                            templateUrl: 'views/modals/connectElb.html',
+                            controller: 'connectElb',
+                            size: 'md',
+                            resolve: {
+                                elbs: function() {
+                                    return response;
+                                },
+                                scale_group: function() {
+                                    return scale_group;
+                                }
                             }
-                        }
-                    });
+                        })
+                        .error(function(err) {
+                            toastr.error(err, 'AWS Error');
+                        });
 
                     modalInstance.result.then(function(selectedItem) {
                         //refresh service accounts
@@ -958,10 +1014,7 @@ angular
                     });
                 })
                 .error(function(err) {
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Chef Error');
                 });
         };
 
@@ -987,10 +1040,7 @@ angular
                     });
                 })
                 .error(function(err) {
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'AWS Error');
                 });
         };
 
@@ -1174,13 +1224,16 @@ angular
 
 angular
     .module('stacks')
-    .controller('setup', function($scope, $http, $state, dataStore) {
+    .controller('setup', function($scope, $http, $state, dataStore, toastr) {
         $scope.showSpinner = false;
         $scope.alerts = [];
 
         $http.get('/api/v1/regions')
             .success(function(regions) {
                 $scope.regions = regions;
+            })
+            .error(function(err) {
+                toastr.error(err, 'Error');
             });
 
         $scope.create = function() {
@@ -1210,10 +1263,7 @@ angular
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Setup Error');
                 });
         };
 
@@ -1390,7 +1440,7 @@ angular
 
 angular
     .module('stacks')
-    .controller('usersController', function($scope, $http, $state, $uibModal, SweetAlert, dataStore) {
+    .controller('usersController', function($scope, $http, $state, $uibModal, SweetAlert, dataStore, toastr) {
 
         //to make the ui render correctly
         $scope.admin = true;
@@ -1438,6 +1488,9 @@ angular
                             .success(function(response) {
                                 refresh();
                                 SweetAlert.swal('Success', user.name + ' admin status has been changed to: ' + user.admin, 'success');
+                            })
+                            .error(function(err) {
+                                toastr.error(err, 'Application Error');
                             });
                     }
                 });
@@ -1460,6 +1513,9 @@ angular
                             .success(function(res) {
                                 SweetAlert.swal('Success', user.name + ' has been removed.', 'success');
                                 refresh();
+                            })
+                            .error(function(err) {
+                                toastr.error(err, 'AWS Error');
                             });
                     }
                 });
@@ -1581,7 +1637,7 @@ angular
 
 angular
     .module('stacks')
-    .controller('system', function($scope, $http, $uibModal, dataStore, SweetAlert) {
+    .controller('system', function($scope, $http, $uibModal, dataStore, SweetAlert, toastr) {
 
         $scope.alerts = [];
 
@@ -1619,6 +1675,9 @@ angular
                         }
                     });
 
+                })
+                .error(function(err) {
+                    toastr.error(err, 'Error');
                 });
         };
 
@@ -1653,7 +1712,7 @@ angular
                     type: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#1ab394',
-                    confirmButtonText: 'Yes, delete it!',
+                    confirmButtonText: 'Yes',
                     closeOnConfirm: false
                 },
                 function(isConfirm) {
@@ -1664,10 +1723,7 @@ angular
                                 refresh();
                             })
                             .error(function(err) {
-                                $scope.alerts.push({
-                                    type: 'danger',
-                                    msg: err
-                                });
+                                toastr.error(err, 'Error');
                             });
                     }
                 });

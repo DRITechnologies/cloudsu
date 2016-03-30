@@ -1,12 +1,15 @@
 angular
     .module('stacks')
-    .controller('stacksController', function($rootScope, $interval, $scope, $http, $state, $uibModal, SweetAlert, dataStore) {
+    .controller('stacksController', function($rootScope, $interval, $scope, $http, $state, $uibModal, SweetAlert, dataStore, toastr) {
 
         //Get stacks from AWS
         function refresh() {
             $http.get('/api/v1/stacks')
                 .success(function(res) {
                     $scope.stacks = res.StackSummaries;
+                })
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
                 });
         }
 
@@ -58,10 +61,7 @@ angular
                                 refresh();
                             })
                             .error(function(err) {
-                                $scope.alerts.push({
-                                    type: 'danger',
-                                    msg: err
-                                });
+                                toastr.error(err, 'AWS Error');
                             });
                     }
                 });
@@ -110,7 +110,7 @@ angular
         var intervalPromise;
 
         function refresher() {
-            // refresh every 10 seconds
+            // refresh every 15 seconds
             intervalPromise = $interval(function() {
                 refresh();
             }, 15000);

@@ -1,12 +1,15 @@
 angular
     .module('stacks')
-    .controller('setup', function($scope, $http, $state, dataStore) {
+    .controller('setup', function($scope, $http, $state, dataStore, toastr) {
         $scope.showSpinner = false;
         $scope.alerts = [];
 
         $http.get('/api/v1/regions')
             .success(function(regions) {
                 $scope.regions = regions;
+            })
+            .error(function(err) {
+                toastr.error(err, 'Error');
             });
 
         $scope.create = function() {
@@ -36,10 +39,7 @@ angular
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Setup Error');
                 });
         };
 

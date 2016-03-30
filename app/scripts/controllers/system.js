@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('system', function($scope, $http, $uibModal, dataStore, SweetAlert) {
+    .controller('system', function($scope, $http, $uibModal, dataStore, SweetAlert, toastr) {
 
         $scope.alerts = [];
 
@@ -38,6 +38,9 @@ angular
                         }
                     });
 
+                })
+                .error(function(err) {
+                    toastr.error(err, 'Error');
                 });
         };
 
@@ -72,7 +75,7 @@ angular
                     type: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#1ab394',
-                    confirmButtonText: 'Yes, delete it!',
+                    confirmButtonText: 'Yes',
                     closeOnConfirm: false
                 },
                 function(isConfirm) {
@@ -83,10 +86,7 @@ angular
                                 refresh();
                             })
                             .error(function(err) {
-                                $scope.alerts.push({
-                                    type: 'danger',
-                                    msg: err
-                                });
+                                toastr.error(err, 'Error');
                             });
                     }
                 });

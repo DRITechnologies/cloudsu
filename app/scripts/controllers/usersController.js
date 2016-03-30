@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('usersController', function($scope, $http, $state, $uibModal, SweetAlert, dataStore) {
+    .controller('usersController', function($scope, $http, $state, $uibModal, SweetAlert, dataStore, toastr) {
 
         //to make the ui render correctly
         $scope.admin = true;
@@ -48,6 +48,9 @@ angular
                             .success(function(response) {
                                 refresh();
                                 SweetAlert.swal('Success', user.name + ' admin status has been changed to: ' + user.admin, 'success');
+                            })
+                            .error(function(err) {
+                                toastr.error(err, 'Application Error');
                             });
                     }
                 });
@@ -70,6 +73,9 @@ angular
                             .success(function(res) {
                                 SweetAlert.swal('Success', user.name + ' has been removed.', 'success');
                                 refresh();
+                            })
+                            .error(function(err) {
+                                toastr.error(err, 'AWS Error');
                             });
                     }
                 });

@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('stackController', function($scope, $q, $interval, $stateParams, $http, $uibModal, SweetAlert, dataStore, _) {
+    .controller('stackController', function($scope, $q, $interval, $stateParams, $http, $uibModal, SweetAlert, dataStore, _, toastr) {
 
         $scope.stack_name = $stateParams.stack_name;
 
@@ -34,6 +34,9 @@ angular
                 $http.get('/api/v1/ec2/' + instances)
                     .success(function(data) {
                         $scope.scaleGroups[index].Instances = mergeEc2Objects(group.Instances, data);
+                    })
+                    .error(function(err) {
+                        toastr.error(err, 'AWS Error');
                     });
             });
         }
@@ -44,6 +47,9 @@ angular
             $http.get('/api/v1/ec2/' + instance_ids)
                 .success(function(data) {
                     $scope.instances = data;
+                })
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
                 });
 
         }
@@ -72,7 +78,9 @@ angular
                     .success(function(data) {
                         $scope.scaleGroups[index].LoadBalancerNames = data.LoadBalancerDescriptions;
                     })
-                    .error(function(err) {});
+                    .error(function(err) {
+                        toastr.error(err, 'AWS Error');
+                    });
             });
         }
 
@@ -85,6 +93,9 @@ angular
                     updateEc2();
                     updateElb();
                     addTags();
+                })
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
                 });
         }
 
@@ -92,6 +103,9 @@ angular
             $http.get('/api/v1/stacks/status/' + $scope.stack_name)
                 .success(function(response) {
                     $scope.stack_status = response;
+                })
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
                 });
 
 
@@ -110,11 +124,17 @@ angular
                     } else if (instances.length > 0) {
                         getEc2(instances);
                     }
+                })
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
                 });
 
             $http.get('/api/v1/stacks/describeEvents/' + $scope.stack_name)
                 .success(function(response) {
                     $scope.stack_logs = response;
+                })
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
                 });
 
             $http.get('/api/v1/chef/environments/' + $scope.stack_name)
@@ -125,6 +145,9 @@ angular
                         $scope.rollback_available = defaults.rollback_available;
                         $scope.chef = defaults.concord_params;
                     }
+                })
+                .error(function(err) {
+                    toastr.error(err, 'Chef Error');
                 });
 
         }
@@ -175,6 +198,9 @@ angular
                             .success(function(response) {
                                 refresh();
                                 SweetAlert.swal('Success', elb_name + ' has been detached from scale group ' + scale_group, 'success');
+                            })
+                            .error(function(err) {
+                                toastr.error(err, 'AWS Error');
                             });
                     }
                 });
@@ -188,7 +214,10 @@ angular
                 version: version,
                 stack_name: $scope.stack_name
             };
-            $http.patch('/api/v1/delete_asg', params);
+            $http.patch('/api/v1/delete_asg', params)
+                .error(function(err) {
+                    toastr.error(err, 'AWS Error');
+                });
         };
 
         $scope.availableElbs = function(scale_group) {
@@ -197,19 +226,22 @@ angular
                 .success(function(response) {
                     //open modal and give user a chance to connect ELB
                     var modalInstance = $uibModal.open({
-                        animation: true,
-                        templateUrl: 'views/modals/connectElb.html',
-                        controller: 'connectElb',
-                        size: 'md',
-                        resolve: {
-                            elbs: function() {
-                                return response;
-                            },
-                            scale_group: function() {
-                                return scale_group;
+                            animation: true,
+                            templateUrl: 'views/modals/connectElb.html',
+                            controller: 'connectElb',
+                            size: 'md',
+                            resolve: {
+                                elbs: function() {
+                                    return response;
+                                },
+                                scale_group: function() {
+                                    return scale_group;
+                                }
                             }
-                        }
-                    });
+                        })
+                        .error(function(err) {
+                            toastr.error(err, 'AWS Error');
+                        });
 
                     modalInstance.result.then(function(selectedItem) {
                         //refresh service accounts
@@ -270,10 +302,7 @@ angular
                     });
                 })
                 .error(function(err) {
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Chef Error');
                 });
         };
 
@@ -299,10 +328,7 @@ angular
                     });
                 })
                 .error(function(err) {
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'AWS Error');
                 });
         };
 

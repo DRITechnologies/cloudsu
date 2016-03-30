@@ -6,6 +6,8 @@
         'angularMoment', //MomentJS
         'underscore', //Underscore
         'oitozero.ngSweetAlert', //sweet alert
-        'ace' //ace editor
+        'ace', //ace editor
+        'toastr', //toastr library
+        'ngAnimate' // animate for toastr
     ]);
 })();
