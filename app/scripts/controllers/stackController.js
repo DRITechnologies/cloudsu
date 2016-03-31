@@ -332,6 +332,18 @@ angular
                 });
         };
 
+        $scope.saveJSON = function() {
+            $scope.toJSON = '';
+            $scope.toJSON = angular.toJson($scope.stack_logs);
+            var blob = new Blob([$scope.toJSON], {
+                type: 'application/json;charset=utf-8;'
+            });
+            var downloadLink = angular.element('<a></a>');
+            downloadLink.attr('href', window.URL.createObjectURL(blob));
+            downloadLink.attr('download', $scope.stack_name + '-CF-LOGS.json');
+            downloadLink[0].click();
+        };
+
         $scope.status_label = function(status) {
             if (status !== 'READY') {
                 return 'badge badge-warning';

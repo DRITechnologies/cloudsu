@@ -194,9 +194,10 @@ class StacksClient {
                         return x.StackName === stack_name;
                     });
                     logger.info(`Polling for stack success: ${stack_name} status: ${stack.StackStatus}`);
-                    if (!stack && count > 3) {
+                    if (!stack) {
                         throw new retry.StopError('Stack not found');
                     } else if (count > max_attempts) {
+                        logger.info('Exited early before success status');
                         return;
                     } else if (stack.StackStatus === 'UPDATE_COMPLETE' || stack.StackStatus === 'CREATE_COMPLETE') {
                         // Success!

@@ -2924,11 +2924,9 @@ body {
 }
 #stack-info-left {
     height: 290px;
-    min-height: 260px;
 }
 #stack-info-right {
     height: 290px;
-    min-height: 260px;
     overflow: scroll;
 }
 .scrollable-menu {
