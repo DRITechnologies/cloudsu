@@ -33,6 +33,7 @@ angular
                     dataStore.setActiveUser(user.name);
                     dataStore.setActiveAWS(user.aws_account);
                     dataStore.setActiveRegion(user.aws_region);
+                    dataStore.setIsLogin(true);
 
                     $scope.startup();
 

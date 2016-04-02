@@ -10,7 +10,7 @@ angular
         $scope.userName = dataStore.getActiveUser();
         $scope.activeAws = dataStore.getActiveAWS();
         $scope.activeRegion = dataStore.getActiveRegion();
-        $scope.isLogin = false;
+        $scope.isLogin = dataStore.getIsLogin();
 
         //send refesh to child controller
         function childRefresh() {

@@ -357,7 +357,7 @@ angular
         $scope.userName = dataStore.getActiveUser();
         $scope.activeAws = dataStore.getActiveAWS();
         $scope.activeRegion = dataStore.getActiveRegion();
-        $scope.isLogin = false;
+        $scope.isLogin = dataStore.getIsLogin();
 
         //send refesh to child controller
         function childRefresh() {
@@ -502,6 +502,12 @@ angular
             },
             getStack: function() {
                 return $localStorage.stack_name;
+            },
+            setIsLogin: function(bool) {
+                $localStorage.isLogin = bool;
+            },
+            getIsLogin: function() {
+                return $localStorage.isLogin;
             },
             clearStack: function() {
                 $localStorage.stack_name = '';
@@ -1191,6 +1197,7 @@ angular
                     dataStore.setActiveUser(user.name);
                     dataStore.setActiveAWS(user.aws_account);
                     dataStore.setActiveRegion(user.aws_region);
+                    dataStore.setIsLogin(true);
 
                     $scope.startup();
 

@@ -10,6 +10,12 @@ angular
             getStack: function() {
                 return $localStorage.stack_name;
             },
+            setIsLogin: function(bool) {
+                $localStorage.isLogin = bool;
+            },
+            getIsLogin: function() {
+                return $localStorage.isLogin;
+            },
             clearStack: function() {
                 $localStorage.stack_name = '';
             },
