@@ -30,11 +30,15 @@ module.exports = function(app) {
     app.get('/api/v1/regions', main.regions);
     app.get('/api/v1/bucket_regions', main.bucketRegions);
     app.get('/api/v1/region_map', main.regionMap);
+    app.post('/api/v1/system/import', main.importConfig);
+    app.get('/api/v1/services/list', main.getServiceList);
 
-
+    //require auth here
     app.use(check_token.run);
     app.use(attach_aws_auth.run);
     app.use(attach_cms_auth.run);
+    //Everything below requires authentication
+
 
     //accounts
     app.get('/api/v1/accounts/token', accounts.getServiceToken);
@@ -120,12 +124,14 @@ module.exports = function(app) {
     //chef recipes
     app.get('/api/v1/chef/recipes', chef.recipes);
 
+    //export config
+    app.get('/api/v1/system/export', main.exportConfig);
+
     //service account
     app.delete('/api/v1/services/:type/:name', main.deleteServiceAccount);
     app.post('/api/v1/services/save_account', main.saveServiceAccount);
     app.get('/api/v1/services/get_accounts/:type', main.getServiceAccounts);
     app.get('/api/v1/services/get_account/:type/:name', main.getServiceAccount);
-    app.get('/api/v1/services/list', main.getServiceList);
 
     //elb
     app.patch('/api/v1/elb/disconnect', elb.disconnectElb);

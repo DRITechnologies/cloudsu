@@ -357,6 +357,7 @@ angular
         $scope.userName = dataStore.getActiveUser();
         $scope.activeAws = dataStore.getActiveAWS();
         $scope.activeRegion = dataStore.getActiveRegion();
+        $scope.isLogin = false;
 
         //send refesh to child controller
         function childRefresh() {
@@ -364,16 +365,18 @@ angular
         }
 
         //get available regions
-        $http.get('/api/v1/regions')
-            .success(function(regions) {
-                $scope.aws_regions = regions;
-            });
+        function refresh() {
+            $http.get('/api/v1/regions')
+                .success(function(regions) {
+                    $scope.aws_regions = regions;
+                });
 
-        //get available aws accounts
-        $http.get('/api/v1/services/list')
-            .success(function(accounts) {
-                $scope.aws_accounts = accounts;
-            });
+            //get available aws accounts
+            $http.get('/api/v1/services/list')
+                .success(function(accounts) {
+                    $scope.aws_accounts = accounts;
+                });
+        }
 
         // ping api request to determine screen if error
         /*
@@ -406,8 +409,7 @@ angular
                     });
                 })
                 .error(function(err) {
-                    //XXX add cool error later on
-                    console.log(err);
+
                 });
 
         };
@@ -446,6 +448,15 @@ angular
                 aws_account: account
             });
         };
+
+        $scope.startup = function() {
+            $scope.isLogin = true;
+            refresh();
+        };
+
+        if ($scope.isLogin) {
+            refresh();
+        }
 
     });
 
@@ -1181,6 +1192,8 @@ angular
                     dataStore.setActiveAWS(user.aws_account);
                     dataStore.setActiveRegion(user.aws_region);
 
+                    $scope.startup();
+
                     //set parent values because they will not reload
                     if (user.aws_account) {
                         $scope.$parent.activeAws = user.aws_account;
@@ -1209,8 +1222,8 @@ angular
             //only show setup modal if it has not run before
             $http.get('/api/v1/ping/' + dataStore.getToken())
                 .success(function(res) {
+                    console.log(res);
                     if (!res.setup) {
-                        dataStore.setIsLogin(false);
                         $uibModal.open({
                             animation: true,
                             templateUrl: 'views/setup.html',
@@ -1232,6 +1245,28 @@ angular
                 });
         };
 
+        $scope.import = function() {
+            //only show setup modal if it has not run before
+            $http.get('/api/v1/ping/' + dataStore.getToken())
+                .success(function(res) {
+                    console.log(res);
+                    if (!res.setup) {
+                        $uibModal.open({
+                            animation: true,
+                            templateUrl: 'views/modals/import.html',
+                            controller: 'import',
+                            size: 'md'
+                        });
+                    } else {
+                        //add alert to show that the system has already been setup
+                        $scope.alerts.push({
+                            type: 'danger',
+                            msg: 'System has already been setup'
+                        });
+                    }
+                });
+        };
+
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
@@ -1241,7 +1276,7 @@ angular
 
 angular
     .module('stacks')
-    .controller('setup', function($scope, $http, $state, dataStore, toastr) {
+    .controller('setup', function($scope, $http, $state, $uibModalInstance, dataStore, toastr, SweetAlert) {
         $scope.showSpinner = false;
         $scope.alerts = [];
 
@@ -1276,17 +1311,22 @@ angular
                     dataStore.setToken(response.token);
                     dataStore.setActiveAWS($scope.account.aws.name);
                     dataStore.setActiveRegion($scope.account.aws.region);
-                    $state.go('/login');
+                    $uibModalInstance.close(true);
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    toastr.error(err, 'Setup Error');
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
                 });
         };
 
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
+
+
 
     });
 
@@ -1752,6 +1792,26 @@ angular
                 });
         };
 
+        //export system config (db config)
+        $scope.exportConfig = function() {
+            $scope.toJSON = '';
+            $scope.showSpinner = true;
+            $http.get('/api/v1/system/export')
+                .success(function(config) {
+                    $scope.toJSON = angular.toJson(config);
+                    var blob = new Blob([$scope.toJSON], {
+                        type: 'application/json;charset=utf-8;'
+                    });
+                    var downloadLink = angular.element('<a></a>');
+                    downloadLink.attr('href', window.URL.createObjectURL(blob));
+                    downloadLink.attr('download', 'secrets.json');
+                    downloadLink[0].click();
+                })
+                .error(function(err) {
+                    toastr.error(err, 'Error');
+                });
+        };
+
 
         // load initial data
         refresh();
@@ -2094,4 +2154,43 @@ angular
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
+    });
+
+angular
+    .module('stacks')
+    .controller('import', function($scope, $http, $uibModalInstance) {
+        console.log('opened');
+        $scope.showSpinner = false;
+        $scope.alerts = [];
+
+
+        $scope.importConfig = function() {
+            $scope.showSpinner = true;
+            if (!$scope.config) {
+                $scope.showSpinner = true;
+                return;
+            }
+            $http.post('/api/v1/system/import', $scope.config)
+                .success(function(response) {
+                    $scope.showSpinner = true;
+                    $uibModalInstance.close(true);
+                })
+                .error(function(err) {
+                    $scope.showSpinner = true;
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
+                });
+        };
+
+        $scope.closeAlert = function(index) {
+            $scope.alerts.splice(index, 1);
+        };
+
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+
     });

@@ -5,11 +5,12 @@ const Promise = require('bluebird');
 const _ = require('underscore');
 const generatePassword = require('password-generator');
 const crypto_client = require('../../utls/crypto_client.js');
-const secure_config = require('../../config/secure_config.js');
 const config = require('../../config/config.js');
 const token_client = require('../../utls/token.js');
 const email_client = require('../../utls/email.js');
 const logger = require('../../utls/logger.js');
+const path = require('path');
+const fs = require('fs');
 
 class AccountsClient {
     constructor() {}
@@ -81,33 +82,35 @@ class AccountsClient {
 
         return new Promise(function(resolve, reject) {
 
-            const db = secure_config.get('db');
+            fs.readFile(path.resolve(__dirname, '../../secrets.json'), function read(err, data) {
 
-            if (!db) {
-                return resolve({
-                    login: false,
-                    setup: false
-                });
-            } else if (!token) {
-                return resolve({
-                    login: false,
-                    setup: true
-                });
-            }
-
-            return token_client.verify(token)
-                .then(response => {
+                if (err) {
                     return resolve({
-                        login: true,
-                        setup: true
+                        login: false,
+                        setup: false
                     });
-                })
-                .catch(err => {
+                } else if (!token) {
                     return resolve({
                         login: false,
                         setup: true
                     });
-                });
+                }
+
+                return token_client.verify(token)
+                    .then(response => {
+                        return resolve({
+                            login: true,
+                            setup: true
+                        });
+                    })
+                    .catch(err => {
+                        return resolve({
+                            login: false,
+                            setup: true
+                        });
+                    });
+
+            });
 
         });
 

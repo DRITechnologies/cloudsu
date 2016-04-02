@@ -4,7 +4,6 @@
 const Promise = require('bluebird');
 const repeat = require('repeat');
 const fs = require('fs');
-const sqs_client = require('../api/clients/sqs_client.js');
 const logger = require('./logger.js');
 const chef_client = require('../api/clients/chef_client.js');
 
@@ -75,6 +74,8 @@ function startup(message) {
 function parseMessages(messages, sqs_url) {
 
     return Promise.map(messages, function(message_body) {
+
+        const sqs_client = require('../api/clients/sqs_client.js');
         let handle = message_body.ReceiptHandle;
         let body = JSON.parse(message_body.Body);
         let message = JSON.parse(body.Message);
@@ -113,11 +114,12 @@ function parseMessages(messages, sqs_url) {
     });
 }
 
-function poll() {
+var poll = function() {
 
     // needs to be assigned inside the repeating function
     // because of cached db connection info
     const config_client = require('../config/config.js');
+    const sqs_client = require('../api/clients/sqs_client.js');
     logger.debug('Polling sqs for new messages');
 
     if (!fs.existsSync(secrets_path)) {
@@ -144,11 +146,15 @@ function poll() {
         .catch(err => {
             logger.debug(err);
         });
+};
+
+function stub() {
+    poll();
 }
 
 function kick_it() {
-    repeat(poll)
-        .every(20, 's')
+    repeat(stub)
+        .every(21, 's')
         .start.in(Math.floor(Math.random() * 10) + 1, 'sec');
 }
 

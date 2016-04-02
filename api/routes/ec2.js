@@ -3,13 +3,14 @@
 
 const logger = require('../../utls/logger.js');
 const err_handler = require('../../utls/error_handler.js');
-const config = require('../../config/config.js');
 
 
 class Ec2 {
     constructor() {}
 
     sizes(req, res) {
+
+        const config = require('../../config/config.js');
 
         return config.get('aws_default_size_available')
             .then(size_array => {

@@ -34,6 +34,8 @@ angular
                     dataStore.setActiveAWS(user.aws_account);
                     dataStore.setActiveRegion(user.aws_region);
 
+                    $scope.startup();
+
                     //set parent values because they will not reload
                     if (user.aws_account) {
                         $scope.$parent.activeAws = user.aws_account;
@@ -62,8 +64,8 @@ angular
             //only show setup modal if it has not run before
             $http.get('/api/v1/ping/' + dataStore.getToken())
                 .success(function(res) {
+                    console.log(res);
                     if (!res.setup) {
-                        dataStore.setIsLogin(false);
                         $uibModal.open({
                             animation: true,
                             templateUrl: 'views/setup.html',
@@ -74,6 +76,28 @@ angular
                                     return $scope.items;
                                 }
                             }
+                        });
+                    } else {
+                        //add alert to show that the system has already been setup
+                        $scope.alerts.push({
+                            type: 'danger',
+                            msg: 'System has already been setup'
+                        });
+                    }
+                });
+        };
+
+        $scope.import = function() {
+            //only show setup modal if it has not run before
+            $http.get('/api/v1/ping/' + dataStore.getToken())
+                .success(function(res) {
+                    console.log(res);
+                    if (!res.setup) {
+                        $uibModal.open({
+                            animation: true,
+                            templateUrl: 'views/modals/import.html',
+                            controller: 'import',
+                            size: 'md'
                         });
                     } else {
                         //add alert to show that the system has already been setup

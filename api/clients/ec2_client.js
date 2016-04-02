@@ -5,9 +5,6 @@ const _ = require('underscore');
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
 
-// load default configs
-const config = require('../../config/config.js');
-
 
 class Ec2Client {
     constructor() {}
@@ -53,6 +50,9 @@ class Ec2Client {
     }
 
     sampleImages() {
+
+        const config = require('../../config/config.js');
+
         return config.get('aws_default_images')
             .then(images => {
                 return images;
@@ -60,6 +60,9 @@ class Ec2Client {
     }
 
     instanceStoreMap() {
+
+        const config = require('../../config/config.js');
+
         return config.get('aws_instancestore_map')
             .then(stores => {
                 return stores;

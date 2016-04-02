@@ -2,13 +2,14 @@
 'use strict';
 
 const crypto_client = require('../utls/crypto_client.js');
-const config = require('../config/config.js');
 const logger = require('../utls/logger.js');
 
 class AttachAwsAuth {
     constructor() {}
 
     run(req, res, next) {
+
+        const config = require('../config/config.js');
 
         let aws_account = req.headers.aws_account || req.body.aws_account;
         let aws_region = req.headers.aws_region || req.body.aws_region;

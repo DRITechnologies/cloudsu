@@ -27,11 +27,11 @@
         <fieldset>
             <div class="form-group">
                 <label for="input">Access Key ID</label>
-                <input class="form-control" type="password" name="key" ng-model="account.aws.key" required>
+                <input class="form-control" type="password" name="key" ng-model="account.aws.key">
             </div>
             <div class="form-group">
                 <label for="input">Secret Access Key</label>
-                <input class="form-control" type="password" name="secret" ng-model="account.aws.secret" required>
+                <input class="form-control" type="password" name="secret" ng-model="account.aws.secret">
             </div>
             <div class="form-group">
                 <label for="select">Region</label>
@@ -51,15 +51,15 @@
             <br>
             <div class="form-group">
                 <label for="input">Username</label>
-                <input class="form-control" type="text" name="username" placeholder="admin" ng-model="account.cms.username" required>
+                <input class="form-control" type="text" name="username" placeholder="admin" ng-model="account.cms.username">
             </div>
             <div class="form-group">
                 <label for="input">Server URL</label>
-                <input class="form-control" type="text" placeholder="https://api.chef.io/organizations/dev" ng-model="account.cms.url" required>
+                <input class="form-control" type="text" placeholder="https://api.chef.io/organizations/dev" ng-model="account.cms.url">
             </div>
             <div class="form-group">
                 <label>Key</label>
-                <textarea class="form-control" type="text" ng-model="account.cms.key" row="4" required></textarea>
+                <textarea class="form-control" type="text" ng-model="account.cms.key" row="4"></textarea>
             </div>
 
         </fieldset>
@@ -75,17 +75,18 @@
             <br>
             <div class="form-group">
                 <label for="input">Email</label>
-                <input class="form-control" type="email" placeholder="admin@concord.io" ng-model="account.user.name" required>
+                <input class="form-control" type="email" placeholder="admin@concord.io" ng-model="account.user.name">
             </div>
             <div class="form-group">
                 <label for="input">Password</label>
-                <input class="form-control" type="password" ng-model="account.user.password" required>
+                <input class="form-control" type="password" ng-model="account.user.password">
             </div>
             <div class="form-group">
                 <label for="input">Confirm Password</label>
-                <input class="form-control" type="password" ng-model="account.user.confirm" required>
+                <input class="form-control" type="password" ng-model="account.user.confirm">
             </div>
         </fieldset>
+        <br>
         <alerts></alerts>
         <div class="form-group text-center">
             <button ladda="showSpinner" class="btn btn-primary ladda-button" ng-click="create()">Setup</button>

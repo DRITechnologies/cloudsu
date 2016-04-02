@@ -10,6 +10,7 @@ angular
         $scope.userName = dataStore.getActiveUser();
         $scope.activeAws = dataStore.getActiveAWS();
         $scope.activeRegion = dataStore.getActiveRegion();
+        $scope.isLogin = false;
 
         //send refesh to child controller
         function childRefresh() {
@@ -17,16 +18,18 @@ angular
         }
 
         //get available regions
-        $http.get('/api/v1/regions')
-            .success(function(regions) {
-                $scope.aws_regions = regions;
-            });
+        function refresh() {
+            $http.get('/api/v1/regions')
+                .success(function(regions) {
+                    $scope.aws_regions = regions;
+                });
 
-        //get available aws accounts
-        $http.get('/api/v1/services/list')
-            .success(function(accounts) {
-                $scope.aws_accounts = accounts;
-            });
+            //get available aws accounts
+            $http.get('/api/v1/services/list')
+                .success(function(accounts) {
+                    $scope.aws_accounts = accounts;
+                });
+        }
 
         // ping api request to determine screen if error
         /*
@@ -59,8 +62,7 @@ angular
                     });
                 })
                 .error(function(err) {
-                    //XXX add cool error later on
-                    console.log(err);
+
                 });
 
         };
@@ -99,5 +101,14 @@ angular
                 aws_account: account
             });
         };
+
+        $scope.startup = function() {
+            $scope.isLogin = true;
+            refresh();
+        };
+
+        if ($scope.isLogin) {
+            refresh();
+        }
 
     });

@@ -1,12 +1,12 @@
 /*jshint esversion: 6 */
 'use strict';
 
-const config = require('../config/config.js');
-
 class AttachCmsAuth {
-    constructor () {}
+    constructor() {}
 
-    run (req, res, next) {
+    run(req, res, next) {
+
+        const config = require('../config/config.js');
 
         return config.getServiceAccount({
                 name: 'DEFAULT',

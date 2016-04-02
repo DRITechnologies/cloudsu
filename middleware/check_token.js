@@ -1,16 +1,20 @@
 /*jshint esversion: 6 */
 'use strict';
 
-const config = require('../config/config.js');
 const token_client = require('../utls/token.js');
 const logger = require('../utls/logger.js');
 
 class AttachAwsAuth {
-    constructor () {}
+    constructor() {}
 
-    run (req, res, next) {
+    run(req, res, next) {
 
+        const config = require('../config/config.js');
         const token = req.headers.token || req.body.token;
+
+        if (!token) {
+            return res.status(401).json('Missing token in request');
+        }
 
         return token_client.verify(token)
             .then(response => {

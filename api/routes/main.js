@@ -5,7 +5,8 @@ const _ = require('underscore');
 const config = require('../../config/config.js');
 const err_handler = require('../../utls/error_handler.js');
 const logger = require('../../utls/logger.js');
-
+const fs = require('fs');
+const path = require('path');
 
 class Main {
     constructor() {}
@@ -150,8 +151,34 @@ class Main {
                 res.status(500).json(err);
             });
     }
+
+    exportConfig(req, res) {
+
+        logger.info('Exporting config');
+        const obj = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../secrets.json'), 'utf8'));
+
+        if (obj) {
+            return res.status(200).json(obj);
+        }
+
+        logger.error('Config file not found');
+        res.status(500).json('File not found');
+    }
+
+    importConfig(req, res) {
+        logger.info('Importing config');
+
+        if (!req.body) {
+            return req.status(500).json('Request body is empty');
+        }
+
+        fs.writeFile(path.resolve(__dirname, '../../secrets.json'), JSON.stringify(req.body), function(err) {
+            if (err) {
+                return req.status(500).json('Error writing config to disk');
+            }
+            res.status(200).json('Successfully imported config');
+        });
+
+    }
 }
-
-
-
 module.exports = new Main();

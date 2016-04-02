@@ -92,6 +92,26 @@ angular
                 });
         };
 
+        //export system config (db config)
+        $scope.exportConfig = function() {
+            $scope.toJSON = '';
+            $scope.showSpinner = true;
+            $http.get('/api/v1/system/export')
+                .success(function(config) {
+                    $scope.toJSON = angular.toJson(config);
+                    var blob = new Blob([$scope.toJSON], {
+                        type: 'application/json;charset=utf-8;'
+                    });
+                    var downloadLink = angular.element('<a></a>');
+                    downloadLink.attr('href', window.URL.createObjectURL(blob));
+                    downloadLink.attr('download', 'secrets.json');
+                    downloadLink[0].click();
+                })
+                .error(function(err) {
+                    toastr.error(err, 'Error');
+                });
+        };
+
 
         // load initial data
         refresh();

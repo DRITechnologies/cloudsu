@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('setup', function($scope, $http, $state, dataStore, toastr) {
+    .controller('setup', function($scope, $http, $state, $uibModalInstance, dataStore, toastr, SweetAlert) {
         $scope.showSpinner = false;
         $scope.alerts = [];
 
@@ -35,16 +35,21 @@ angular
                     dataStore.setToken(response.token);
                     dataStore.setActiveAWS($scope.account.aws.name);
                     dataStore.setActiveRegion($scope.account.aws.region);
-                    $state.go('/login');
+                    $uibModalInstance.close(true);
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    toastr.error(err, 'Setup Error');
+                    $scope.alerts.push({
+                        type: 'danger',
+                        msg: err
+                    });
                 });
         };
 
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
+
+
 
     });

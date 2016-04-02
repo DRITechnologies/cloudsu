@@ -1,10 +1,8 @@
 /*jshint esversion: 6 */
 'use strict';
 
-const accounts_client = require('../clients/accounts_client.js');
 const logger = require('../../utls/logger.js');
 const err_handler = require('../../utls/error_handler.js');
-const config = require('../../config/config.js');
 
 
 class Accounts {
@@ -12,7 +10,9 @@ class Accounts {
 
     attemptLogin(req, res) {
 
+        const accounts_client = require('../clients/accounts_client.js');
         const params = req.body;
+
         return accounts_client.checkPassword(params.name, params.password)
             .then(user => {
                 res.status(200)
@@ -25,6 +25,8 @@ class Accounts {
     }
 
     resetPassword(req, res) {
+
+        const accounts_client = require('../clients/accounts_client.js');
 
         return accounts_client.resetPassword(req.user.name, req.body.password)
             .then(response => {
@@ -47,6 +49,7 @@ class Accounts {
             return;
         }
 
+        const config = require('../../config/config.js');
         //not sure why this was set so commenting for now
         //const params = _.extend(req.user, req.body);
 
@@ -71,7 +74,9 @@ class Accounts {
             return;
         }
 
+        const accounts_client = require('../clients/accounts_client.js');
         const params = req.body;
+
         return accounts_client.create(params)
             .then(response => {
                 res.status(200)
@@ -100,6 +105,8 @@ class Accounts {
             return;
         }
 
+        const accounts_client = require('../clients/accounts_client.js');
+
         return accounts_client.delete(name)
             .then(response => {
                 res.status(200)
@@ -121,6 +128,8 @@ class Accounts {
             return;
         }
 
+        const accounts_client = require('../clients/accounts_client.js');
+
         return accounts_client.list()
             .then(users => {
                 res.status(200)
@@ -135,7 +144,9 @@ class Accounts {
 
     checkToken(req, res) {
 
+        const accounts_client = require('../clients/accounts_client.js');
         const token = req.params.token;
+
         return accounts_client.checkToken(token)
             .then(response => {
                 logger.info(response);
@@ -158,6 +169,8 @@ class Accounts {
                 .json(`${req.user.name} is not in the admin group`);
             return;
         }
+
+        const accounts_client = require('../clients/accounts_client.js');
 
         return accounts_client.getServiceToken(req.user)
             .then(response => {

@@ -4,9 +4,7 @@
 const fs = require('fs');
 const _ = require('underscore');
 const path = require('path');
-const config = require('../../config/config.js');
 const logger = require('../../utls/logger.js');
-const secure = require('../../config/secure_config');
 
 //clients
 const ec2_client = require('./ec2_client.js');
@@ -66,6 +64,7 @@ class ConstructTemplate {
 
         const self = this;
         const root_params = _.clone(params);
+        const secure = require('../../config/secure_config');
         const client_db = secure.get('db_client');
 
         return this.build_volumes(params)
@@ -233,6 +232,7 @@ class ConstructTemplate {
 
     get_single_template(template, params) {
 
+        const secure = require('../../config/secure_config');
         const client_db = secure.get('db_client');
         chef_client.init(params.cms);
         const client_body = {
@@ -338,6 +338,8 @@ class ConstructTemplate {
     }
 
     sourceDefaults() {
+
+        const config = require('../../config/config.js');
 
         return config.getAll()
             .then(defaults => {
