@@ -21,7 +21,7 @@ angular
         $scope.openCreateForm = function() {
             var modalInstance = $uibModal.open({
                 animation: true,
-                templateUrl: 'views/modals/createForm.html',
+                templateUrl: 'views/modals/createStack.html',
                 controller: 'createStack',
                 size: 'md'
             });

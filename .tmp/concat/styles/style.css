@@ -2945,3 +2945,6 @@ hr.soften {
 .ace-editor {
     height: 400px;
 }
+.table > thead > tr > th {
+    vertical-align: middle;
+}

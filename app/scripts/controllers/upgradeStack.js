@@ -1,15 +1,15 @@
 angular
     .module('stacks')
-    .controller('upgradeStack', function($scope, $http, $uibModalInstance, stack_name, dataStore) {
+    .controller('upgradeStack', function($scope, $http, $uibModalInstance, dataStore, stack_name, build_size) {
 
         $scope.alerts = [];
         $scope.advanced = false;
         $scope.stack = {};
-        $scope.stack.apps = [];
         $scope.stack.type = 'upgrade';
         $scope.stack.stack_name = stack_name;
         $scope.showSpinner = false;
         $scope.upgrade_options = true;
+        $scope.build_size = build_size;
 
 
         $http.get('/api/v1/ec2/sizes')
@@ -30,17 +30,11 @@ angular
                     $scope.stack.ami = chef.ami;
                     $scope.stack.instance_size = chef.instance_size;
                     $scope.stack.app_name = chef.app_name;
-                    $scope.stack.update_list = chef.update_list;
                 }
 
             });
 
         $scope.upgrade = function() {
-
-            $scope.stack.update_list = [{
-                app_name: $scope.stack.app_name,
-                version: $scope.stack.app_version
-            }];
 
             //show spinner
             $scope.showSpinner = true;

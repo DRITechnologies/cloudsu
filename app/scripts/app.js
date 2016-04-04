@@ -5,10 +5,11 @@
         'ngStorage', //NG Storage
         'angularMoment', //MomentJS
         'underscore', //Underscore
-        'oitozero.ngSweetAlert', //sweet alert
-        'ace', //ace editor
-        'toastr', //toastr library
-        'ngAnimate', // animate for toastr
-        'angular-ladda' //ladda buttons library
+        'oitozero.ngSweetAlert', //Sweet Alert
+        'ace', // Ace Editor
+        'toastr', // Toastr library
+        'ngAnimate', // Animate for toastr
+        'angular-ladda', // Ladda buttons library
+        'ngPrettyJson' // Pretty json library
     ]);
 })();

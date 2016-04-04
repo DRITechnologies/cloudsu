@@ -7,18 +7,6 @@ const _ = require('underscore');
 const Promise = require('bluebird');
 const moment = require('moment');
 const logger = require('./logger.js');
-const config = require('../config/config.js');
-
-//aws
-const autoscaling = Promise.promisifyAll(new AWS.AutoScaling({
-    region: config.get('aws.default.region')
-}));
-const cloudformation = Promise.promisifyAll(new AWS.CloudFormation({
-    region: config.get('aws.default.region')
-}));
-
-const S3_CLIENT = require('../api/s3.js');
-const DEFAULT_S3_URL = config.get('aws.default.bucket.url');
 
 
 function parse_tags(Tags) {
@@ -57,43 +45,51 @@ function parse_tags(Tags) {
 }
 
 function remove_scale_group(params) {
-    const s3_client = new S3_CLIENT();
 
-    return cloudformation.getTemplateAsync({
-            StackName: params.stack_name
+    const config_client = require('../config/config.js');
+    let cloudformation;
+
+    return config_client.getDefaultAws()
+        .then(response => {
+            cloudformation = Promise.promisifyAll(new AWS.CloudFormation(response.aws_account));
+
+            return cloudformation.getTemplateAsync({
+                StackName: params.stack_name
+            });
         })
         .then(response => {
             const template = JSON.parse(response.TemplateBody);
             template.Resources = _.omit(template.Resources, params.omit_list);
-            return s3_client.putObject(params.stack_name, JSON.stringify(template));
+            return template;
         })
-        .then(res => {
-            const url = DEFAULT_S3_URL + params.stack_name;
-            return cloudformation.validateTemplateAsync({
-                TemplateURL: url
-            });
-        })
-        .then(() => {
-            const url = DEFAULT_S3_URL + params.stack_name;
+        .then(template => {
             return cloudformation.updateStackAsync({
                 StackName: params.stack_name,
-                TemplateURL: url
+                TemplateBody: JSON.stringify(template)
             });
         })
         .then(() => {
-            logger.info(`Removed items because of group_terminate_date tag ${params.omit_list}`);
+            logger.info(`Removed items because of terminate_date tag ${params.omit_list}`);
         });
 }
 
 function check_scale_groups() {
+
+    const config_client = require('../config/config.js');
+    let autoscaling;
+
     logger.info('Polling for stale scale-groups');
-    return autoscaling.describeAutoScalingGroupsAsync()
+    return config_client.getDefaultAws()
         .then(response => {
-            const omit_list = {};
+            autoscaling = Promise.promisifyAll(new AWS.AutoScaling(response.aws_account));
+            return autoscaling.describeAutoScalingGroupsAsync();
+        })
+        .then(response => {
+            let omit_list = {};
             return Promise.map(response.AutoScalingGroups, scale_group => {
                     const date_string = _.chain(scale_group.Tags)
                         .find(x => {
-                            return x.Key === 'group_terminate_date';
+                            return x.Key === 'terminate_date';
                         })
                         .value();
 
@@ -165,7 +161,7 @@ function parse_tags(Tags) {
 function start_polling() {
     logger.info('Starting stack cleanup tool');
     repeat(check_scale_groups)
-        .every(15, 'm')
+        .every(1, 'm')
         .start.in(Math.floor(Math.random() * 10) + 1, 'sec');
 }
 

@@ -174,11 +174,11 @@
                                 <tr>
                                     <td><strong>Name:&nbsp;</strong></td>
                                     <td>{{ELB.LoadBalancerName}}</td>
-                                    <i ng-click="detachElb(scaleGroup.AutoScalingGroupName, scaleGroup.LoadBalancerNames[$index].LoadBalancerName)" class="fa fa-times pull-right"></i>
+                                    <td><i ng-click="detachElb(scaleGroup.AutoScalingGroupName, ELB.LoadBalancerName)" class="fa fa-times pull-right"></i></td>
                                 </tr>
                                 <tr>
                                     <td><strong>CNAME:&nbsp;</strong></td>
-                                    <td><a ng-href="https://{{ ELB.DNSName }}">{{ ELB.DNSName }}</a></td>
+                                    <td><a ng-href="http://{{ ELB.DNSName }}">{{ ELB.DNSName }}</a></td>
                                 </tr>
                             </table>
                         </div>

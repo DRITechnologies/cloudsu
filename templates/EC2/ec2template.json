@@ -4,6 +4,10 @@
         "ImageId": "<%= ami %>",
         "InstanceType": "<%= instance_size %>",
         "KeyName": "<%= key %>",
-        "BlockDeviceMappings": []
+        "BlockDeviceMappings": [],
+        "Tags": [{
+            "Key": "app_name",
+            "Value": "<%= app_name %>"
+        }]
     }
 }

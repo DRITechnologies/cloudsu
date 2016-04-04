@@ -2,7 +2,7 @@
     "Type": "AWS::AutoScaling::AutoScalingGroup",
     "Properties": {
         "LaunchConfigurationName": {
-            "Ref": "LC<%= app_name %><%= version %>"
+            "Ref": "LC<%= app_name %><%= app_version %>"
         },
         "MinSize": "<%= min_size %>",
         "MaxSize": "<%= max_size %>",
@@ -10,7 +10,7 @@
         "HealthCheckType": "ELB",
         "Tags": [{
             "Key": "version",
-            "Value": "<%= version %>",
+            "Value": "<%= app_version %>",
             "PropagateAtLaunch": true
         }, {
             "Key": "app_name",
@@ -18,7 +18,7 @@
             "PropagateAtLaunch": true
         }, {
             "Key": "Name",
-            "Value": "<%= stack_name %>-<%= app_name %>-<%= version %>",
+            "Value": "<%= stack_name %>-<%= app_name %>-<%= app_version %>",
             "PropagateAtLaunch": true
         }],
         "LoadBalancerNames": []

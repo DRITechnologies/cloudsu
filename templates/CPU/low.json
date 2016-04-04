@@ -9,12 +9,12 @@
         "EvaluationPeriods": "2",
         "Threshold": "70",
         "AlarmActions": [{
-            "Ref": "SPD<%= app_name %><%= version %>"
+            "Ref": "SPD<%= app_name %><%= app_version %>"
         }],
         "Dimensions": [{
             "Name": "AutoScalingGroupName",
             "Value": {
-                "Ref": "ASG<%= app_name %><%= version %>"
+                "Ref": "ASG<%= app_name %><%= app_version %>"
             }
         }],
         "ComparisonOperator": "LessThanThreshold"

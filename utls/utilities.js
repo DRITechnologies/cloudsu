@@ -10,7 +10,14 @@ class utls_client {
     remove_non_alpha(app) {
 
         app.app_name = app.app_name.replace(/\W/g, '');
-        app.version = app.version.replace(/\W/g, '');
+
+        if (app.version) {
+            app.version = app.version.replace(/\W/g, '');
+        }
+
+        if (app.app_version) {
+            app.app_version = app.app_version.replace(/\W/g, '');
+        }
 
         return app;
 

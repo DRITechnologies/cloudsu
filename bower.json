@@ -32,7 +32,9 @@
         "angular-ladda": "latest",
         "angular-sweetalert": "latest",
         "angular-ace": "latest",
-        "angular-toastr": "latest"
+        "angular-toastr": "latest",
+        "angular-multi-step-form": "latest",
+        "ng-prettyjson": "latest"
     },
     "resolutions": {
         "jquery": "~2.1.4",

@@ -40,7 +40,7 @@ if (cluster.isMaster) {
     require('./utls/queue_rider.js');
 
     //start cleanup tool (cleans up expired resources)
-    //require('./utls/cleanup_tool.js');
+    require('./utls/cleanup_tool.js');
 
     for (let i = 0; i < numCPUs; i++) {
         cluster.fork();

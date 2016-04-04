@@ -98,11 +98,12 @@ $(function () {
         'ngStorage', //NG Storage
         'angularMoment', //MomentJS
         'underscore', //Underscore
-        'oitozero.ngSweetAlert', //sweet alert
-        'ace', //ace editor
-        'toastr', //toastr library
-        'ngAnimate', // animate for toastr
-        'angular-ladda' //ladda buttons library
+        'oitozero.ngSweetAlert', //Sweet Alert
+        'ace', // Ace Editor
+        'toastr', // Toastr library
+        'ngAnimate', // Animate for toastr
+        'angular-ladda', // Ladda buttons library
+        'ngPrettyJson' // Pretty json library
     ]);
 })();
 
@@ -378,18 +379,6 @@ angular
                 });
         }
 
-        // ping api request to determine screen if error
-        /*
-        $http.get('/api/v1/ping/' + dataStore.getToken())
-            .success(function (res) {
-                if (!res.login) {
-                    dataStore.clearAll();
-                    $state.go('login');
-                    return;
-                }
-            });
-        */
-
         //logout method
         $scope.logout = function() {
             dataStore.clearAll();
@@ -625,7 +614,7 @@ angular
         $scope.openCreateForm = function() {
             var modalInstance = $uibModal.open({
                 animation: true,
-                templateUrl: 'views/modals/createForm.html',
+                templateUrl: 'views/modals/createStack.html',
                 controller: 'createStack',
                 size: 'md'
             });
@@ -913,7 +902,7 @@ angular
         };
 
         $scope.detachElb = function(scale_group, elb_name) {
-
+            console.log(scale_group, elb_name);
             SweetAlert.swal({
                     title: '',
                     text: 'Are you sure you want to detach this ELB?',
@@ -995,6 +984,9 @@ angular
                 resolve: {
                     stack_name: function() {
                         return $scope.stack_name;
+                    },
+                    build_size: function() {
+                        return $scope.chef.build_size;
                     }
                 }
             });
@@ -1353,7 +1345,15 @@ angular
         $scope.showSpinner = false;
         $scope.stack.volumes = [];
         $scope.stack.recipes = [];
-        $scope.stack.update_list = [];
+        $scope.activeTab = 'stack-tab';
+        $scope.last_name;
+        $scope.chef_preview = {
+            description: 'Managed by Concord',
+            json_class: 'Chef::Environment',
+            chef_type: 'environment',
+            default_attributes: {},
+            override_attributes: {}
+        };
 
         $http.get('/api/v1/ec2/sample/images')
             .success(function(response) {
@@ -1362,7 +1362,7 @@ angular
 
         $http.get('/api/v1/ec2/sizes')
             .success(function(res) {
-                $scope.instanceSizes = res;
+                $scope.instanceSizes = res.reverse();
             });
 
 
@@ -1391,7 +1391,9 @@ angular
                 $scope.security_groups = response;
             });
 
+
         $scope.createStack = function() {
+
             $scope.showSpinner = true;
 
             // check for alphas
@@ -1412,13 +1414,7 @@ angular
                 $scope.stack.recipes = [];
             }
 
-            var app_obj = {
-                app_name: $scope.stack.app_name,
-                version: $scope.stack.app_version
-            };
-
             if ($scope.stack.build_size === 'HA') {
-                $scope.stack.update_list.push(app_obj);
                 //add all az's from region if true
                 if ($scope.stack.multi_az) {
                     $scope.stack.regions = $scope.regions;
@@ -1454,6 +1450,97 @@ angular
                     });
                 });
 
+        };
+
+        $scope.envChange = function() {
+            // remove last name
+            // causes a name for each letter typed
+            if ($scope.last_name) {
+                const new_defaults = _.omit($scope.chef_preview.default_attributes, [$scope.last_name]);
+                $scope.chef_preview.default_attributes = new_defaults;
+            }
+
+            if ($scope.stack.stack_name) {
+                $scope.chef_preview.name = $scope.stack.stack_name;
+            }
+
+            if ($scope.stack.app_name && $scope.stack.app_version) {
+                $scope.chef_preview.default_attributes[$scope.stack.app_name] = {};
+                $scope.chef_preview.default_attributes[$scope.stack.app_name].version = $scope.stack.app_version;
+            }
+
+            if ($scope.stack.domain) {
+                $scope.chef_preview.default_attributes.domain = $scope.stack.domain;
+            }
+
+            $scope.last_name = _.clone($scope.stack.app_name);
+        };
+
+        $scope.setActiveTab = function(tab) {
+            $scope.activeTab = tab;
+        };
+
+        $scope.isFirst = function() {
+            return ($scope.activeTab === 'stack-tab');
+        };
+
+        $scope.isLast = function() {
+            return ($scope.activeTab === 'scripts-tab');
+        };
+
+        //logic for step wizard
+        $scope.activeNavTab = function(tab) {
+            if ($scope.activeTab === tab) {
+                return 'active';
+            }
+            return;
+        };
+
+        $scope.activeContentTab = function(tab) {
+            if ($scope.activeTab === tab) {
+                return 'tab-pane active';
+            }
+            return 'tab-pane';
+        };
+
+
+        // next decision matrix
+        $scope.next = function(tab) {
+
+            if ($scope.activeTab === 'stack-tab') {
+                $scope.activeTab = 'launch-config-tab';
+            } else if ($scope.activeTab === 'launch-config-tab') {
+                $scope.activeTab = 'storage-tab';
+            } else if ($scope.activeTab === 'storage-tab') {
+                if ($scope.stack.build_size === 'HA' && $scope.stack.create_elb) {
+                    $scope.activeTab = 'elb-tab';
+                } else {
+                    $scope.activeTab = 'scripts-tab';
+                }
+            } else if ($scope.activeTab === 'elb-tab') {
+                $scope.activeTab = 'scripts-tab';
+            }
+
+        };
+
+        // previous decision matrix
+        $scope.previous = function() {
+
+            if ($scope.activeTab === 'launch-config-tab') {
+                $scope.activeTab = 'stack-tab';
+            } else if ($scope.activeTab === 'storage-tab') {
+                $scope.activeTab = 'launch-config-tab';
+            } else if ($scope.activeTab === 'elb-tab') {
+                $scope.activeTab = 'storage-tab';
+            } else if ($scope.activeTab === 'scripts-tab') {
+                if ($scope.stack.build_size === 'HA' && $scope.stack.create_elb) {
+                    $scope.activeTab = 'elb-tab';
+                } else {
+                    $scope.activeTab = 'storage-tab';
+                }
+            }
+
+            return;
         };
 
         // close modal instance
@@ -1866,16 +1953,16 @@ angular
 
 angular
     .module('stacks')
-    .controller('upgradeStack', function($scope, $http, $uibModalInstance, stack_name, dataStore) {
+    .controller('upgradeStack', function($scope, $http, $uibModalInstance, dataStore, stack_name, build_size) {
 
         $scope.alerts = [];
         $scope.advanced = false;
         $scope.stack = {};
-        $scope.stack.apps = [];
         $scope.stack.type = 'upgrade';
         $scope.stack.stack_name = stack_name;
         $scope.showSpinner = false;
         $scope.upgrade_options = true;
+        $scope.build_size = build_size;
 
 
         $http.get('/api/v1/ec2/sizes')
@@ -1896,17 +1983,11 @@ angular
                     $scope.stack.ami = chef.ami;
                     $scope.stack.instance_size = chef.instance_size;
                     $scope.stack.app_name = chef.app_name;
-                    $scope.stack.update_list = chef.update_list;
                 }
 
             });
 
         $scope.upgrade = function() {
-
-            $scope.stack.update_list = [{
-                app_name: $scope.stack.app_name,
-                version: $scope.stack.app_version
-            }];
 
             //show spinner
             $scope.showSpinner = true;

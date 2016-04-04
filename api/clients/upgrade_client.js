@@ -28,12 +28,17 @@ class UpgradeClient {
 
     run(params) {
         //determine upgrade type
-        if (params.upgrade_type === 'Simple') {
-            logger.info('Simple upgrade initiated');
-            return this.simpleUpgrade(params);
-        }
-        logger.info('Advanced upgrade initiated');
-        return this.advancedUpgrade(params);
+        return this.getBuildSize(params)
+            .then(build_size => {
+                if (build_size === 'HA') {
+                    logger.info('HA upgrade initiated');
+                    return this.advancedUpgrade(params);
+                } else if (build_size === 'Single') {
+                    logger.info('Simple upgrade initiated');
+                    return this.simpleUpgrade(params);
+                }
+                throw new Error('Cannot retrieve build size for environment');
+            });
 
     }
 
@@ -45,9 +50,12 @@ class UpgradeClient {
         return chef_client.getEnvironment(params.stack_name)
             .then(environment => {
                 env = environment;
-                params.update_list = env.default_attributes.concord_params.update_list;
-                params.last_update_list = env.default_attributes.concord_params.last_update_list;
-                env.default_attributes.concord_params.update_list = params.last_update_list;
+                params.app_name = env.default_attributes.concord_params.app_name;
+                params.app_version = env.default_attributes.concord_params.last_version;
+                params.last_version = env.default_attributes.concord_params.app_version;
+
+                env.default_attributes[params.app_name].version = params.app_version;
+                env.default_attributes.concord_params.app_version = params.app_version;
                 env.default_attributes.rollback_available = false;
                 return self.connectELB(params);
             })
@@ -67,9 +75,6 @@ class UpgradeClient {
                 return self.updateEnvVersion(env, params);
             })
             .then(() => {
-                return self.updateVersionTags(params);
-            })
-            .then(() => {
                 return self.upgradeFinished(env, params);
             });
 
@@ -78,13 +83,13 @@ class UpgradeClient {
     advancedUpgrade(params) {
 
         const self = this;
-        let env;
+        var env;
 
         function verifyStack() {
             return stacks_client.waitForStack(params.stack_name, 20, 500)
                 .then(() => {
-                    if (params.elb) {
-                        return self.connectELBs(params);
+                    if (params.create_elb) {
+                        return self.connectELB(params);
                     }
                 })
                 .then(() => {
@@ -107,6 +112,8 @@ class UpgradeClient {
                 return self.updateEnvVersion(env, params);
             })
             .then(() => {
+                //extend chef env options to params
+                params = _.extend(_.clone(env.default_attributes.concord_params), params);
                 return self.launchServers(env, params);
             })
             .then(() => {
@@ -114,6 +121,13 @@ class UpgradeClient {
                 return 'Sucessfully started upgrade';
             });
 
+    }
+
+    getBuildSize(params) {
+        return chef_client.getEnvironment(params.stack_name)
+            .then(response => {
+                return response.default_attributes.concord_params.build_size;
+            });
     }
 
     checkEnv(params) {
@@ -136,16 +150,12 @@ class UpgradeClient {
                 return;
             })
             .then(() => {
-                const old_update_list = environment.default_attributes.concord_params.update_list;
-                _.each(params.update_list, app => {
-                    const old_app = _.find(old_update_list, old => {
-                        return old.app_name === app.app_name;
-                    });
 
-                    if (old_app.version === app.version) {
-                        throw new Error(`Upgrade version is already live: ${app.version}`);
-                    }
-                });
+                params.last_version = _.clone(environment.default_attributes.concord_params.app_version);
+
+                if (params.last_version === params.app_version) {
+                    throw new Error(`Upgrade version is already live: ${params.version}`);
+                }
 
                 return environment;
             });
@@ -154,19 +164,25 @@ class UpgradeClient {
 
     upgradeStartSetup(environment, params) {
 
-        const options = _.omit(_.clone(params), ['aws', 'cms', 'aws_account']);
+        const concord_params = environment.default_attributes.concord_params;
 
-        let concord_params = _.clone(environment.default_attributes.concord_params);
-        params.last_update_list = _.clone(concord_params.update_list);
+        const options = _.extend(concord_params, _.omit(_.clone(params), ['aws',
+            'cms',
+            'aws_account',
+            'upgrade_type',
+            'cleanup_type',
+            'force_upgrade'
+        ]));
+
         params.last_environment = _.clone(environment);
-        environment.default_attributes.concord_params = _.extend(concord_params, options);
+        environment.default_attributes.concord_params = options;
         environment.default_attributes.status = 'UPGRADING';
 
         return chef_client.updateEnvironment(environment);
     }
 
     lockNodes(environment, params) {
-        let concord_params = environment.default_attributes.concord_params;
+        let default_attributes = environment.default_attributes;
 
         return chef_client.getEnvironmentNodes(params.stack_name)
             .then(nodes => {
@@ -175,7 +191,7 @@ class UpgradeClient {
                     //get and update node
                     return chef_client.getNode(node)
                         .then(node_body => {
-                            node_body.normal.concord_params = concord_params;
+                            node_body.normal = default_attributes;
                             return chef_client.updateNode(node_body);
                         });
 
@@ -213,28 +229,31 @@ class UpgradeClient {
 
     removeOldServers(params) {
 
-        logger.info(`Removing old servers: ${params.stack_name}`);
+        logger.info(`Removing old servers: ${params.stack_name} version: ${params.last_version}`);
+        let template;
 
         return stacks_client.getTemplate(params.stack_name)
             .then(template_body => {
-                const template = JSON.parse(template_body);
-                return Promise.map(params.last_update_list, app => {
-                        const service = utls.remove_non_alpha(_.clone(app));
-                        const cf_name = service.app_name + service.version;
-                        const omit_list = [`ASG${cf_name}`,
-                            `LC${cf_name}`,
-                            `CPUH${cf_name}`,
-                            `CPUL${cf_name}`,
-                            `SPD${cf_name}`,
-                            `SPU${cf_name}`,
-                            `WC${cf_name}`
-                        ];
-                        template.Resources = _.omit(template.Resources, omit_list);
-                        return;
-                    })
-                    .then(() => {
-                        return stacks_client.updateStack(JSON.stringify(template), params.stack_name);
-                    });
+                template = JSON.parse(template_body);
+                const service = utls.remove_non_alpha(_.clone({
+                    app_name: params.app_name,
+                    version: params.last_version
+                }));
+                const cf_name = service.app_name + service.version;
+                const omit_list = [`ASG${cf_name}`,
+                    `LC${cf_name}`,
+                    `CPUH${cf_name}`,
+                    `CPUL${cf_name}`,
+                    `SPD${cf_name}`,
+                    `SPU${cf_name}`,
+                    `WC${cf_name}`
+                ];
+                template.Resources = _.omit(template.Resources, omit_list);
+                return;
+
+            })
+            .then(() => {
+                return stacks_client.updateStack(JSON.stringify(template), params.stack_name);
             });
     }
 
@@ -246,20 +265,22 @@ class UpgradeClient {
 
         return stacks_client.stack(params.stack_name)
             .then(stack => {
-                return Promise.map(params.last_update_list, app => {
-                    const service = utls.remove_non_alpha(_.clone(app));
-                    const as_name = `ASG${service.app_name}${service.version}`;
-                    const as_group = _.find(stack.StackResources, x => {
-                        return x.LogicalResourceId === as_name;
-                    });
-
-                    return autoscale_client.addTags(as_group, terminate_date);
-
+                const service = utls.remove_non_alpha(_.clone({
+                    app_name: params.app_name,
+                    version: params.last_version
+                }));
+                const as_name = `ASG${service.app_name}${service.version}`;
+                const as_group = _.find(stack.StackResources, x => {
+                    return x.LogicalResourceId === as_name;
                 });
+                if (as_name && as_group) {
+                    return autoscale_client.addTags(as_group, 'terminate_date', terminate_date);
+                }
+                logger.error('Missing data to tag servers with termination date');
             });
     }
 
-    connectELBs(params) {
+    connectELB(params) {
 
         logger.info(`Connecting ELB's for stack: ${params.stack_name}`);
 
@@ -281,9 +302,9 @@ class UpgradeClient {
             environment.default_attributes.rollback_available = true;
         }
 
-        environment.default_attributes.concord_params.last_update_list = params.last_update_list;
         environment.default_attributes.concord_params.upgrade_time = Math.round(+new Date() / 1000);
         environment.default_attributes.status = 'READY';
+
         return chef_client.updateEnvironment(environment);
     }
 
@@ -291,25 +312,14 @@ class UpgradeClient {
 
         logger.info(`Updating environment version: ${params.app_version} stack: ${params.stack_name}`);
 
+        environment.default_attributes[params.app_name].version = params.app_version;
+        environment.default_attributes.concord_params.last_version = params.last_version;
         environment.default_attributes.concord_params.app_version = params.app_version;
-        environment.default_attributes.concord_params.last_upgrade_type = params.build_type;
 
         return chef_client.updateEnvironment(environment);
 
     }
 
-    updateVersionTags(params) {
-
-        logger.info(`Updating tag version ${params.stack_name}`);
-
-        return stacks_client.stack(params.stack_name)
-            .then(stack => {
-                const as_group = _.find(stack.StackResources, x => {
-                    return x.ResourceType === 'AWS::AutoScaling::AutoScalingGroup';
-                });
-                return autoscale_client.addTags(as_group, 'version', params.app_version);
-            });
-    }
 }
 
 module.exports = new UpgradeClient();

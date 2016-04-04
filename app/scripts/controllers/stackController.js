@@ -179,7 +179,7 @@ angular
         };
 
         $scope.detachElb = function(scale_group, elb_name) {
-
+            console.log(scale_group, elb_name);
             SweetAlert.swal({
                     title: '',
                     text: 'Are you sure you want to detach this ELB?',
@@ -261,6 +261,9 @@ angular
                 resolve: {
                     stack_name: function() {
                         return $scope.stack_name;
+                    },
+                    build_size: function() {
+                        return $scope.chef.build_size;
                     }
                 }
             });

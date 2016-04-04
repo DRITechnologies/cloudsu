@@ -35,6 +35,8 @@ class ChefClient {
 
         const default_attributes = {};
         default_attributes.status = 'READY';
+        default_attributes[params.app_name] = {};
+        default_attributes[params.app_name].version = params.app_version;
         default_attributes.rollback_available = false;
         default_attributes.concord_params = concord_params;
 

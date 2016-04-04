@@ -63,167 +63,164 @@ class ConstructTemplate {
     get_ha_template(template, params, defaults) {
 
         const self = this;
-        const root_params = _.clone(params);
+
         const secure = require('../../config/secure_config');
         const client_db = secure.get('db_client');
 
         return this.build_volumes(params)
             .then(volumes => {
 
-                _.each(params.update_list, app => {
+                //combine defaults into flat json
+                let vars = _.defaults(_.clone(params), defaults);
 
-                    //combine defaults into flat json
-                    let vars = _.defaults(_.clone(app), root_params, defaults);
+                //dns
+                vars.dns = [vars.stack_name, '-', vars.app_name, '.', vars.domain].join('');
 
-                    //dns
-                    vars.dns = [vars.stack_name, '-', vars.app_name, '.', vars.domain].join('');
+                //Setup nginx proxy
+                vars.first_boot = {
+                    service_proxy: {
+                        name: 'serviceProxy',
+                        services: {}
+                    }
+                };
 
-                    //Setup nginx proxy
-                    vars.first_boot = {
-                        service_proxy: {
-                            name: 'serviceProxy',
-                            services: {}
+                vars.first_boot = self.get_first_boot(vars.first_boot, vars.app_name, vars.dns, vars.port);
+
+                // cleanup names
+                vars = utls.remove_non_alpha(vars);
+
+                // set wait handle callback
+                vars.node_name = `${vars.stack_name}-${vars.app_name}`;
+                vars.wc_ref = `LC${vars.app_name}${vars.app_version}`;
+                vars.wh_name = `WH${vars.app_name}`;
+                vars.dns_ref = `ELB${vars.app_name}${vars.app_version}`;
+                vars.dns_type = 'DNSName';
+
+                //add client db creds
+                let bootstrap = _.template(BOOTSTRAP_HA);
+                bootstrap = bootstrap(client_db);
+
+                // push asg params into template
+                let asg = _.template(ASG);
+                asg = JSON.parse(asg(vars));
+
+                // wc and wh
+                let lc = _.template(LC);
+                lc = JSON.parse(lc(vars));
+                let wc = _.template(WC);
+                wc = wc(vars);
+
+
+                // cpu
+                let cpu_high = _.template(CPU_HIGH);
+                cpu_high = cpu_high(vars);
+                let cpu_low = _.template(CPU_LOW);
+                cpu_low = cpu_low(vars);
+
+
+                // scale policies
+                let spu = _.template(SP_UP);
+                spu = spu(vars);
+                let spd = _.template(SP_DOWN);
+                spd = spd(vars);
+
+
+                let userdata = _.template(USER_DATA);
+                userdata = JSON.parse(userdata(vars));
+                lc.Properties.UserData = userdata;
+                let metadata = _.template(META_DATA);
+                metadata = JSON.parse(metadata(vars));
+                metadata['AWS::CloudFormation::Init']['chef_register']['files']['/etc/chef/first-boot.json'].content = vars.first_boot;
+                metadata['AWS::CloudFormation::Init']['chef_register']['files']['/tmp/bootstrap.py'].content = String(bootstrap);
+                lc.Metadata = metadata;
+                lc.Properties.BlockDeviceMappings = volumes;
+
+                if (vars.iam_role) {
+                    lc.Properties.IamInstanceProfile = vars.iam_profile;
+                }
+
+
+                const suffix = vars.app_name + vars.app_version;
+
+                if (vars.desired_size) {
+                    asg.Properties.DesiredCapacity = vars.desired_size;
+                }
+
+                lc.Properties.SecurityGroups = vars.security_groups;
+                if (vars.multi_az) {
+                    asg.Properties.AvailabilityZones = vars.regions;
+                } else {
+                    asg.Properties.AvailabilityZones = vars.regions;
+                }
+
+                //add sns topic
+                asg.Properties.NotificationConfigurations = [{
+                    TopicARN: vars.aws.topic_arn,
+                    NotificationTypes: [
+                        'autoscaling:EC2_INSTANCE_LAUNCH',
+                        'autoscaling:EC2_INSTANCE_TERMINATE'
+                    ]
+                }];
+
+
+                // add auto scale group and launch config to template
+                template.Resources[`ASG${suffix}`] = asg;
+                template.Resources[`LC${suffix}`] = lc;
+                // add cpu alerts to template
+                template.Resources[`CPUH${suffix}`] = JSON.parse(cpu_high);
+                template.Resources[`CPUL${suffix}`] = JSON.parse(cpu_low);
+                // add scale policy to template
+                template.Resources[`SPU${suffix}`] = JSON.parse(spu);
+                template.Resources[`SPD${suffix}`] = JSON.parse(spd);
+                // add wait condition to template
+                template.Resources[`WC${suffix}`] = JSON.parse(wc);
+
+                if (vars.type === 'create' || vars.type === 'add') {
+
+                    //only create elb if it is requested
+                    if (vars.elb) {
+                        // elb
+                        vars.dns_ref = `ELB${vars.app_name}`;
+                        let elb = _.template(ELB);
+                        elb = JSON.parse(elb(vars));
+                        elb.Properties.SecurityGroups = vars.elb_security_groups;
+
+                        // multi az settings for ELB
+                        if (vars.multi_az) {
+                            elb.Properties.CrossZone = true;
+                            elb.Properties.AvailabilityZones = vars.regions;
+                        } else {
+                            elb.Properties.AvailabilityZones = vars.regions;
                         }
-                    };
 
-                    vars.first_boot = self.get_first_boot(vars.first_boot, vars.app_name, vars.dns, vars.port);
+                        // add cert and listener for ssl
+                        if (vars.ssl_cert) {
+                            const https_config = {
+                                LoadBalancerPort: '443',
+                                InstanceProtocol: 'HTTPS',
+                                InstancePort: '443',
+                                Protocol: 'HTTPS',
+                                SSLCertificateId: vars.ssl_cert
+                            };
+                            elb.Properties.Listeners.push(https_config);
+                        }
 
-                    // cleanup names
-                    vars = utls.remove_non_alpha(vars);
+                        // add to template
+                        template.Resources[`ELB${vars.app_name}`] = elb;
 
-                    // set wait handle callback
-                    vars.node_name = `${vars.stack_name}-${vars.app_name}`;
-                    vars.wc_ref = `LC${vars.app_name}${vars.version}`;
-                    vars.wh_name = `WH${vars.app_name}`;
-                    vars.dns_ref = `ELB${vars.app_name}${vars.version}`;
-                    vars.dns_type = 'DNSName';
-
-                    //add client db creds
-                    let bootstrap = _.template(BOOTSTRAP_HA);
-                    bootstrap = bootstrap(client_db);
-
-                    // push asg params into template
-                    let asg = _.template(ASG);
-                    asg = JSON.parse(asg(vars));
-
-                    // wc and wh
-                    let lc = _.template(LC);
-                    lc = JSON.parse(lc(vars));
-                    let wc = _.template(WC);
-                    wc = wc(vars);
-
-
-                    // cpu
-                    let cpu_high = _.template(CPU_HIGH);
-                    cpu_high = cpu_high(vars);
-                    let cpu_low = _.template(CPU_LOW);
-                    cpu_low = cpu_low(vars);
-
-
-                    // scale policies
-                    let spu = _.template(SP_UP);
-                    spu = spu(vars);
-                    let spd = _.template(SP_DOWN);
-                    spd = spd(vars);
-
-
-                    let userdata = _.template(USER_DATA);
-                    userdata = JSON.parse(userdata(vars));
-                    lc.Properties.UserData = userdata;
-                    let metadata = _.template(META_DATA);
-                    metadata = JSON.parse(metadata(vars));
-                    metadata['AWS::CloudFormation::Init']['chef_register']['files']['/etc/chef/first-boot.json'].content = vars.first_boot;
-                    metadata['AWS::CloudFormation::Init']['chef_register']['files']['/tmp/bootstrap.py'].content = String(bootstrap);
-                    lc.Metadata = metadata;
-                    lc.Properties.BlockDeviceMappings = volumes;
-
-                    if (vars.iam_role) {
-                        lc.Properties.IamInstanceProfile = vars.iam_profile;
+                    }
+                    //add route 53 to template
+                    if (params.route_53) {
+                        // dns
+                        let route_53 = _.template(ROUTE_53);
+                        route_53 = route_53(vars);
+                        template.Resources[`DNS${vars.app_name}`] = JSON.parse(route_53);
                     }
 
-
-                    const suffix = vars.app_name + vars.version;
-
-                    if (vars.desired_size) {
-                        asg.Properties.DesiredCapacity = vars.desired_size;
-                    }
-
-                    lc.Properties.SecurityGroups = vars.security_groups;
-                    if (vars.multi_az) {
-                        asg.Properties.AvailabilityZones = vars.regions;
-                    } else {
-                        asg.Properties.AvailabilityZones = vars.regions;
-                    }
-
-                    //add sns topic
-                    asg.Properties.NotificationConfigurations = [{
-                        TopicARN: vars.aws.topic_arn,
-                        NotificationTypes: [
-                            'autoscaling:EC2_INSTANCE_LAUNCH',
-                            'autoscaling:EC2_INSTANCE_TERMINATE'
-                        ]
-                    }];
-
-
-                    // add auto scale group and launch config to template
-                    template.Resources[`ASG${suffix}`] = asg;
-                    template.Resources[`LC${suffix}`] = lc;
-                    // add cpu alerts to template
-                    template.Resources[`CPUH${suffix}`] = JSON.parse(cpu_high);
-                    template.Resources[`CPUL${suffix}`] = JSON.parse(cpu_low);
-                    // add scale policy to template
-                    template.Resources[`SPU${suffix}`] = JSON.parse(spu);
-                    template.Resources[`SPD${suffix}`] = JSON.parse(spd);
                     // add wait condition to template
-                    template.Resources[`WC${suffix}`] = JSON.parse(wc);
+                    template.Resources[vars.wh_name] = JSON.parse(WH);
+                }
 
-                    if (vars.type === 'create' || vars.type === 'add') {
-
-                        //only create elb if it is requested
-                        if (vars.elb) {
-                            // elb
-                            vars.dns_ref = `ELB${vars.app_name}`;
-                            let elb = _.template(ELB);
-                            elb = JSON.parse(elb(vars));
-                            elb.Properties.SecurityGroups = vars.elb_security_groups;
-
-                            // multi az settings for ELB
-                            if (vars.multi_az) {
-                                elb.Properties.CrossZone = true;
-                                elb.Properties.AvailabilityZones = vars.regions;
-                            } else {
-                                elb.Properties.AvailabilityZones = vars.regions;
-                            }
-
-                            // add cert and listener for ssl
-                            if (vars.ssl_cert) {
-                                const https_config = {
-                                    LoadBalancerPort: '443',
-                                    InstanceProtocol: 'HTTPS',
-                                    InstancePort: '443',
-                                    Protocol: 'HTTPS',
-                                    SSLCertificateId: vars.ssl_cert
-                                };
-                                elb.Properties.Listeners.push(https_config);
-                            }
-
-                            // add to template
-                            template.Resources[`ELB${vars.app_name}`] = elb;
-
-                        }
-                        //add route 53 to template
-                        if (params.route_53) {
-                            // dns
-                            let route_53 = _.template(ROUTE_53);
-                            route_53 = route_53(vars);
-                            template.Resources[`DNS${vars.app_name}`] = JSON.parse(route_53);
-                        }
-
-                        // add wait condition to template
-                        template.Resources[vars.wh_name] = JSON.parse(WH);
-                    }
-
-                });
                 logger.info(`Addiing stack with resources: ${_.keys(template.Resources)}`);
                 return JSON.stringify(template);
             });

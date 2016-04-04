@@ -9,12 +9,12 @@
         "EvaluationPeriods": "2",
         "Threshold": "90",
         "AlarmActions": [{
-            "Ref": "SPU<%= app_name %><%= version %>"
+            "Ref": "SPU<%= app_name %><%= app_version %>"
         }],
         "Dimensions": [{
             "Name": "AutoScalingGroupName",
             "Value": {
-                "Ref": "ASG<%= app_name %><%= version %>"
+                "Ref": "ASG<%= app_name %><%= app_version %>"
             }
         }],
         "ComparisonOperator": "GreaterThanThreshold"

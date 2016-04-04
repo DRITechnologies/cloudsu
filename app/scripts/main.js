@@ -31,18 +31,6 @@ angular
                 });
         }
 
-        // ping api request to determine screen if error
-        /*
-        $http.get('/api/v1/ping/' + dataStore.getToken())
-            .success(function (res) {
-                if (!res.login) {
-                    dataStore.clearAll();
-                    $state.go('login');
-                    return;
-                }
-            });
-        */
-
         //logout method
         $scope.logout = function() {
             dataStore.clearAll();
