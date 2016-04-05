@@ -26,7 +26,6 @@ angular
 
         $http.get('/api/v1/ec2/sample/images')
             .success(function(response) {
-                console.log(response);
                 $scope.images = response;
             });
 
