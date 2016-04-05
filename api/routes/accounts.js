@@ -3,6 +3,7 @@
 
 const logger = require('../../utls/logger.js');
 const err_handler = require('../../utls/error_handler.js');
+const _ = require('underscore');
 
 
 class Accounts {
@@ -50,8 +51,10 @@ class Accounts {
         }
 
         const config = require('../../config/config.js');
-        //not sure why this was set so commenting for now
-        //const params = _.extend(req.user, req.body);
+
+        if (!req.body.name) {
+            req.body = _.extend(req.user, req.body);
+        }
 
         return config.updateUser(req.body)
             .then(user => {
