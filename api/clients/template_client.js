@@ -342,8 +342,6 @@ class ConstructTemplate {
             .then(defaults => {
 
                 return {
-                    ami: defaults.aws_default_ami,
-                    instance_size: defaults.aws_default_instance_size,
                     min_size: 1,
                     max_size: 3,
                     port: '3000'

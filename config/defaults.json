@@ -68,13 +68,6 @@
         "cc2.8xlarge",
         "cg1.4xlarge"
     ],
-    "aws_default_images": [{
-        "name": "Amazon Linux AMI 2015.09.1 (HVM)",
-        "id": "ami-f0091d91"
-    }, {
-        "name": "Ubuntu Server 14.04 LTS (HVM)",
-        "id": "ami-5189a661"
-    }],
     "region_map": {
         "us-east-1": [
             "us-east-1a",

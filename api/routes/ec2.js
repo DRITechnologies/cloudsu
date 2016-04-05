@@ -49,7 +49,7 @@ class Ec2 {
         const ec2_client = require('../clients/ec2_client.js');
         ec2_client.init(aws_account);
 
-        return ec2_client.sampleImages()
+        return ec2_client.sampleImages(aws_account.region)
             .then(images => {
                 res.status(200)
                     .json(images);

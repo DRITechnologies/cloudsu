@@ -4,6 +4,7 @@
 const _ = require('underscore');
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
+const cache = require('../../utls/cache.js');
 
 
 class Ec2Client {
@@ -40,23 +41,32 @@ class Ec2Client {
             });
     }
 
-    describeImages() {
-        return this.ec2.describeImagesAsync({
-                Owners: ['self', 'amazon']
-            })
-            .then(response => {
-                return response.Images;
-            });
-    }
+    sampleImages(region) {
 
-    sampleImages() {
+        const self = this;
 
-        const config = require('../../config/config.js');
+        return new Promise(function(resolve, reject) {
 
-        return config.get('aws_default_images')
-            .then(images => {
-                return images;
-            });
+            const images = cache.get(`images_${region}`);
+
+            if (images) {
+                return resolve(images);
+            }
+
+            return self.ec2.describeImagesAsync({
+                    Filters: [{
+                        Name: 'name',
+                        Values: [
+                            'amzn-ami-hvm-2016.03.0.x86_64-gp2',
+                            'ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20160114.5'
+                        ]
+                    }]
+                })
+                .then(response => {
+                    cache.set(`images_${region}`, response.Images);
+                    return resolve(response.Images);
+                });
+        });
     }
 
     instanceStoreMap() {
@@ -75,6 +85,7 @@ class Ec2Client {
                 return response.SecurityGroups;
             });
     }
+
 }
 
 module.exports = new Ec2Client();
