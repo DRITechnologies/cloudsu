@@ -1,7 +1,7 @@
 
 # Advanced configurations
 
-## Environment Variables
+### Environment Variables
 
 ### Redis cache (local cache will be used if REDIS_HOST is not set)  
 * REDIS_HOST - IP address or hostname of your Redis server
