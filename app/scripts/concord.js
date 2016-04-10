@@ -1,14 +1,7 @@
 // sizing script
 
 $(document)
-    .ready(function () {
-
-        // i-check checkboxs
-        $('.i-checks')
-            .iCheck({
-                checkboxClass: 'icheckbox_square-green',
-                radioClass: 'iradio_square-green',
-            });
+    .ready(function() {
 
 
         // Full height of sidebar
@@ -49,7 +42,7 @@ $(document)
         }
 
         $(window)
-            .bind('load resize scroll', function () {
+            .bind('load resize scroll', function() {
                 if (!$('body')
                     .hasClass('body-small')) {
                     fix_height();
@@ -58,7 +51,7 @@ $(document)
 
         // Move right sidebar top after scroll
         $(window)
-            .scroll(function () {
+            .scroll(function() {
                 if ($(window)
                     .scrollTop() > 0 && !$('body')
                     .hasClass('fixed-nav')) {
@@ -70,16 +63,16 @@ $(document)
                 }
             });
 
-        setTimeout(function () {
+        setTimeout(function() {
             fix_height();
         });
 
     });
 
 // Minimalize menu when screen is less than 768px
-$(function () {
+$(function() {
     $(window)
-        .bind('load resize', function () {
+        .bind('load resize', function() {
             if ($(document)
                 .width() < 769) {
                 $('body')

@@ -1,6 +1,8 @@
-$(document).ready(function () {
-    $('.i-checks').iCheck({
-        checkboxClass: 'icheckbox_square-green',
-        radioClass: 'iradio_square-green',
-    });
+$(document).ready(function() {
+    // i-check checkboxs
+    $('input')
+        .iCheck({
+            labelHover: false,
+            cursor: true
+        });
 });

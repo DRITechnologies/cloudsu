@@ -102,7 +102,7 @@
                                 "Ref": "AWS::Region"
                             }, ":", {
                                 "Ref": "AWS::AccountId"
-                            }, ": table / ", {
+                            }, ":table/", {
                                 "Ref": "servers"
                             }]]
                         }]

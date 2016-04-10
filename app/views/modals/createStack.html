@@ -46,7 +46,7 @@
                             <label>Build Size
                                 <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="(HA) Created with Auto Scaling Group. (Single) Created with a single EC2 instance."></i>
                             </label>
-                            <select ng-model="stack.build_size" class="form-control" id="select">
+                            <select ng-model="stack.build_size" class="form-control">
                                 <option value="HA">HA</option>
                                 <option value="Single">Single</option>
                             </select>
@@ -64,7 +64,7 @@
                             <input type="text" class="form-control" ng-model="stack.hosted_zone" name="hosted_zone">
                         </div>
 
-                        <div ng-show="stack.build_size === 'HA'" class="i-checks form-group">
+                        <div ng-show="stack.build_size === 'HA'" class="icheckbox form-group">
                             <label>
                                 <i></i>
                                 <input type="checkbox" ng-model="stack.create_elb"> Create ELB?
@@ -245,7 +245,7 @@
 
                         <div class=" form-group">
                             <label>Chef Recipes</label>
-                            <textarea rows="3" class="form-control" ng-model="stack.recipes_string" placeholder="role[base], recipe[nginx], recipe[nodejs], recipe[api]"></textarea>
+                            <textarea rows="3" class="form-control" ng-model="stack.recipes_string" placeholder="role[base], recipe[nginx]"></textarea>
                         </div>
 
                         <div class="form-group">
