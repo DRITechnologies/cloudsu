@@ -130,6 +130,10 @@ class Main {
 
     getServiceAccounts(req, res) {
 
+        if (!req.user.admin) {
+            return res.status(403).json('User is not apart of the admin group');
+        }
+
         return config.getServiceAccounts(req.params.type)
             .then(response => {
                 res.status(200).json(response);
