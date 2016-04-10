@@ -1,10 +1,8 @@
 // model editor view
 angular
     .module('stacks')
-    .controller('chefEditor', function($scope, $http, $uibModalInstance, environment,
-        dataStore) {
+    .controller('chefEditor', function($scope, $http, $uibModalInstance, environment, dataStore, toastr) {
 
-        $scope.alerts = [];
         $scope.showSpinner = false;
         $scope.name = environment.name;
 
@@ -27,10 +25,7 @@ angular
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Chef Error');
                 });
         };
 
@@ -38,7 +33,4 @@ angular
             $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
-        };
     });

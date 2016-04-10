@@ -2,8 +2,6 @@ angular
     .module('stacks')
     .controller('system', function($scope, $http, $uibModal, dataStore, SweetAlert, toastr) {
 
-        $scope.alerts = [];
-
         //to make the ui render correctly
         $scope.admin = true;
 

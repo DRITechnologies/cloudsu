@@ -50,7 +50,7 @@ angular
                                 SweetAlert.swal('Success', user.name + ' admin status has been changed to: ' + user.admin, 'success');
                             })
                             .error(function(err) {
-                                toastr.error(err, 'Application Error');
+                                toastr.error(err, 'Error');
                             });
                     }
                 });

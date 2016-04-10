@@ -1,8 +1,7 @@
 angular
     .module('stacks')
-    .controller('stackRollback', function($scope, $http, $uibModalInstance, stack_name, dataStore) {
+    .controller('stackRollback', function($scope, $http, $uibModalInstance, stack_name, dataStore, toastr) {
 
-        $scope.alerts = [];
         $scope.stack_name = stack_name;
         $scope.showSpinner = false;
 
@@ -12,10 +11,7 @@ angular
                 $scope.rollback_available = response;
             })
             .error(function(err) {
-                $scope.alerts.push({
-                    type: 'danger',
-                    msg: err
-                });
+                toastr.error(err, 'Error');
             });
 
         $scope.rollback = function() {
@@ -29,22 +25,13 @@ angular
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Error');
                 });
         };
 
         $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
         };
-
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
-        };
-
-
 
 
     });

@@ -1,9 +1,8 @@
 angular
     .module('stacks')
-    .controller('import', function($scope, $http, $uibModalInstance) {
-        console.log('opened');
+    .controller('import', function($scope, $http, $uibModalInstance, toastr) {
+
         $scope.showSpinner = false;
-        $scope.alerts = [];
 
 
         $scope.importConfig = function() {
@@ -19,15 +18,8 @@ angular
                 })
                 .error(function(err) {
                     $scope.showSpinner = true;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Error');
                 });
-        };
-
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
         };
 
         $scope.cancel = function() {

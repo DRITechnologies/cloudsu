@@ -1,316 +1,158 @@
 /*jshint esversion: 6 */
 'use strict';
 
-const Promise = require('bluebird');
 const _ = require('underscore');
-const AWS = require('aws-sdk');
 const logger = require('../../utls/logger.js');
-const err_handler = require('../../utls/error_handler.js');
-const fs = require('fs');
-const path = require('path');
-const defaults_file = fs.readFileSync(path.resolve(__dirname, '../../config/defaults.json'), 'utf8');
-const secure = require('../../config/secure_config.js');
 const crypto_client = require('../../utls/crypto_client.js');
 const token = require('../../utls/token.js');
+const err_handler = require('../../utls/error_handler.js');
+const secure = require('../../config/secure_config.js');
+const fs = require('fs');
+const path = require('path');
+const stacks_client = require('../clients/stacks_client.js');
+const iam_client = require('../clients/iam_client.js');
+const sqs_client = require('../clients/sqs_client.js');
+let db;
+
+const SETUP_TEMPLATE = fs.readFileSync(path.resolve(__dirname, '../../templates/SETUP/setup.json'), 'utf8');
+const DEFAULT_FILE = fs.readFileSync(path.resolve(__dirname, '../../config/defaults.json'), 'utf8');
 
 
-function createServerIam(params, db, config_db_arn, servers_db_arn) {
-    const policy = {
-        Version: '2012-10-17',
-        Statement: [{
-            Effect: 'Allow',
-            Action: [
-                'dynamodb:*'
-            ],
-            Resource: [
-                config_db_arn,
-                servers_db_arn
-            ]
-        }]
-    };
-    const iam = Promise.promisifyAll(new AWS.IAM(
-        params.aws
-    ));
-    const username = 'concord_db_access';
-
-    return iam.createUserAsync({
-            UserName: username
-        })
+function finishConfig(params) {
+    return stacks_client.stack(params.stack_name)
         .then(response => {
-            return iam.createAccessKeyAsync({
-                UserName: username
+            //get admin account
+            const concordAdmin = _.find(response.StackResources, function(x) {
+                return x.LogicalResourceId === 'concordAdmin';
             });
-        })
-        .then(response => {
-            let db_key = response.AccessKey;
-            db_key.region = params.aws.region;
-            db_key = _.omit(db_key, 'CreateDate');
-            return secure.save('db', db_key);
-        })
-        .then(response => {
-            return iam.createPolicyAsync({
-                PolicyDocument: JSON.stringify(policy),
-                PolicyName: 'concord_db_access'
+            //get servers account
+            const concordRO = _.find(response.StackResources, function(x) {
+                return x.LogicalResourceId === 'concordRO';
             });
-        })
-        .then(response => {
-            return iam.attachUserPolicyAsync({
-                PolicyArn: response.Policy.Arn,
-                UserName: username
+
+            const concordSqs = _.find(response.StackResources, function(x) {
+                return x.ResourceType === 'AWS::SQS::Queue';
             });
-        })
-        .catch(err => {
-            throw new Error(err);
-        });
 
-}
-
-function createClientIam(params, db, servers_db_arn) {
-    const policy = {
-        Version: '2012-10-17',
-        Statement: [{
-            Effect: 'Allow',
-            Action: [
-                'dynamodb:GetItem'
-            ],
-            Resource: [
-                servers_db_arn
-            ]
-        }]
-    };
-    const iam = Promise.promisifyAll(new AWS.IAM(
-        params.aws
-    ));
-    const username = 'concord_client_access';
-
-    return iam.createUserAsync({
-            UserName: username
-        })
-        .then(response => {
-            return iam.createAccessKeyAsync({
-                UserName: username
+            const concordSns = _.find(response.StackResources, function(x) {
+                return x.ResourceType === 'AWS::SNS::Topic';
             });
-        })
-        .then(response => {
-            let db_key = response.AccessKey;
-            db_key.region = params.aws.region;
-            db_key = _.omit(db_key, 'CreateDate');
-            return secure.save('db_client', db_key);
-        })
-        .then(response => {
-            return iam.createPolicyAsync({
-                PolicyDocument: JSON.stringify(policy),
-                PolicyName: 'concord_client_db_access'
-            });
-        })
-        .then(response => {
-            return iam.attachUserPolicyAsync({
-                PolicyArn: response.Policy.Arn,
-                UserName: username
-            });
-        })
-        .catch(err => {
-            throw new Error(err);
-        });
-
-}
 
 
-function setupQueue(params, db) {
-
-    const queue_name = 'concord';
-    let queue_url;
-    let queue_arn;
-    let sns_topic;
-
-    const sns = Promise.promisifyAll(new AWS.SNS(
-        params.aws
-    ));
-
-    const sqs = Promise.promisifyAll(new AWS.SQS(
-        params.aws
-    ));
-
-    return sqs.createQueueAsync({
-            QueueName: queue_name
-        })
-        .then(url => {
-            logger.info('queue_url', url.QueueUrl);
-            queue_url = url.QueueUrl;
-            return sns.createTopicAsync({
-                Name: queue_name
-            });
-        })
-        .then(topic_arn => {
-            sns_topic = topic_arn.TopicArn;
-            logger.info('created sns topic', sns_topic);
-            return db.update({
-                hash: params.aws.type,
-                range: params.aws.name
-            }, {
-                topic_arn: sns_topic
-            });
-        })
-        .then(() => {
-            logger.info('queue_url', queue_url);
-            return sqs.getQueueAttributesAsync({
-                QueueUrl: queue_url,
-                AttributeNames: ['QueueArn']
-            });
-        })
-        .then(arn => {
-
-            logger.info('adding sns permissions to sqs');
-
-            queue_arn = arn.Attributes.QueueArn;
-            let policy = {
-                'Version': '2012-10-17',
-                'Statement': [{
-                    'Sid': 'Concord SNS Policy',
-                    'Effect': 'Allow',
-                    'Principal': '*',
-                    'Action': 'sqs:SendMessage',
-                    'Resource': queue_arn,
-                    'Condition': {
-                        'ArnEquals': {
-                            'aws:SourceArn': sns_topic
+            return iam_client.createKey(concordAdmin.PhysicalResourceId)
+                .then(account => {
+                    let db_key = account.AccessKey;
+                    db_key.region = params.aws.region;
+                    db_key = _.omit(db_key, 'CreateDate');
+                    return secure.save('db', db_key);
+                })
+                .then(() => {
+                    logger.info('Created access key for config DB');
+                    return iam_client.createKey(concordRO.PhysicalResourceId);
+                })
+                .then(account => {
+                    let db_key = account.AccessKey;
+                    db_key.region = params.aws.region;
+                    db_key = _.omit(db_key, 'CreateDate');
+                    return secure.save('db_client', db_key);
+                })
+                .then(() => {
+                    logger.info('Created RO key for server DB');
+                    return sqs_client.getQueueArn(concordSqs.PhysicalResourceId);
+                })
+                .then(queue_arn => {
+                    return db.update({
+                        hash: params.aws.type,
+                        range: params.aws.name
+                    }, {
+                        queue: {
+                            name: concordSqs.LogicalResourceId,
+                            arn: queue_arn,
+                            url: concordSqs.PhysicalResourceId
                         }
-                    }
-                }]
-            };
-
-            return sqs.setQueueAttributesAsync({
-                Attributes: {
-                    Policy: JSON.stringify(policy)
-                },
-                QueueUrl: queue_url
-            });
-        })
-        .then(() => {
-
-            logger.info(`subscribing ${queue_arn} to topic ${sns_topic}`);
-            return sns.subscribeAsync({
-                Protocol: 'sqs',
-                TopicArn: sns_topic,
-                Endpoint: queue_arn
-            });
-        })
-        .then(() => {
-            return db.update({
-                hash: params.aws.type,
-                range: params.aws.name
-            }, {
-                queue: {
-                    name: queue_name,
-                    arn: queue_arn,
-                    url: queue_url
-                }
-            });
-        })
-        .catch(err => {
-            throw new Error(err);
-        });
-}
-
-function createUser(params, db) {
-
-    let user = params.user;
-    user.invincible = true;
-
-    user.aws_account = params.aws.name;
-    user.aws_region = params.aws.region;
-    user.hash = crypto_client.encrypt(user.password);
-    user.token = token.sign(user.name);
-
-    user = _.omit(user, ['password', 'confirm']);
-
-    return db.insert(user)
-        .then(() => {
-            return user.token;
+                    });
+                })
+                .then(() => {
+                    logger.info('Saving SNS and SQS info to DEFAULT AWS account in DB');
+                    return db.update({
+                        hash: params.aws.type,
+                        range: params.aws.name
+                    }, {
+                        topic_arn: concordSns.PhysicalResourceId
+                    });
+                });
         });
 }
 
 
 class Setup {
+
     constructor() {}
 
     run(req, res) {
 
+        let params = req.body;
+        params.stack_name = 'concord';
+        params.table_name = 'concord_config';
+        const initial_data = JSON.parse(DEFAULT_FILE);
 
-        const params = req.body;
-        const servers_db_name = 'concord_servers';
-        const config_db_name = 'concord_config';
-        const initial_data = JSON.parse(defaults_file);
-        const aws_cred = _.clone(params.aws);
-        const dynasty = require('dynasty')(aws_cred);
-        let servers_db_arn;
-        let config_db_arn;
-        let db;
+        // set creds for each aws service
+        const sqs_cred = _.clone(params.aws);
+        const iam_cred = _.clone(params.aws);
+        const stack_cred = _.clone(params.aws);
 
-        return dynasty.create(config_db_name, {
-                key_schema: {
-                    hash: ['type', 'string'],
-                    range: ['name', 'string']
-                },
-                throughput: {
-                    write: 2,
-                    read: 2
-                }
+        // encrypt aws secret
+        let aws_cred = _.clone(params.aws);
+        aws_cred.secret = crypto_client.encrypt_string(aws_cred.secret);
+
+        // encrypt chef key
+        let chef_account = _.clone(params.cms);
+        chef_account.key = crypto_client.encrypt_string(chef_account.key);
+
+        // encrypt user password
+        let user = params.user;
+        user.aws_account = params.aws.name;
+        user.aws_region = params.aws.region;
+        user.hash = crypto_client.encrypt(user.password);
+        user.token = token.sign(user.name);
+        user.admin = true;
+        user.invincible = true;
+        user = _.omit(user, ['password', 'confirm']);
+
+        // setup dynasty library
+        const dynasty = require('dynasty')(params.aws);
+
+        //init stackclient with create
+        stacks_client.init(stack_cred);
+        iam_client.init(iam_cred);
+        sqs_client.init(sqs_cred);
+
+        return stacks_client.createSetupStack(params.stack_name, SETUP_TEMPLATE)
+            .then(() => {
+                res.status(200).json('Started creation of stack');
+                logger.info(`Created stack ${params.stack_name}`);
+                return stacks_client.waitForStack(params.stack_name, 15, 50);
             })
-            .delay(5000)
-            .then(response => {
-                config_db_arn = response.TableDescription.TableArn;
-                logger.info(`Created DynamoDB ${response.TableDescription.TableArn}`);
-                db = dynasty.table(config_db_name);
-                return dynasty.create(servers_db_name, {
-                    key_schema: {
-                        hash: ['instance_id', 'string']
-                    },
-                    throughput: {
-                        write: 2,
-                        read: 2
-                    }
-                });
-            })
-            .then(response => {
-                servers_db_arn = response.TableDescription.TableArn;
-                logger.info(`Created DynamoDB ${response.TableDescription.TableArn}`);
+            .then(() => {
+                db = dynasty.table(params.table_name);
                 return db.insert(initial_data);
             })
             .then(() => {
-                logger.info('Added initial config data to DynamoDB');
-                let aws_account = _.clone(params.aws);
-                aws_account.secret = crypto_client.encrypt_string(aws_account.secret);
-                return db.insert(aws_account);
+                logger.info('Added initial data to DB');
+                return db.insert(aws_cred);
             })
             .then(() => {
-                logger.info('Added AWS data to DynamoDB');
-                return setupQueue(params, db);
+                logger.info('Encrypted and added AWS account to DB');
+                return db.insert(user);
             })
             .then(() => {
-                logger.info('Created SQS queue');
-                return createServerIam(params, db, config_db_arn, servers_db_arn);
-            })
-            .then(() => {
-
-                logger.info('Created server IAM user');
-                return createClientIam(params, db, servers_db_arn);
-            })
-            .then(() => {
-                logger.info('Created client IAM user');
-                return createUser(params, db);
-            })
-            .then(response => {
-                var chef_account = _.clone(params.cms);
-                chef_account.key = crypto_client.encrypt_string(chef_account.key);
+                logger.info('Hashed and salted admin user password');
+                logger.info('Added admin user to DB');
                 return db.insert(chef_account);
             })
-            .then(response => {
-                logger.info('Added chef account account');
-                res.status(200).json({
-                    info: 'Successful setup',
-                    token: response
-                });
+            .then(() => {
+                logger.info('Added chef account to DB');
+                return finishConfig(params);
             })
             .catch(err => {
                 logger.error(err);
@@ -318,6 +160,8 @@ class Setup {
             });
 
     }
+
+
 }
 
 

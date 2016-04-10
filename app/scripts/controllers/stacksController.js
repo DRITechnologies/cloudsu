@@ -5,8 +5,8 @@ angular
         //Get stacks from AWS
         function refresh() {
             $http.get('/api/v1/stacks')
-                .success(function(res) {
-                    $scope.stacks = res.StackSummaries;
+                .success(function(response) {
+                    $scope.stacks = response;
                 })
                 .error(function(err) {
                     toastr.error(err, 'AWS Error');

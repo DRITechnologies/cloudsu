@@ -7,7 +7,6 @@ const fs = require('fs');
 const logger = require('./logger.js');
 const chef_client = require('../api/clients/chef_client.js');
 
-const secrets_path = 'secrets.json';
 
 function shutdown(message) {
 
@@ -116,16 +115,16 @@ function parseMessages(messages, sqs_url) {
 
 var poll = function() {
 
+    if (!fs.existsSync('secrets.json')) {
+        logger.debug('Initial setup has not been completed (secrets.json missing)');
+        return;
+    }
+
     // needs to be assigned inside the repeating function
     // because of cached db connection info
     const config_client = require('../config/config.js');
     const sqs_client = require('../api/clients/sqs_client.js');
     logger.debug('Polling sqs for new messages');
-
-    if (!fs.existsSync(secrets_path)) {
-        logger.error('Initial setup has not been completed (secrets.json missing)');
-        return;
-    }
 
     let sqs_url;
 
@@ -148,12 +147,8 @@ var poll = function() {
         });
 };
 
-function stub() {
-    poll();
-}
-
 function kick_it() {
-    repeat(stub)
+    repeat(poll)
         .every(21, 's')
         .start.in(Math.floor(Math.random() * 10) + 1, 'sec');
 }

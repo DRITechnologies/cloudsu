@@ -1,8 +1,7 @@
 angular
     .module('stacks')
-    .controller('upgradeStack', function($scope, $http, $uibModalInstance, dataStore, stack_name, build_size) {
+    .controller('upgradeStack', function($scope, $http, $uibModalInstance, dataStore, toastr, stack_name, build_size) {
 
-        $scope.alerts = [];
         $scope.advanced = false;
         $scope.stack = {};
         $scope.stack.type = 'upgrade';
@@ -46,19 +45,12 @@ angular
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Error');
                 });
         };
-
 
         $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
-        };
     });

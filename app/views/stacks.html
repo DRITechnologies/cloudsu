@@ -18,10 +18,9 @@
         </div>
     </div>
 </div>
-<alerts></alerts>
 <div class="wrapper wrapper-content  animated fadeInRight">
     <div class="row">
-        <div class="col-lg-4" ng-repeat="stack in stacks">
+        <div class="col-lg-4" ng-repeat="stack in stacks" style="cursor: pointer;">
             <div ng-class="panelColor(stack.StackStatus)" ng-click="openStack(stack.StackName)">
                 <div class="panel-heading clearfix">
                     <h3 class="panel-title pull-left" style="padding-top: 7.5px;">

@@ -3,6 +3,7 @@
 
 const AWS = require('aws-sdk');
 const repeat = require('repeat');
+const fs = require('fs');
 const _ = require('underscore');
 const Promise = require('bluebird');
 const moment = require('moment');
@@ -74,6 +75,11 @@ function remove_scale_group(params) {
 }
 
 function check_scale_groups() {
+
+    if (!fs.existsSync('secrets.json')) {
+        logger.debug('Initial setup has not been completed (secrets.json missing)');
+        return;
+    }
 
     const config_client = require('../config/config.js');
     let autoscaling;

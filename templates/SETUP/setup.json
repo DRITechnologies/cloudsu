@@ -1,0 +1,165 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Concord Resources",
+    "Resources": {
+        "config": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "AttributeDefinitions": [{
+                    "AttributeName": "type",
+                    "AttributeType": "S"
+                }, {
+                    "AttributeName": "name",
+                    "AttributeType": "S"
+                }],
+                "KeySchema": [{
+                    "AttributeName": "type",
+                    "KeyType": "HASH"
+                }, {
+                    "AttributeName": "name",
+                    "KeyType": "RANGE"
+                }],
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": 2,
+                    "WriteCapacityUnits": 2
+                },
+                "TableName": "concord_config"
+            }
+        },
+        "servers": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "AttributeDefinitions": [{
+                    "AttributeName": "instance_id",
+                    "AttributeType": "S"
+                }],
+                "KeySchema": [{
+                    "AttributeName": "instance_id",
+                    "KeyType": "HASH"
+                }],
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": 2,
+                    "WriteCapacityUnits": 2
+                },
+                "TableName": "concord_servers"
+            }
+        },
+        "concordRO": {
+            "Type": "AWS::IAM::User",
+            "Properties": {}
+        },
+        "concordAdmin": {
+            "Type": "AWS::IAM::User",
+            "Properties": {}
+        },
+        "concordFullPolicy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Action": [
+                            "dynamodb:*"
+                        ],
+                        "Resource": [{
+                            "Fn::Join": ["", ["arn:aws:dynamodb:", {
+                                "Ref": "AWS::Region"
+                            }, ":", {
+                                "Ref": "AWS::AccountId"
+                            }, ":table/", {
+                                "Ref": "config"
+                            }]]
+                        }, {
+                            "Fn::Join": ["", ["arn:aws:dynamodb:", {
+                                "Ref": "AWS::Region"
+                            }, ":", {
+                                "Ref": "AWS::AccountId"
+                            }, ":table/", {
+                                "Ref": "servers"
+                            }]]
+                        }]
+                    }]
+                },
+                "PolicyName": "concord_full_policy",
+                "Users": [{
+                    "Ref": "concordAdmin"
+                }]
+            }
+        },
+        "concordROPolicy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Action": [
+                            "dynamodb:GetItem"
+                        ],
+                        "Resource": [{
+                            "Fn::Join": ["", ["arn:aws:dynamodb:", {
+                                "Ref": "AWS::Region"
+                            }, ":", {
+                                "Ref": "AWS::AccountId"
+                            }, ": table / ", {
+                                "Ref": "servers"
+                            }]]
+                        }]
+                    }]
+                },
+                "PolicyName": "concordROPolicy",
+                "Users": [{
+                    "Ref": "concordRO"
+                }]
+            }
+        },
+        "concordTopic": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+                "DisplayName": "concord_topic",
+                "Subscription": [{
+                    "Endpoint": {
+                        "Fn::GetAtt": ["concordSqs", "Arn"]
+                    },
+                    "Protocol": "sqs"
+                }],
+                "TopicName": "concordTopic"
+            }
+        },
+        "concordSqs": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+                "QueueName": "concordSqs"
+            }
+        },
+        "concordSqsPolicy": {
+            "Type": "AWS::SQS::QueuePolicy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Sid": "Concord SNS Policy",
+                        "Effect": "Allow",
+                        "Principal": "*",
+                        "Action": "sqs:SendMessage",
+                        "Resource": {
+                            "Fn::GetAtt": ["concordSqs", "Arn"]
+                        },
+                        "Condition": {
+                            "ArnEquals": {
+                                "aws:SourceArn": {
+                                    "Ref": "concordTopic"
+                                }
+                            }
+                        }
+                    }]
+                },
+                "Queues": [{
+                    "Ref": "concordSqs"
+                }]
+            }
+        }
+
+    }
+}

@@ -1,11 +1,11 @@
 angular
     .module('stacks')
-    .controller('loginController', function($rootScope, $scope, $http, $state, $uibModal, dataStore) {
+    .controller('loginController', function($rootScope, $scope, $http, $state, $uibModal, dataStore, toastr) {
+
         //set default spinner action
         $scope.showSpinner = false;
         //remove all data in local storage
         dataStore.clearAll();
-        $scope.alerts = [];
 
 
         $scope.attemptLogin = function() {
@@ -53,10 +53,7 @@ angular
                 .error(function(err) {
                     //stop spinnner and present error
                     $scope.showSpinner = false;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Error');
                 });
 
         };
@@ -65,7 +62,7 @@ angular
             //only show setup modal if it has not run before
             $http.get('/api/v1/ping/' + dataStore.getToken())
                 .success(function(res) {
-                    console.log(res);
+
                     if (!res.setup) {
                         $uibModal.open({
                             animation: true,
@@ -80,10 +77,7 @@ angular
                         });
                     } else {
                         //add alert to show that the system has already been setup
-                        $scope.alerts.push({
-                            type: 'danger',
-                            msg: 'System has already been setup'
-                        });
+                        toastr.error('System has already been setup', 'Error');
                     }
                 });
         };
@@ -92,7 +86,7 @@ angular
             //only show setup modal if it has not run before
             $http.get('/api/v1/ping/' + dataStore.getToken())
                 .success(function(res) {
-                    console.log(res);
+
                     if (!res.setup) {
                         $uibModal.open({
                             animation: true,
@@ -102,16 +96,9 @@ angular
                         });
                     } else {
                         //add alert to show that the system has already been setup
-                        $scope.alerts.push({
-                            type: 'danger',
-                            msg: 'System has already been setup'
-                        });
+                        toastr.error('System has already been setup', 'Error');
                     }
                 });
-        };
-
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
         };
 
 

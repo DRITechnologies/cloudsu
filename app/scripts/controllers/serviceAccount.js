@@ -1,8 +1,7 @@
 angular
     .module('stacks')
-    .controller('serviceAccount', function($scope, $http, $uibModalInstance, dataStore, _, account, type) {
+    .controller('serviceAccount', function($scope, $http, $uibModalInstance, dataStore, _, account, type, toastr) {
 
-        $scope.alerts = [];
         $scope.account = account || {};
         $scope.account.type = type;
         $scope.showSpinner = false;
@@ -19,19 +18,12 @@ angular
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Error');
                 });
         };
 
         $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
-        };
-
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
         };
 
     });

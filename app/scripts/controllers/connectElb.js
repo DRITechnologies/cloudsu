@@ -1,8 +1,7 @@
 angular
     .module('stacks')
-    .controller('connectElb', function($scope, $http, $uibModalInstance, elbs, scale_group, dataStore) {
+    .controller('connectElb', function($scope, $http, $uibModalInstance, elbs, scale_group, dataStore, toastr) {
 
-        $scope.alerts = [];
         $scope.elbs = elbs;
         $scope.showSpinner = false;
 
@@ -19,19 +18,12 @@ angular
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'AWS Error');
                 });
         };
 
         $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
-        };
-
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
         };
 
     });

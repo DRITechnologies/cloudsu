@@ -3,7 +3,6 @@
 
 const Promise = require('bluebird');
 const AWS = require('aws-sdk');
-
 const logger = require('../../utls/logger.js');
 
 class SqsClient {

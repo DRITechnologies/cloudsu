@@ -1,10 +1,8 @@
 // model editor view
 angular
     .module('stacks')
-    .controller('templateEditor', function($scope, $http, $uibModalInstance, template, stack_name,
-        dataStore) {
+    .controller('templateEditor', function($scope, $http, $uibModalInstance, template, stack_name, dataStore, toastr) {
 
-        $scope.alerts = [];
         $scope.name = stack_name;
         $scope.showSpinner = false;
 
@@ -16,7 +14,6 @@ angular
             editor.setOption('showPrintMargin', false);
             editor.getSession()
                 .setTabSize(4);
-
         };
 
         $scope.onDeploy = function() {
@@ -34,19 +31,12 @@ angular
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Error');
                 });
         };
 
         $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
-        };
-
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
         };
 
     });

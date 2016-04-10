@@ -37,13 +37,12 @@
                                     {{ account.name }}
                                 </td>
                                 <td>
-                                    <div ng-show="account.name !== 'DEFAULT'" class="btn-toolbar">
-                                        <a class="btn btn-default btn-circle pull-right" ng-click="removeAccount(account)">
-                                            <i class="fa fa-close"></i>
-                                        </a>
-                                        <a class="btn btn-default btn-circle pull-right" ng-click="awsModal(account)">
-                                            <i class="fa fa-cog"></i>
-                                        </a>
+                                    <div ng-show="account.name !== 'DEFAULT'" class="btn-group pull-right">
+                                        <a class="btn btn-default dropdown-toggle pull-right" data-toggle="dropdown"><i class="fa fa-cog"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a ng-click="awsModal(account)">Edit</a></li>
+                                            <li><a ng-click="removeAccount(account)">Remove</a></li>
+                                        </ul>
                                     </div>
                                 </td>
                             </tr>
@@ -59,7 +58,7 @@
                                 </td>
                                 <td>
                                     <div class="btn-toolbar">
-                                        <a class="btn btn-default btn-circle pull-right" ng-click="chefModal()">
+                                        <a class="btn btn-default pull-right" ng-click="chefModal()">
                                             <i class="fa fa-cog"></i>
                                         </a>
                                     </div>

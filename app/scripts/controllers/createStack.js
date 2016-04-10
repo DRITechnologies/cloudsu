@@ -1,8 +1,7 @@
 angular
     .module('stacks')
-    .controller('createStack', function($scope, $http, $state, $uibModalInstance, dataStore, _) {
+    .controller('createStack', function($scope, $http, $state, $uibModalInstance, dataStore, _, toastr) {
 
-        $scope.alerts = [];
         $scope.sgs = [];
         $scope.elb_sgs = [];
         $scope.stack = {};
@@ -67,10 +66,7 @@ angular
 
             // check for alphas
             if (!$scope.stack.stack_name || $scope.stack.stack_name.match(/[^0-9a-z]/i)) {
-                $scope.alerts.push({
-                    type: 'danger',
-                    msg: 'AWS only allows Alphanumeric characters for stack names'
-                });
+                toastr.error('AWS only allows Alphanumeric characters for stack names', 'Error');
                 $scope.showSpinner = false;
                 return;
             }
@@ -113,10 +109,7 @@ angular
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Error');
                 });
 
         };
@@ -208,18 +201,12 @@ angular
                     $scope.activeTab = 'storage-tab';
                 }
             }
-
             return;
         };
 
         // close modal instance
         $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
-        };
-
-        // close alert
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
         };
 
         // adds volume from the form

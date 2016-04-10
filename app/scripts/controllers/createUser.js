@@ -1,9 +1,8 @@
 angular
     .module('stacks')
-    .controller('createUser', function($scope, $http, $state, $uibModalInstance, dataStore, _) {
+    .controller('createUser', function($scope, $http, $state, $uibModalInstance, dataStore, _, toastr) {
 
         // setup defaults
-        $scope.alerts = [];
         $scope.token = false;
         $scope.user = {};
         $scope.user.type = 'USER';
@@ -16,20 +15,14 @@ angular
             if ($scope.user.password !== $scope.user.confirm &&
                 $scope.user.user_type === 'User' &&
                 !$scope.user.email_pass) {
-                return $scope.alerts.push({
-                    type: 'danger',
-                    msg: 'Passwords do not match'
-                });
+                return toastr.error('Passwords do not match', 'Error');
                 // ensure password is at least 8 characters
             } else if ($scope.user.user_type === 'Service' || ($scope.user.email_pass && $scope.user.user_type === 'User')) {
                 //stub so password length is not hit when it is not used
             } else if ($scope.user.password.length < 8 &&
                 $scope.user.user_type === 'User' &&
                 !$scope.user.email_pass) {
-                return $scope.alerts.push({
-                    type: 'danger',
-                    msg: 'Passwords must be at least 8 characters'
-                });
+                return toastr.error('Passwords must be at least 8 characters', 'Error');
             }
 
             //start spinner
@@ -47,17 +40,9 @@ angular
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Error');
                 });
         };
-
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
-        };
-
 
         $scope.cancel = function() {
             $uibModalInstance.close('success');

@@ -1,22 +1,15 @@
 angular
     .module('stacks')
-    .controller('resetPassword', function($scope, $http, $state, $uibModalInstance) {
+    .controller('resetPassword', function($scope, $http, $state, $uibModalInstance, toastr) {
 
-        $scope.alerts = [];
         $scope.showSpinner = false;
 
 
         $scope.save = function() {
             if ($scope.user.password !== $scope.user.confirm) {
-                return $scope.alerts.push({
-                    type: 'danger',
-                    msg: 'Passwords do not match'
-                });
+                return toastr.error('Passwords do not match', 'Error');
             } else if ($scope.user.password < 8) {
-                return $scope.alerts.push({
-                    type: 'danger',
-                    msg: 'Passwords must be at least 8 characters'
-                });
+                return toastr.error('Passwords must be at least 8 characters', 'Error');
             }
 
             //start show spinner
@@ -29,15 +22,8 @@ angular
                 })
                 .error(function(err) {
                     $scope.showSpinner = false;
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: err
-                    });
+                    toastr.error(err, 'Error');
                 });
-        };
-
-        $scope.closeAlert = function(index) {
-            $scope.alerts.splice(index, 1);
         };
 
         $scope.cancel = function() {

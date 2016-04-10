@@ -4,7 +4,6 @@
 const Promise = require('bluebird');
 const _ = require('underscore');
 const chef = require('chef');
-
 const logger = require('../../utls/logger.js');
 
 

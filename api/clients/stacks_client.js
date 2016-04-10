@@ -13,7 +13,7 @@ const logger = require('../../utls/logger.js');
 const template_client = require('./template_client.js');
 const elb_client = require('./elb_client.js');
 
-// Verify client
+//verify client
 const verify = require('../../utls/verify.js');
 
 
@@ -29,24 +29,29 @@ class StacksClient {
     listStacks() {
         logger.info('Getting list of stacks');
         return this.cloudformation.listStacksAsync({
-            StackStatusFilter: [
-                'CREATE_IN_PROGRESS',
-                'CREATE_FAILED',
-                'CREATE_COMPLETE',
-                'ROLLBACK_IN_PROGRESS',
-                'ROLLBACK_FAILED',
-                'ROLLBACK_COMPLETE',
-                'DELETE_IN_PROGRESS',
-                'DELETE_FAILED',
-                'UPDATE_IN_PROGRESS',
-                'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
-                'UPDATE_COMPLETE',
-                'UPDATE_ROLLBACK_IN_PROGRESS',
-                'UPDATE_ROLLBACK_FAILED',
-                'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS',
-                'UPDATE_ROLLBACK_COMPLETE'
-            ]
-        });
+                StackStatusFilter: [
+                    'CREATE_IN_PROGRESS',
+                    'CREATE_FAILED',
+                    'CREATE_COMPLETE',
+                    'ROLLBACK_IN_PROGRESS',
+                    'ROLLBACK_FAILED',
+                    'ROLLBACK_COMPLETE',
+                    'DELETE_IN_PROGRESS',
+                    'DELETE_FAILED',
+                    'UPDATE_IN_PROGRESS',
+                    'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
+                    'UPDATE_COMPLETE',
+                    'UPDATE_ROLLBACK_IN_PROGRESS',
+                    'UPDATE_ROLLBACK_FAILED',
+                    'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS',
+                    'UPDATE_ROLLBACK_COMPLETE'
+                ]
+            })
+            .then(response => {
+                return _.filter(response.StackSummaries, x => {
+                    return x.TemplateDescription === 'Template managed by Concord';
+                });
+            });
 
     }
 
@@ -114,6 +119,16 @@ class StacksClient {
                 //return success message
                 return 'success';
             });
+    }
+
+    createSetupStack(stack_name, template) {
+        return this.cloudformation.createStackAsync({
+            StackName: stack_name,
+            TemplateBody: template,
+            Capabilities: [
+                'CAPABILITY_IAM'
+            ]
+        });
     }
 
     deleteAsg(params) {

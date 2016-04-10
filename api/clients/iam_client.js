@@ -25,6 +25,12 @@ class IamClient {
                 return response.InstanceProfiles;
             });
     }
+
+    createKey(username) {
+        return this.iam.createAccessKeyAsync({
+            UserName: username
+        });
+    }
 }
 
 module.exports = new IamClient();
