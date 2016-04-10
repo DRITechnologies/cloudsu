@@ -45,28 +45,29 @@ class Ec2Client {
 
         const self = this;
 
-        return new Promise(function(resolve, reject) {
+        return cache.get(`images_${region}`)
+            .then(images => {
 
-            const images = cache.get(`images_${region}`);
+                if (images) {
+                    logger.debug(`Using cache for ec2 images: images_${region}`);
+                    return resolve(images);
+                }
 
-            if (images) {
-                return resolve(images);
-            }
+                return self.ec2.describeImagesAsync({
+                        Filters: [{
+                            Name: 'name',
+                            Values: [
+                                'amzn-ami-hvm-2016.03.0.x86_64-gp2',
+                                'ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20160114.5'
+                            ]
+                        }]
+                    })
+                    .then(response => {
+                        cache.set(`images_${region}`, response.Images);
+                        return resolve(response.Images);
+                    });
 
-            return self.ec2.describeImagesAsync({
-                    Filters: [{
-                        Name: 'name',
-                        Values: [
-                            'amzn-ami-hvm-2016.03.0.x86_64-gp2',
-                            'ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20160114.5'
-                        ]
-                    }]
-                })
-                .then(response => {
-                    cache.set(`images_${region}`, response.Images);
-                    return resolve(response.Images);
-                });
-        });
+            });
     }
 
     instanceStoreMap() {

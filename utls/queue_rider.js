@@ -131,7 +131,7 @@ var poll = function() {
     return config_client.getDefaultAws()
         .then(response => {
             sqs_url = response.queue.url;
-            sqs_client.init(response.aws_account);
+            sqs_client.init(response.aws);
             return sqs_client.getMessage(sqs_url);
         })
         .then(messages => {

@@ -1,26 +1,71 @@
 /*jshint esversion: 6 */
 'use strict';
 
-const NodeCache = require('node-cache');
-const Cache = new NodeCache({
-    stdTTL: 3000,
-    checkperiod: 150
-});
+const _ = require('underscore');
+const logger = require('./logger.js');
 
-class cache {
-    constructor() {}
+function cache() {}
 
-    get(key) {
-        return Cache.get(key);
-    }
+if (process.env.REDIS_HOST) {
+    const options = _.extend({
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT
+    }, {
+        password: process.env.REDIS_PASSWORD
+    });
+    const redis = require('redis-node');
+    var client = redis.createClient(options);
 
-    set(key, obj) {
-        return Cache.set(key, obj);
-    }
+    //event listeners
+    client.on('connect', function() {
+        logger.debug(`Successful connection to redis: ${options.host} port: ${options.port}`);
+    });
+    client.on("error", function(err) {
+        logger.error(err);
+    });
 
-    flush() {
-        return Cache.flushAll();
-    }
+    cache.prototype.get = function(key) {
+        return new Promise(function(resolve, reject) {
+            client.get(key, function(err, value) {
+                if (err) {
+                    return reject(err);
+                }
+
+                return resolve(JSON.parse(value));
+            });
+        });
+    };
+
+    cache.prototype.set = function(key, obj) {
+        return client.set(key, JSON.stringify(obj));
+    };
+
+    cache.prototype.flush = function() {
+        return client.flushall();
+    };
+
+
+} else {
+    const NodeCache = require('node-cache');
+    var client = new NodeCache({
+        stdTTL: 3000,
+        checkperiod: 150
+    });
+
+
+    cache.prototype.get = function(key) {
+        return new Promise(function(resolve, reject) {
+            return resolve(client.get(key));
+        });
+    };
+
+    cache.prototype.set = function(key, obj) {
+        return client.set(key, obj);
+    };
+
+    cache.prototype.flush = function() {
+        return client.flushAll();
+    };
 }
 
 

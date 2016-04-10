@@ -52,7 +52,7 @@ function remove_scale_group(params) {
 
     return config_client.getDefaultAws()
         .then(response => {
-            cloudformation = Promise.promisifyAll(new AWS.CloudFormation(response.aws_account));
+            cloudformation = Promise.promisifyAll(new AWS.CloudFormation(response.aws));
 
             return cloudformation.getTemplateAsync({
                 StackName: params.stack_name
@@ -87,7 +87,7 @@ function check_scale_groups() {
     logger.info('Polling for stale scale-groups');
     return config_client.getDefaultAws()
         .then(response => {
-            autoscaling = Promise.promisifyAll(new AWS.AutoScaling(response.aws_account));
+            autoscaling = Promise.promisifyAll(new AWS.AutoScaling(response.aws));
             return autoscaling.describeAutoScalingGroupsAsync();
         })
         .then(response => {
