@@ -11,25 +11,36 @@ const email_client = require('../../utls/email.js');
 const logger = require('../../utls/logger.js');
 const path = require('path');
 const fs = require('fs');
+const validator = require('validator');
 
 class AccountsClient {
     constructor() {}
 
     checkPassword(name, password) {
 
+        console.log(name);
+        console.log(typeof name);
+
+        //validate email
+        if (!name) {
+            throw 'Email could not be validated';
+        } else if (!validator.isEmail(name)) {
+            throw 'Email could not be validated';
+        }
+
         // check password against db
         return config.getUser(name)
             .then(user => {
 
                 if (!user) {
-                    throw new Error('Incorrect email and password combination');
+                    throw 'Incorrect email and password combination';
                 } else if (crypto_client.check_password(user.hash, password)) {
                     logger.info(`Successful login attempt: ${name}`);
                     user.token = token_client.sign(user.name);
                     return user;
                 } else {
                     logger.error(`Failed login attempt: ${name}`);
-                    throw new Error('Incorrect email and password combination');
+                    throw 'Incorrect email and password combination';
                 }
 
             });

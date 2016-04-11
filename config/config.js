@@ -10,14 +10,11 @@ const crypto_client = require('../utls/crypto_client.js');
 function decrypt(account) {
 
     var key;
-    var account;
 
     if (account.type === 'CMS') {
         key = account.key;
     } else if (account.type === 'AWS') {
         key = account.secret;
-    } else {
-        return account;
     }
 
     return crypto_client.decrypt_string(key)
@@ -63,31 +60,28 @@ class Config {
 
     get(key) {
 
-        return new Promise(function(resolve, reject) {
+        const db = require('../utls/db.js');
 
-            const db = require('../utls/db.js');
+        logger.info(`Getting data from db for key: ${key}`);
+        return cache.get('GLOBAL')
+            .then(global_config => {
 
-            logger.info(`Getting data from db for key: ${key}`);
-            return cache.get('GLOBAL')
-                .then(val => {
-
-                    if (global_config) {
-                        const val = global_config[key];
-                        if (val) {
-                            return resolve(val);
-                        }
+                if (global_config) {
+                    const val = global_config[key];
+                    if (val) {
+                        return val;
                     }
-                    // get settings from globals
-                    return db.find({
-                            hash: 'SETTINGS',
-                            range: 'GLOBAL'
-                        })
-                        .then(settings => {
-                            cache.set('GLOBAL', settings);
-                            return resolve(settings[key]);
-                        });
-                });
-        });
+                }
+                // get settings from globals
+                return db.find({
+                        hash: 'SETTINGS',
+                        range: 'GLOBAL'
+                    })
+                    .then(settings => {
+                        cache.set('GLOBAL', settings);
+                        return settings[key];
+                    });
+            });
     }
 
     getAll() {

@@ -190,8 +190,6 @@
                                 <thead>
                                     <tr>
                                         <td>
-                                        </td>
-                                        <td>
                                             ID
                                         </td>
                                         <td>
@@ -213,7 +211,6 @@
                                 </thead>
                                 <tbody>
                                     <tr ng-repeat="instance in scaleGroup.Instances" ng-class="rowColor(instance.HealthStatus, instance.LifecycleState)">
-                                        <td class="fa fa-cube"></td>
                                         <td> {{ instance.InstanceId }} </td>
                                         <td> {{ instance.PublicIpAddress }} / {{ instance.PrivateIpAddress }} </td>
                                         <td><i ng-class="isHappy(instance.HealthStatus)"></i> {{ instance.HealthStatus }} </td>

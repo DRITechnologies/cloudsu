@@ -9,10 +9,6 @@ angular
 
 
         $scope.attemptLogin = function() {
-            // return if empty form
-            if (!$scope.user) {
-                return;
-            }
 
             // setup http body
             var user = {

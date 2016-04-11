@@ -5,6 +5,7 @@ const _ = require('underscore');
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
 const cache = require('../../utls/cache.js');
+const logger = require('../../utls/logger.js');
 
 
 class Ec2Client {
@@ -50,7 +51,7 @@ class Ec2Client {
 
                 if (images) {
                     logger.debug(`Using cache for ec2 images: images_${region}`);
-                    return resolve(images);
+                    return images;
                 }
 
                 return self.ec2.describeImagesAsync({
@@ -64,7 +65,7 @@ class Ec2Client {
                     })
                     .then(response => {
                         cache.set(`images_${region}`, response.Images);
-                        return resolve(response.Images);
+                        return response.Images;
                     });
 
             });

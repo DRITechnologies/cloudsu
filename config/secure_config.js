@@ -4,7 +4,6 @@
 const _ = require('underscore');
 const Promise = require('bluebird');
 const path = require('path');
-const cache = require('../utls/cache.js');
 const SECURE_SETTINGS_FILE = '../secrets.json';
 const secrets_file = path.resolve(__dirname, SECURE_SETTINGS_FILE);
 const logger = require('../utls/logger.js');

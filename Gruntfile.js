@@ -51,7 +51,6 @@ module.exports = function(grunt) {
                 jshintrc: '.jshintrc',
                 reporter: require('jshint-stylish')
             },
-
             build: ['Gruntfile.js', 'app/scripts/**/*.js', 'api/**/*.js', 'utls/**/*.js', 'config/**/*.js']
         },
 

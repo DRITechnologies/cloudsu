@@ -24,7 +24,8 @@
         "jsonwebtoken": "latest",
         "password-generator": "latest",
         "nodemailer": "latest",
-        "redis-node": "latest"
+        "redis-node": "latest",
+        "validator": "latest"
     },
     "devDependencies": {
         "angular": "latest",
@@ -32,10 +33,6 @@
         "angular-ui-bootstrap": "latest",
         "bootstrap": "latest",
         "grunt": "latest",
-        "grunt-nodemon": "latest",
-        "jshint": "latest",
-        "jshint-stylish": "latest",
-        "ngstorage": "latest",
         "grunt-concurrent": "latest",
         "grunt-contrib-clean": "latest",
         "grunt-contrib-concat": "latest",
@@ -43,12 +40,18 @@
         "grunt-contrib-copy": "latest",
         "grunt-contrib-cssmin": "latest",
         "grunt-contrib-htmlmin": "latest",
+        "grunt-contrib-jshint": "^1.0.0",
         "grunt-contrib-less": "latest",
         "grunt-contrib-uglify": "latest",
         "grunt-contrib-watch": "latest",
+        "grunt-nodemon": "latest",
         "grunt-usemin": "latest",
+        "jshint": "latest",
+        "jshint-stylish": "latest",
         "load-grunt-tasks": "latest",
-        "time-grunt": "latest"
+        "ngstorage": "latest",
+        "time-grunt": "latest",
+        "grunt-filerev": "latest"
     },
     "scripts": {
         "start": "grunt",

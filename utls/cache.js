@@ -3,6 +3,7 @@
 
 const _ = require('underscore');
 const logger = require('./logger.js');
+const Promise = require('bluebird');
 
 function cache() {}
 
@@ -20,7 +21,7 @@ if (process.env.REDIS_HOST) {
     client.on('connect', function() {
         logger.debug(`Successful connection to redis: ${options.host} port: ${options.port}`);
     });
-    client.on("error", function(err) {
+    client.on('error', function(err) {
         logger.error(err);
     });
 
