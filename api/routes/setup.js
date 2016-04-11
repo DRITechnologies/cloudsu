@@ -96,10 +96,17 @@ class Setup {
         params.table_name = 'concord_config';
         const initial_data = JSON.parse(DEFAULT_FILE);
 
+        const aws_account = {
+            region: params.aws.region,
+            accessKeyId: params.aws.key,
+            secretAccessKey: params.aws.secret
+        };
+
         // set creds for each aws service
-        const sqs_cred = _.clone(params.aws);
-        const iam_cred = _.clone(params.aws);
-        const stack_cred = _.clone(params.aws);
+        const sqs_cred = _.clone(aws_account);
+        const iam_cred = _.clone(aws_account);
+        const stacks_cred = _.clone(aws_account);
+        const dynasty_cred = _.clone(aws_account);
 
         // encrypt aws secret
         let aws_cred = _.clone(params.aws);
@@ -120,10 +127,10 @@ class Setup {
         user = _.omit(user, ['password', 'confirm']);
 
         // setup dynasty library
-        const dynasty = require('dynasty')(params.aws);
+        const dynasty = require('dynasty')(dynasty_cred);
 
         //init stackclient with create
-        stacks_client.init(stack_cred);
+        stacks_client.init(stacks_cred);
         iam_client.init(iam_cred);
         sqs_client.init(sqs_cred);
 

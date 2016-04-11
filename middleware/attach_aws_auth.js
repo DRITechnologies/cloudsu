@@ -32,8 +32,8 @@ class AttachAwsAuth {
                 req.aws = response;
                 req.aws_account = {
                     region: req.headers.aws_region,
-                    accessKeyId: response.accessKeyId,
-                    secretAccessKey: response.secretAccessKey
+                    accessKeyId: response.aws.accessKeyId,
+                    secretAccessKey: response.aws.secretAccessKey
                 };
                 return next();
             });
