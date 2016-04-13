@@ -50,12 +50,12 @@ class UpgradeClient {
         return chef_client.getEnvironment(params.stack_name)
             .then(environment => {
                 env = environment;
-                params.app_name = env.default_attributes.concord_params.app_name;
-                params.app_version = env.default_attributes.concord_params.last_version;
-                params.last_version = env.default_attributes.concord_params.app_version;
+                params.app_name = env.default_attributes._params.app_name;
+                params.app_version = env.default_attributes.cloudsu_params.last_version;
+                params.last_version = env.default_attributes.cloudsu_params.app_version;
 
                 env.default_attributes[params.app_name].version = params.app_version;
-                env.default_attributes.concord_params.app_version = params.app_version;
+                env.default_attributes.cloudsu_params.app_version = params.app_version;
                 env.default_attributes.rollback_available = false;
                 return self.connectELB(params);
             })
@@ -113,7 +113,7 @@ class UpgradeClient {
             })
             .then(() => {
                 //extend chef env options to params
-                params = _.extend(_.clone(env.default_attributes.concord_params), params);
+                params = _.extend(_.clone(env.default_attributes.cloudsu_params), params);
                 return self.launchServers(env, params);
             })
             .then(() => {
@@ -126,7 +126,7 @@ class UpgradeClient {
     getBuildSize(params) {
         return chef_client.getEnvironment(params.stack_name)
             .then(response => {
-                return response.default_attributes.concord_params.build_size;
+                return response.default_attributes.cloudsu_params.build_size;
             });
     }
 
@@ -151,7 +151,7 @@ class UpgradeClient {
             })
             .then(() => {
 
-                params.last_version = _.clone(environment.default_attributes.concord_params.app_version);
+                params.last_version = _.clone(environment.default_attributes.cloudsu_params.app_version);
 
                 if (params.last_version === params.app_version) {
                     throw new Error(`Upgrade version is already live: ${params.version}`);
@@ -164,9 +164,9 @@ class UpgradeClient {
 
     upgradeStartSetup(environment, params) {
 
-        const concord_params = environment.default_attributes.concord_params;
+        const cloudsu_params = environment.default_attributes.cloudsu_params;
 
-        const options = _.extend(concord_params, _.omit(_.clone(params), ['aws',
+        const options = _.extend(cloudsu_params, _.omit(_.clone(params), ['aws',
             'cms',
             'aws_account',
             'upgrade_type',
@@ -175,7 +175,7 @@ class UpgradeClient {
         ]));
 
         params.last_environment = _.clone(environment);
-        environment.default_attributes.concord_params = options;
+        environment.default_attributes.cloudsu_params = options;
         environment.default_attributes.status = 'UPGRADING';
 
         return chef_client.updateEnvironment(environment);
@@ -204,8 +204,8 @@ class UpgradeClient {
 
         logger.info(`Launching servers for stack: ${params.stack_name}`);
 
-        const concord_params = environment.default_attributes.concord_params;
-        const launch_params = _.extend(_.clone(params), concord_params);
+        const cloudsu_params = environment.default_attributes.cloudsu_params;
+        const launch_params = _.extend(_.clone(params), cloudsu_params);
 
         return stacks_client.getTemplate(params.stack_name)
             .then(template => {
@@ -302,7 +302,7 @@ class UpgradeClient {
             environment.default_attributes.rollback_available = true;
         }
 
-        environment.default_attributes.concord_params.upgrade_time = Math.round(+new Date() / 1000);
+        environment.default_attributes.cloudsu_params.upgrade_time = Math.round(+new Date() / 1000);
         environment.default_attributes.status = 'READY';
 
         return chef_client.updateEnvironment(environment);
@@ -313,8 +313,8 @@ class UpgradeClient {
         logger.info(`Updating environment version: ${params.app_version} stack: ${params.stack_name}`);
 
         environment.default_attributes[params.app_name].version = params.app_version;
-        environment.default_attributes.concord_params.last_version = params.last_version;
-        environment.default_attributes.concord_params.app_version = params.app_version;
+        environment.default_attributes.cloudsu_params.last_version = params.last_version;
+        environment.default_attributes.cloudsu_params.app_version = params.app_version;
 
         return chef_client.updateEnvironment(environment);
 

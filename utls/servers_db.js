@@ -21,7 +21,7 @@ function servers_db() {
     logger.debug(`setup DynamoDB servers connection: ${db_cred.region}`);
 
     //setup table connection
-    return dynasty.table('concord_servers');
+    return dynasty.table('cloudsu_servers');
 
 }
 

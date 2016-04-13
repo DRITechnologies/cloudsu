@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 const numCPUs = require('os').cpus().length;
 
 // determine listening port
-const listenPort = process.env.CONCORD_PORT || 3000;
+const listenPort = process.env.CLOUDSU_PORT || 3000;
 
 
 // express configuration

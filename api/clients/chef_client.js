@@ -18,9 +18,9 @@ class ChefClient {
     createEnvironment(params) {
 
         logger.info(`Creating chef environment: ${params.stack_name}`);
-        let concord_params = _.clone(params);
+        let cloudsu_params = _.clone(params);
 
-        concord_params = _.omit(concord_params, [
+        cloudsu_params = _.omit(cloudsu_params, [
             'elb_groups_string',
             'instance_groups_string',
             'cms_validator',
@@ -37,11 +37,11 @@ class ChefClient {
         default_attributes[params.app_name] = {};
         default_attributes[params.app_name].version = params.app_version;
         default_attributes.rollback_available = false;
-        default_attributes.concord_params = concord_params;
+        default_attributes.cloudsu_params = cloudsu_params;
 
         const environment = {
             name: params.stack_name,
-            description: 'Managed by Concord',
+            description: 'Managed by cloudsu',
             json_class: 'Chef::Environment',
             chef_type: 'environment',
             cookbook_versions: {},

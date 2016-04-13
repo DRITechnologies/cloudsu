@@ -11,7 +11,7 @@ const logger = require('./logger.js');
 const transporter = nodemailer.createTransport();
 // setup defualt e-mail data
 var mailOptions = {
-    from: '"Concord" <no-reply@concord.io>', // sender address
+    from: '"cloudsu" <no-reply@cloudsu.io>', // sender address
     subject: 'New Account ✔', // Subject line
 };
 

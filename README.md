@@ -9,5 +9,5 @@
 * REDIS_PASSWORD - Redis password for authentication (not required)
 
 ### Application settings
-* CONCORD_PORT - Http listening port for the server (default: 3000)
-* CONCORD_LOG_LEVEL - Winston log level (default: debug)
+* CLOUDSU_PORT - Http listening port for the server (default: 3000)
+* CLOUDSU_LOG_LEVEL - Winston log level (default: debug)

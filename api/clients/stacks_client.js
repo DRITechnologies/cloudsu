@@ -49,7 +49,7 @@ class StacksClient {
             })
             .then(response => {
                 return _.filter(response.StackSummaries, x => {
-                    return x.TemplateDescription === 'Template managed by Concord';
+                    return x.TemplateDescription === 'Template managed by cloudsu';
                 });
             });
 
@@ -103,7 +103,7 @@ class StacksClient {
                             TemplateBody: template,
                             Tags: [{
                                 Key: 'stack_type',
-                                Value: 'Concord'
+                                Value: 'cloudsu'
                             }]
                         });
                     });

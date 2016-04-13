@@ -16,7 +16,7 @@ angular
         $scope.activeTab = 'stack-tab';
         $scope.last_name;
         $scope.chef_preview = {
-            description: 'Managed by Concord',
+            description: 'Managed by cloudsu',
             json_class: 'Chef::Environment',
             chef_type: 'environment',
             default_attributes: {},

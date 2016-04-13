@@ -21,7 +21,7 @@ angular
 
                 var defaults = response.default_attributes;
                 if (defaults) {
-                    var chef = defaults.concord_params;
+                    var chef = defaults.cloudsu_params;
                     $scope.stack.min_size = chef.min_size;
                     $scope.stack.desired_size = chef.desired_size;
                     $scope.stack.max_size = chef.max_size;

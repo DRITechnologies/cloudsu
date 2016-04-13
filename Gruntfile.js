@@ -21,7 +21,7 @@ module.exports = function(grunt) {
     grunt.initConfig({
 
         // Project settings
-        concord: appConfig,
+        cloudsu: appConfig,
 
         // get the configuration info from package.json ----------------------------
         // this way we can use things like name and version (pkg.name)
@@ -97,8 +97,8 @@ module.exports = function(grunt) {
                     dot: true,
                     src: [
                         '.tmp',
-                        '<%= concord.dist %>/{,*/}*',
-                        '!<%= concord.dist %>/.git*'
+                        '<%= cloudsu.dist %>/{,*/}*',
+                        '!<%= cloudsu.dist %>/.git*'
                     ]
                 }]
             },
@@ -110,8 +110,8 @@ module.exports = function(grunt) {
                 files: [{
                     expand: true,
                     dot: true,
-                    cwd: '<%= concord.app %>',
-                    dest: '<%= concord.dist %>',
+                    cwd: '<%= cloudsu.app %>',
+                    dest: '<%= cloudsu.dist %>',
                     src: [
                         '*.{ico,png,txt}',
                         '.htaccess',
@@ -125,24 +125,24 @@ module.exports = function(grunt) {
                     dot: true,
                     cwd: 'app/styles',
                     src: ['fonts/*.*'],
-                    dest: '<%= concord.dist %>'
+                    dest: '<%= cloudsu.dist %>'
                 }, {
                     expand: true,
                     dot: true,
                     cwd: 'bower_components/fontawesome',
                     src: ['fonts/*.*'],
-                    dest: '<%= concord.dist %>'
+                    dest: '<%= cloudsu.dist %>'
                 }, {
                     expand: true,
                     dot: true,
                     cwd: 'bower_components/bootstrap',
                     src: ['fonts/*.*'],
-                    dest: '<%= concord.dist %>'
+                    dest: '<%= cloudsu.dist %>'
                 }]
             },
             styles: {
                 expand: true,
-                cwd: '<%= concord.app %>/styles',
+                cwd: '<%= cloudsu.app %>/styles',
                 dest: '.tmp/styles/',
                 src: '{,*/}*.css'
             }
@@ -151,9 +151,9 @@ module.exports = function(grunt) {
         filerev: {
             dist: {
                 src: [
-                    '<%= concord.dist %>/scripts/{,*/}*.js',
-                    '<%= concord.dist %>/styles/{,*/}*.css',
-                    '<%= concord.dist %>/styles/fonts/*'
+                    '<%= cloudsu.dist %>/scripts/{,*/}*.js',
+                    '<%= cloudsu.dist %>/styles/{,*/}*.css',
+                    '<%= cloudsu.dist %>/styles/fonts/*'
                 ]
             }
         },
@@ -168,9 +168,9 @@ module.exports = function(grunt) {
                 },
                 files: [{
                     expand: true,
-                    cwd: '<%= concord.dist %>',
+                    cwd: '<%= cloudsu.dist %>',
                     src: ['*.html', 'views/{,*/}*.html'],
-                    dest: '<%= concord.dist %>'
+                    dest: '<%= cloudsu.dist %>'
                 }]
             }
         },

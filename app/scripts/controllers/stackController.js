@@ -143,7 +143,7 @@ angular
                     if (defaults) {
                         $scope.chef_status = defaults.status;
                         $scope.rollback_available = defaults.rollback_available;
-                        $scope.chef = defaults.concord_params;
+                        $scope.chef = defaults.cloudsu_params;
                     }
                 })
                 .error(function(err) {

@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Concord Resources",
+    "Description": "cloudsu Resources",
     "Resources": {
         "config": {
             "Type": "AWS::DynamoDB::Table",
@@ -23,7 +23,7 @@
                     "ReadCapacityUnits": 2,
                     "WriteCapacityUnits": 2
                 },
-                "TableName": "concord_config"
+                "TableName": "cloudsu_config"
             }
         },
         "servers": {
@@ -41,18 +41,18 @@
                     "ReadCapacityUnits": 2,
                     "WriteCapacityUnits": 2
                 },
-                "TableName": "concord_servers"
+                "TableName": "cloudsu_servers"
             }
         },
-        "concordRO": {
+        "cloudsuRO": {
             "Type": "AWS::IAM::User",
             "Properties": {}
         },
-        "concordAdmin": {
+        "cloudsuAdmin": {
             "Type": "AWS::IAM::User",
             "Properties": {}
         },
-        "concordFullPolicy": {
+        "cloudsuFullPolicy": {
             "Type": "AWS::IAM::Policy",
             "Properties": {
                 "PolicyDocument": {
@@ -81,13 +81,13 @@
                         }]
                     }]
                 },
-                "PolicyName": "concord_full_policy",
+                "PolicyName": "cloudsu_full_policy",
                 "Users": [{
-                    "Ref": "concordAdmin"
+                    "Ref": "cloudsuAdmin"
                 }]
             }
         },
-        "concordROPolicy": {
+        "cloudsuROPolicy": {
             "Type": "AWS::IAM::Policy",
             "Properties": {
                 "PolicyDocument": {
@@ -108,55 +108,55 @@
                         }]
                     }]
                 },
-                "PolicyName": "concordROPolicy",
+                "PolicyName": "cloudsuROPolicy",
                 "Users": [{
-                    "Ref": "concordRO"
+                    "Ref": "cloudsuRO"
                 }]
             }
         },
-        "concordTopic": {
+        "cloudsuTopic": {
             "Type": "AWS::SNS::Topic",
             "Properties": {
-                "DisplayName": "concord_topic",
+                "DisplayName": "cloudsu_topic",
                 "Subscription": [{
                     "Endpoint": {
-                        "Fn::GetAtt": ["concordSqs", "Arn"]
+                        "Fn::GetAtt": ["cloudsuSqs", "Arn"]
                     },
                     "Protocol": "sqs"
                 }],
-                "TopicName": "concordTopic"
+                "TopicName": "cloudsuTopic"
             }
         },
-        "concordSqs": {
+        "cloudsuSqs": {
             "Type": "AWS::SQS::Queue",
             "Properties": {
-                "QueueName": "concordSqs"
+                "QueueName": "cloudsuSqs"
             }
         },
-        "concordSqsPolicy": {
+        "cloudsuSqsPolicy": {
             "Type": "AWS::SQS::QueuePolicy",
             "Properties": {
                 "PolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [{
-                        "Sid": "Concord SNS Policy",
+                        "Sid": "cloudsu SNS Policy",
                         "Effect": "Allow",
                         "Principal": "*",
                         "Action": "sqs:SendMessage",
                         "Resource": {
-                            "Fn::GetAtt": ["concordSqs", "Arn"]
+                            "Fn::GetAtt": ["cloudsuSqs", "Arn"]
                         },
                         "Condition": {
                             "ArnEquals": {
                                 "aws:SourceArn": {
-                                    "Ref": "concordTopic"
+                                    "Ref": "cloudsuTopic"
                                 }
                             }
                         }
                     }]
                 },
                 "Queues": [{
-                    "Ref": "concordSqs"
+                    "Ref": "cloudsuSqs"
                 }]
             }
         }

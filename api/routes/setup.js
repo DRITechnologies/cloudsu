@@ -22,24 +22,24 @@ function finishConfig(params) {
     return stacks_client.stack(params.stack_name)
         .then(response => {
             //get admin account
-            const concordAdmin = _.find(response.StackResources, function(x) {
-                return x.LogicalResourceId === 'concordAdmin';
+            const cloudsuAdmin = _.find(response.StackResources, function(x) {
+                return x.LogicalResourceId === 'cloudsuAdmin';
             });
             //get servers account
-            const concordRO = _.find(response.StackResources, function(x) {
-                return x.LogicalResourceId === 'concordRO';
+            const cloudsuRO = _.find(response.StackResources, function(x) {
+                return x.LogicalResourceId === 'cloudsuRO';
             });
 
-            const concordSqs = _.find(response.StackResources, function(x) {
+            const cloudsuSqs = _.find(response.StackResources, function(x) {
                 return x.ResourceType === 'AWS::SQS::Queue';
             });
 
-            const concordSns = _.find(response.StackResources, function(x) {
+            const cloudsuSns = _.find(response.StackResources, function(x) {
                 return x.ResourceType === 'AWS::SNS::Topic';
             });
 
 
-            return iam_client.createKey(concordAdmin.PhysicalResourceId)
+            return iam_client.createKey(cloudsuAdmin.PhysicalResourceId)
                 .then(account => {
                     let db_key = account.AccessKey;
                     db_key.region = params.aws.region;
@@ -48,7 +48,7 @@ function finishConfig(params) {
                 })
                 .then(() => {
                     logger.info('Created access key for config DB');
-                    return iam_client.createKey(concordRO.PhysicalResourceId);
+                    return iam_client.createKey(cloudsuRO.PhysicalResourceId);
                 })
                 .then(account => {
                     let db_key = account.AccessKey;
@@ -58,7 +58,7 @@ function finishConfig(params) {
                 })
                 .then(() => {
                     logger.info('Created RO key for server DB');
-                    return sqs_client.getQueueArn(concordSqs.PhysicalResourceId);
+                    return sqs_client.getQueueArn(cloudsuSqs.PhysicalResourceId);
                 })
                 .then(queue_arn => {
                     return db.update({
@@ -66,9 +66,9 @@ function finishConfig(params) {
                         range: params.aws.name
                     }, {
                         queue: {
-                            name: concordSqs.LogicalResourceId,
+                            name: cloudsuSqs.LogicalResourceId,
                             arn: queue_arn,
-                            url: concordSqs.PhysicalResourceId
+                            url: cloudsuSqs.PhysicalResourceId
                         }
                     });
                 })
@@ -78,7 +78,7 @@ function finishConfig(params) {
                         hash: params.aws.type,
                         range: params.aws.name
                     }, {
-                        topic_arn: concordSns.PhysicalResourceId
+                        topic_arn: cloudsuSns.PhysicalResourceId
                     });
                 });
         });
@@ -92,8 +92,8 @@ class Setup {
     run(req, res) {
 
         let params = req.body;
-        params.stack_name = 'concord';
-        params.table_name = 'concord_config';
+        params.stack_name = 'cloudsu';
+        params.table_name = 'cloudsu_config';
         const initial_data = JSON.parse(DEFAULT_FILE);
 
         const aws_account = {

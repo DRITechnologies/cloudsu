@@ -34,7 +34,7 @@ session = boto3.session.Session(aws_access_key_id='<%= AccessKeyId %>',
                                 aws_secret_access_key='<%= SecretAccessKey %>',
                                 region_name='<%= region %>')
 dynamodb = session.resource("dynamodb")
-table = dynamodb.Table('concord_servers')
+table = dynamodb.Table('cloudsu_servers')
 timeout = time.time() + 60 * 5   # 5 minutes from now
 
 # print instance id for debug purposes

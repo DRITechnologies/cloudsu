@@ -1,7 +1,7 @@
 /*jshint esversion: 6 */
 'use strict';
 
-const log_level = process.env.CONCORD_LOG_LEVEL || 'debug';
+const log_level = process.env.CLOUDSU_LOG_LEVEL || 'debug';
 const winston = require('winston');
 winston.emitErrs = true;
 

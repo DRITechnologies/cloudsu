@@ -150,7 +150,7 @@ function pageTitle($rootScope, $timeout) {
         link: function(scope, element) {
             var listener = function(event, toState, toParams, fromState, fromParams) {
                 // Default title - load on Dashboard 1
-                var title = 'Concord';
+                var title = 'cloudsu';
                 // Create your own title pattern
 
                 $timeout(function() {
@@ -346,7 +346,7 @@ angular
     .module('stacks')
     .controller('MainCtrl', function($scope, $http, $state, $uibModal, dataStore, SweetAlert) {
 
-        this.helloText = 'Concord Stacks';
+        this.helloText = 'cloudsu Stacks';
         this.descriptionText = 'Click + to create a new stack!';
         $scope.userName = dataStore.getActiveUser();
         $scope.activeAws = dataStore.getActiveAWS();
@@ -859,7 +859,7 @@ angular
                     if (defaults) {
                         $scope.chef_status = defaults.status;
                         $scope.rollback_available = defaults.rollback_available;
-                        $scope.chef = defaults.concord_params;
+                        $scope.chef = defaults.cloudsu_params;
                     }
                 })
                 .error(function(err) {
@@ -1393,7 +1393,7 @@ angular
         $scope.activeTab = 'stack-tab';
         $scope.last_name;
         $scope.chef_preview = {
-            description: 'Managed by Concord',
+            description: 'Managed by cloudsu',
             json_class: 'Chef::Environment',
             chef_type: 'environment',
             default_attributes: {},
@@ -1968,7 +1968,7 @@ angular
 
                 var defaults = response.default_attributes;
                 if (defaults) {
-                    var chef = defaults.concord_params;
+                    var chef = defaults.cloudsu_params;
                     $scope.stack.min_size = chef.min_size;
                     $scope.stack.desired_size = chef.desired_size;
                     $scope.stack.max_size = chef.max_size;

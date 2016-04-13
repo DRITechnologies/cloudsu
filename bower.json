@@ -1,7 +1,7 @@
 {
-    "name": "concord",
+    "name": "cloudsu",
     "version": "2.5.0",
-    "description": "Concord",
+    "description": "cloudsu",
     "main": "public/index.html",
     "private": true,
     "ignore": [

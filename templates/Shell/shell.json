@@ -1,5 +1,5 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Template managed by Concord",
+    "Description": "Template managed by cloudsu",
     "Resources": {}
 }
