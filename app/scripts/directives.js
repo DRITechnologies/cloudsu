@@ -6,7 +6,7 @@ function pageTitle($rootScope, $timeout) {
         link: function(scope, element) {
             var listener = function(event, toState, toParams, fromState, fromParams) {
                 // Default title - load on Dashboard 1
-                var title = 'cloudsu';
+                var title = 'su';
                 // Create your own title pattern
 
                 $timeout(function() {

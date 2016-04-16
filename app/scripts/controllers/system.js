@@ -62,6 +62,8 @@ angular
             modalInstance.result.then(function(selectedItem) {
                 //refresh stacks to show newly created stack
                 refresh();
+                // run refresh on parent controller
+                $scope.startup();
             });
         };
 
@@ -81,7 +83,12 @@ angular
                         $http.delete(['/api/v1/services', account.type, account.name].join('/'))
                             .success(function(response) {
                                 SweetAlert.swal('Success', account.name + ' has been removed.', 'success');
+                                // refresh system accounts
                                 refresh();
+                                //revert back to default after deleting
+                                $scope.activateAccount('DEFAULT');
+                                // refresh parent controller
+                                $scope.startup();
                             })
                             .error(function(err) {
                                 toastr.error(err, 'Error');

@@ -9,6 +9,7 @@ const logger = require('../../utls/logger.js');
 //clients
 const ec2_client = require('./ec2_client.js');
 const chef_client = require('./chef_client.js');
+const config_client = require('../../config/config.js');
 
 
 // templates
@@ -45,56 +46,51 @@ class ConstructTemplate {
         } else {
             template = JSON.parse(SHELL_TEMPLATE);
         }
+
         const self = this;
 
-        return this.sourceDefaults()
-            .then(defaults => {
+        return config_client.query({
+                name: 'DEFAULT',
+                type: 'TOPIC'
+            })
+            .then(topic => {
 
                 if (params.build_size === 'Single') {
                     return self.get_single_template(template, params);
                 }
 
-                return self.get_ha_template(template, params, defaults);
+                return self.get_ha_template(template, params, topic.arn);
 
             });
 
     }
 
-    get_ha_template(template, params, defaults) {
+    get_ha_template(template, params, topic_arn) {
 
-        const self = this;
 
         const secure = require('../../config/secure_config');
         const client_db = secure.get('db_client');
 
         return this.build_volumes(params)
             .then(volumes => {
-
-                //combine defaults into flat json
-                let vars = _.defaults(_.clone(params), defaults);
-
                 //dns
-                vars.dns = [vars.stack_name, '-', vars.app_name, '.', vars.domain].join('');
+                params.dns = [params.stack_name, '-', params.app_name, '.', params.domain].join('');
 
-                //Setup nginx proxy
-                vars.first_boot = {
-                    service_proxy: {
-                        name: 'serviceProxy',
-                        services: {}
-                    }
+                //Setup nginx/apache proxy
+                params.first_boot = {
+                    proxy: {}
                 };
-
-                vars.first_boot = self.get_first_boot(vars.first_boot, vars.app_name, vars.dns, vars.port);
+                params.first_boot.proxy[params.app_name] = params.dns;
 
                 // cleanup names
-                vars = utls.remove_non_alpha(vars);
+                params = utls.remove_non_alpha(params);
 
                 // set wait handle callback
-                vars.node_name = `${vars.stack_name}-${vars.app_name}`;
-                vars.wc_ref = `LC${vars.app_name}${vars.app_version}`;
-                vars.wh_name = `WH${vars.app_name}`;
-                vars.dns_ref = `ELB${vars.app_name}${vars.app_version}`;
-                vars.dns_type = 'DNSName';
+                params.node_name = `${params.stack_name}-${params.app_name}`;
+                params.wc_ref = `LC${params.app_name}${params.app_version}`;
+                params.wh_name = `WH${params.app_name}`;
+                params.dns_ref = `ELB${params.app_name}${params.app_version}`;
+                params.dns_type = 'DNSName';
 
                 //add client db creds
                 let bootstrap = _.template(BOOTSTRAP_HA);
@@ -102,60 +98,59 @@ class ConstructTemplate {
 
                 // push asg params into template
                 let asg = _.template(ASG);
-                asg = JSON.parse(asg(vars));
+                asg = JSON.parse(asg(params));
 
                 // wc and wh
                 let lc = _.template(LC);
-                lc = JSON.parse(lc(vars));
+                lc = JSON.parse(lc(params));
                 let wc = _.template(WC);
-                wc = wc(vars);
+                wc = wc(params);
 
 
                 // cpu
                 let cpu_high = _.template(CPU_HIGH);
-                cpu_high = cpu_high(vars);
+                cpu_high = cpu_high(params);
                 let cpu_low = _.template(CPU_LOW);
-                cpu_low = cpu_low(vars);
+                cpu_low = cpu_low(params);
 
 
                 // scale policies
                 let spu = _.template(SP_UP);
-                spu = spu(vars);
+                spu = spu(params);
                 let spd = _.template(SP_DOWN);
-                spd = spd(vars);
+                spd = spd(params);
 
 
                 let userdata = _.template(USER_DATA);
-                userdata = JSON.parse(userdata(vars));
+                userdata = JSON.parse(userdata(params));
                 lc.Properties.UserData = userdata;
                 let metadata = _.template(META_DATA);
-                metadata = JSON.parse(metadata(vars));
-                metadata['AWS::CloudFormation::Init']['chef_register']['files']['/etc/chef/first-boot.json'].content = vars.first_boot;
+                metadata = JSON.parse(metadata(params));
+                metadata['AWS::CloudFormation::Init']['chef_register']['files']['/etc/chef/first-boot.json'].content = params.first_boot;
                 metadata['AWS::CloudFormation::Init']['chef_register']['files']['/tmp/bootstrap.py'].content = String(bootstrap);
                 lc.Metadata = metadata;
                 lc.Properties.BlockDeviceMappings = volumes;
 
-                if (vars.iam_role) {
-                    lc.Properties.IamInstanceProfile = vars.iam_profile;
+                if (params.iam_role) {
+                    lc.Properties.IamInstanceProfile = params.iam_profile;
                 }
 
 
-                const suffix = vars.app_name + vars.app_version;
+                const suffix = params.app_name + params.app_version;
 
-                if (vars.desired_size) {
-                    asg.Properties.DesiredCapacity = vars.desired_size;
-                }
+                //set asg desired size
+                asg.Properties.DesiredCapacity = params.desired_size || params.min_size;
 
-                lc.Properties.SecurityGroups = vars.security_groups;
-                if (vars.multi_az) {
-                    asg.Properties.AvailabilityZones = vars.regions;
+                lc.Properties.SecurityGroups = params.security_groups;
+                if (params.multi_az) {
+                    asg.Properties.AvailabilityZones = params.regions;
                 } else {
-                    asg.Properties.AvailabilityZones = vars.regions;
+                    asg.Properties.AvailabilityZones = params.regions;
                 }
 
                 //add sns topic
                 asg.Properties.NotificationConfigurations = [{
-                    TopicARN: vars.aws.topic_arn,
+                    TopicARN: topic_arn,
                     NotificationTypes: [
                         'autoscaling:EC2_INSTANCE_LAUNCH',
                         'autoscaling:EC2_INSTANCE_TERMINATE'
@@ -175,50 +170,50 @@ class ConstructTemplate {
                 // add wait condition to template
                 template.Resources[`WC${suffix}`] = JSON.parse(wc);
 
-                if (vars.type === 'create' || vars.type === 'add') {
+                if (params.type === 'create' || params.type === 'add') {
 
                     //only create elb if it is requested
-                    if (vars.elb) {
+                    if (params.elb) {
                         // elb
-                        vars.dns_ref = `ELB${vars.app_name}`;
+                        params.dns_ref = `ELB${params.app_name}`;
                         let elb = _.template(ELB);
-                        elb = JSON.parse(elb(vars));
-                        elb.Properties.SecurityGroups = vars.elb_security_groups;
+                        elb = JSON.parse(elb(params));
+                        elb.Properties.SecurityGroups = params.elb_security_groups;
 
                         // multi az settings for ELB
-                        if (vars.multi_az) {
+                        if (params.multi_az) {
                             elb.Properties.CrossZone = true;
-                            elb.Properties.AvailabilityZones = vars.regions;
+                            elb.Properties.AvailabilityZones = params.regions;
                         } else {
-                            elb.Properties.AvailabilityZones = vars.regions;
+                            elb.Properties.AvailabilityZones = params.regions;
                         }
 
                         // add cert and listener for ssl
-                        if (vars.ssl_cert) {
+                        if (params.ssl_cert) {
                             const https_config = {
                                 LoadBalancerPort: '443',
                                 InstanceProtocol: 'HTTPS',
                                 InstancePort: '443',
                                 Protocol: 'HTTPS',
-                                SSLCertificateId: vars.ssl_cert
+                                SSLCertificateId: params.ssl_cert
                             };
                             elb.Properties.Listeners.push(https_config);
                         }
 
                         // add to template
-                        template.Resources[`ELB${vars.app_name}`] = elb;
+                        template.Resources[`ELB${params.app_name}`] = elb;
 
                     }
                     //add route 53 to template
                     if (params.route_53) {
                         // dns
                         let route_53 = _.template(ROUTE_53);
-                        route_53 = route_53(vars);
-                        template.Resources[`DNS${vars.app_name}`] = JSON.parse(route_53);
+                        route_53 = route_53(params);
+                        template.Resources[`DNS${params.app_name}`] = JSON.parse(route_53);
                     }
 
                     // add wait condition to template
-                    template.Resources[vars.wh_name] = JSON.parse(WH);
+                    template.Resources[params.wh_name] = JSON.parse(WH);
                 }
 
                 logger.info(`Addiing stack with resources: ${_.keys(template.Resources)}`);
@@ -239,7 +234,6 @@ class ConstructTemplate {
         };
 
         //load templates
-        const self = this;
         return this.build_volumes(params)
             .then(volumes => {
                 params.volumes = volumes;
@@ -273,14 +267,12 @@ class ConstructTemplate {
                 params.dns_ref = 'instance';
                 params.wh_name = ['WH', params.wc_ref].join('');
 
+                //Setup nginx/apache proxy
                 params.first_boot = {
-                    service_proxy: {
-                        name: 'serviceProxy',
-                        services: {}
-                    }
+                    proxy: {}
                 };
+                params.first_boot.proxy[params.app_name] = params.dns;
 
-                params.first_boot = self.get_first_boot(params.first_boot, params.app_name, params.dns, params.port);
                 ec2 = JSON.parse(ec2(params));
                 ec2.Properties.AvailabilityZone = params.regions;
                 ec2.Properties.BlockDeviceMappings = params.volumes;
@@ -323,32 +315,6 @@ class ConstructTemplate {
             });
     }
 
-    get_first_boot(first_boot, app_name, dns, port) {
-
-        first_boot.service_proxy.services[app_name] = {
-            hostname: dns,
-            port: port
-        };
-
-        return first_boot;
-
-    }
-
-    sourceDefaults() {
-
-        const config = require('../../config/config.js');
-
-        return config.getAll()
-            .then(defaults => {
-
-                return {
-                    min_size: 1,
-                    max_size: 3,
-                    port: '3000'
-                };
-
-            });
-    }
 
     build_volumes(params) {
 

@@ -149,7 +149,7 @@ class StacksClient {
                     `WC${cf_name}`
                 ];
                 template.Resources = _.omit(template.Resources, omit_list);
-                return self.updateStack(JSON.stringify(template), params.stack_name);
+                return self.updateStack(params.stack_name, JSON.stringify(template));
             });
 
     }
@@ -254,7 +254,7 @@ class StacksClient {
             });
     }
 
-    updateStack(template, stack_name) {
+    updateStack(stack_name, template) {
 
         logger.info(`Updating stack: ${stack_name}`);
 

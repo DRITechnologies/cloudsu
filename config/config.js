@@ -112,6 +112,28 @@ class Config {
         });
     }
 
+    query(params) {
+        logger.info(`Making db query: ${params.type} ${params.name}`);
+
+        const db = require('../utls/db.js');
+        return cache.get(`${params.name}_${params.type}`)
+            .then(val => {
+                //return value if not undef
+                if (val) {
+                    return val;
+                }
+
+                return db.find({
+                        hash: params.type,
+                        range: params.name
+                    })
+                    .then(response => {
+                        cache.set(`${params.name}_${params.type}`, response);
+                        return response;
+                    });
+            });
+    }
+
     saveServiceAccount(params) {
 
         //flush cache on updates
@@ -133,6 +155,7 @@ class Config {
         return db.insert(params);
 
     }
+
 
     getServiceAccounts(type) {
 
@@ -165,7 +188,6 @@ class Config {
 
                 //return value if not undef
                 if (val) {
-                    logger.debug(`Using cache for account: ${params.name}`);
                     return decrypt(val);
                 }
 
@@ -193,7 +215,6 @@ class Config {
             .then(val => {
                 //return value if not undef
                 if (val) {
-                    logger.debug(`Using cache for account ${query.range}`);
                     return decrypt(val);
                 }
 

@@ -31,6 +31,7 @@ angular
                     dataStore.setActiveRegion(user.aws_region);
                     dataStore.setIsLogin(true);
 
+                    // run refresh on parent controller
                     $scope.startup();
 
                     //set parent values because they will not reload

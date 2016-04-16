@@ -126,12 +126,19 @@ var poll = function() {
     const sqs_client = require('../api/clients/sqs_client.js');
     logger.debug('Polling sqs for new messages');
 
+    // needed further down in the promise chain
     let sqs_url;
 
     return config_client.getDefaultAws()
         .then(response => {
-            sqs_url = response.queue.url;
             sqs_client.init(response.aws);
+            return config_client.query({
+                name: 'DEFAULT',
+                type: 'QUEUE'
+            });
+        })
+        .then(queue => {
+            sqs_url = queue.url;
             return sqs_client.getMessage(sqs_url);
         })
         .then(messages => {

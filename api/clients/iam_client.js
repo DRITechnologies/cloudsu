@@ -31,6 +31,15 @@ class IamClient {
             UserName: username
         });
     }
+
+    getAccountId(params) {
+        return this.iam.getAccountAuthorizationDetailsAsync({
+                Filter: ['User']
+            })
+            .then(response => {
+                return response.UserDetailList[0].Arn.split(':')[4];
+            });
+    }
 }
 
 module.exports = new IamClient();

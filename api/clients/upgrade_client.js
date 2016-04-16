@@ -212,7 +212,7 @@ class UpgradeClient {
                 return template_client.get(template, launch_params);
             })
             .then(template => {
-                return stacks_client.updateStack(template, params.stack_name);
+                return stacks_client.updateStack(params.stack_name, template);
             });
 
     }
@@ -253,7 +253,7 @@ class UpgradeClient {
 
             })
             .then(() => {
-                return stacks_client.updateStack(JSON.stringify(template), params.stack_name);
+                return stacks_client.updateStack(params.stack_name, JSON.stringify(template));
             });
     }
 

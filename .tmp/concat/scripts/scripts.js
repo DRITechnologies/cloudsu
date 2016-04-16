@@ -150,7 +150,7 @@ function pageTitle($rootScope, $timeout) {
         link: function(scope, element) {
             var listener = function(event, toState, toParams, fromState, fromParams) {
                 // Default title - load on Dashboard 1
-                var title = 'cloudsu';
+                var title = 'su';
                 // Create your own title pattern
 
                 $timeout(function() {
@@ -346,8 +346,6 @@ angular
     .module('stacks')
     .controller('MainCtrl', function($scope, $http, $state, $uibModal, dataStore, SweetAlert) {
 
-        this.helloText = 'cloudsu Stacks';
-        this.descriptionText = 'Click + to create a new stack!';
         $scope.userName = dataStore.getActiveUser();
         $scope.activeAws = dataStore.getActiveAWS();
         $scope.activeRegion = dataStore.getActiveRegion();
@@ -1180,6 +1178,7 @@ angular
                     dataStore.setActiveRegion(user.aws_region);
                     dataStore.setIsLogin(true);
 
+                    // run refresh on parent controller
                     $scope.startup();
 
                     //set parent values because they will not reload
@@ -1860,6 +1859,8 @@ angular
             modalInstance.result.then(function(selectedItem) {
                 //refresh stacks to show newly created stack
                 refresh();
+                // run refresh on parent controller
+                $scope.startup();
             });
         };
 
@@ -1879,7 +1880,12 @@ angular
                         $http.delete(['/api/v1/services', account.type, account.name].join('/'))
                             .success(function(response) {
                                 SweetAlert.swal('Success', account.name + ' has been removed.', 'success');
+                                // refresh system accounts
                                 refresh();
+                                //revert back to default after deleting
+                                $scope.activateAccount('DEFAULT');
+                                // refresh parent controller
+                                $scope.startup();
                             })
                             .error(function(err) {
                                 toastr.error(err, 'Error');
@@ -1928,6 +1934,7 @@ angular
             //show show spinner
             $scope.showSpinner = true;
 
+            //save account in database
             $http.post('/api/v1/services/save_account', $scope.account)
                 .success(function(res) {
                     $scope.showSpinner = false;

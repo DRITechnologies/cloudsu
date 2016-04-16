@@ -11,20 +11,14 @@ const email_client = require('../../utls/email.js');
 const logger = require('../../utls/logger.js');
 const path = require('path');
 const fs = require('fs');
-const validator = require('validator');
 
 class AccountsClient {
     constructor() {}
 
     checkPassword(name, password) {
 
-        console.log(name);
-        console.log(typeof name);
-
         //validate email
         if (!name) {
-            throw 'Email could not be validated';
-        } else if (!validator.isEmail(name)) {
             throw 'Email could not be validated';
         }
 

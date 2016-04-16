@@ -7,6 +7,7 @@ const err_handler = require('../../utls/error_handler.js');
 const logger = require('../../utls/logger.js');
 const fs = require('fs');
 const path = require('path');
+const config_client = require('../../config/config.js');
 
 class Main {
     constructor() {}
@@ -94,7 +95,22 @@ class Main {
             return res.status(403).json('Cannot delete DEFAULT service accounts');
         }
 
-        return config.deleteServiceAccount(req.params)
+        //require clients
+        const sns_client = require('../clients/sns_client.js');
+        let user;
+
+        return config_client.getServiceAccount(req.params)
+            .then(response => {
+                user = response;
+                return config_client.getDefaultAws();
+            })
+            .then(response => {
+                sns_client.init(response.aws);
+                return sns_client.removePermission(user);
+            })
+            .then(response => {
+                return config.deleteServiceAccount(user);
+            })
             .then(response => {
                 res.status(200).json(response);
             })
@@ -106,7 +122,40 @@ class Main {
 
     saveServiceAccount(req, res) {
 
-        return config.saveServiceAccount(req.body)
+        let params = _.clone(req.body);
+
+        //require clients
+        const iam_client = require('../clients/iam_client.js');
+        const sns_client = require('../clients/sns_client.js');
+
+        //init client
+        iam_client.init({
+            accessKeyId: params.key,
+            secretAccessKey: params.secret
+        });
+
+        return iam_client.getAccountId(params)
+            .then(AccountId => {
+                params.AccountId = AccountId;
+                req.body.AccountId = AccountId;
+                return config_client.query({
+                    name: 'DEFAULT',
+                    type: 'TOPIC'
+                });
+            })
+            .then(topic => {
+                params.TopicArn = topic.arn;
+                req.body.TopicArn = topic.arn;
+                return config_client.getDefaultAws();
+            })
+            .then(response => {
+                sns_client.init(response.aws);
+                return sns_client.addPermission(params);
+            })
+            .then(() => {
+                console.log('saving data', req.body);
+                return config.saveServiceAccount(req.body);
+            })
             .then(response => {
                 res.status(200).json(response);
             })
@@ -114,6 +163,7 @@ class Main {
                 logger.error(err);
                 res.status(500).json(err_handler(err));
             });
+
     }
 
     getServiceAccount(req, res) {

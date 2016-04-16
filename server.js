@@ -15,13 +15,13 @@ const listenPort = process.env.CLOUDSU_PORT || 3000;
 
 // express configuration
 app.use(express.static(`${__dirname}/dist`));
-app.use(bodyParser.urlencoded({
-    'extended': 'true'
-}));
+//app.use(bodyParser.urlencoded({
+//    'extended': 'true'
+//}));
 app.use(bodyParser.json());
-app.use(bodyParser.json({
-    type: 'application/vnd.api+json'
-}));
+//app.use(bodyParser.json({
+//    type: 'application/vnd.api+json'
+//}));
 //app.use(methodOverride());
 app.use(morgan('combined', {
     'stream': logger.stream
@@ -36,8 +36,8 @@ require('./api/router.js')(app)
 if (cluster.isMaster) {
 
     //init functions that only run on master
-    //queue rider (looks for new server messages in sqs)
-    require('./utls/queue_rider.js');
+    //queue rida (looks for new server messages in sqs)
+    require('./utls/queue_rida.js');
 
     //start cleanup tool (cleans up expired resources)
     require('./utls/cleanup_tool.js');

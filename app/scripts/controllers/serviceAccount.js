@@ -11,6 +11,7 @@ angular
             //show show spinner
             $scope.showSpinner = true;
 
+            //save account in database
             $http.post('/api/v1/services/save_account', $scope.account)
                 .success(function(res) {
                     $scope.showSpinner = false;

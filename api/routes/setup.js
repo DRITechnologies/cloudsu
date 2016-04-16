@@ -61,24 +61,20 @@ function finishConfig(params) {
                     return sqs_client.getQueueArn(cloudsuSqs.PhysicalResourceId);
                 })
                 .then(queue_arn => {
-                    return db.update({
-                        hash: params.aws.type,
-                        range: params.aws.name
-                    }, {
-                        queue: {
-                            name: cloudsuSqs.LogicalResourceId,
-                            arn: queue_arn,
-                            url: cloudsuSqs.PhysicalResourceId
-                        }
+                    return db.insert({
+                        type: 'QUEUE',
+                        name: 'DEFAULT',
+                        queue: cloudsuSqs.LogicalResourceId,
+                        arn: queue_arn,
+                        url: cloudsuSqs.PhysicalResourceId
                     });
                 })
                 .then(() => {
                     logger.info('Saving SNS and SQS info to DEFAULT AWS account in DB');
-                    return db.update({
-                        hash: params.aws.type,
-                        range: params.aws.name
-                    }, {
-                        topic_arn: cloudsuSns.PhysicalResourceId
+                    return db.insert({
+                        type: 'TOPIC',
+                        name: 'DEFAULT',
+                        arn: cloudsuSns.PhysicalResourceId
                     });
                 });
         });

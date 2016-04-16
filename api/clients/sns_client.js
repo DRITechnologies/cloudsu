@@ -36,6 +36,27 @@ class SnsClient {
             Endpoint: params.Endpoint
         });
     }
+
+    addPermission(params) {
+        console.log(params);
+        return this.sns.addPermissionAsync({
+            AWSAccountId: [
+                params.AccountId,
+            ],
+            ActionName: [
+                'Publish'
+            ],
+            Label: [params.name, 'sns'].join('-'),
+            TopicArn: params.TopicArn
+        });
+    }
+
+    removePermission(params) {
+        return this.sns.removePermissionAsync({
+            Label: [params.name, 'sns'].join('-'),
+            TopicArn: params.TopicArn
+        });
+    }
 }
 
 module.exports = new SnsClient();

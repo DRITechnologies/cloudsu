@@ -5,8 +5,6 @@ angular
     .module('stacks')
     .controller('MainCtrl', function($scope, $http, $state, $uibModal, dataStore, SweetAlert) {
 
-        this.helloText = 'cloudsu Stacks';
-        this.descriptionText = 'Click + to create a new stack!';
         $scope.userName = dataStore.getActiveUser();
         $scope.activeAws = dataStore.getActiveAWS();
         $scope.activeRegion = dataStore.getActiveRegion();

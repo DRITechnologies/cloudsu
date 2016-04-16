@@ -24,8 +24,7 @@
         "jsonwebtoken": "latest",
         "password-generator": "latest",
         "nodemailer": "latest",
-        "redis-node": "latest",
-        "validator": "latest"
+        "redis-node": "latest"
     },
     "devDependencies": {
         "angular": "latest",
