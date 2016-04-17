@@ -19,7 +19,7 @@ class Autoscale {
                 res.status(200).json(response);
             })
             .catch(err => {
-                logger.info(err);
+                logger.error(err);
                 res.status(500).json(err_handler(err));
             });
     }

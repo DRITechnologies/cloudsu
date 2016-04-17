@@ -348,7 +348,7 @@ class Chef {
             .catch(err => {
                 logger.error(err);
                 res.status(500)
-                    .json(err);
+                    .json(err_handler(err));
             });
     }
 }

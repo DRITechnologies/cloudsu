@@ -20,6 +20,7 @@ class Accounts {
                     .json(user);
             })
             .catch(err => {
+                logger.error(err);
                 res.status(401)
                     .json(err_handler(err));
             });
