@@ -7,7 +7,6 @@ const app = express();
 const logger = require('./utls/logger.js');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-//const emojiFavicon = require('emoji-favicon');
 
 //get number of CPU's
 const numCPUs = require('os').cpus().length;
@@ -25,7 +24,6 @@ app.use(bodyParser.json());
 app.use(morgan('combined', {
     'stream': logger.stream
 }));
-//app.use(emojiFavicon('smiley'));
 
 //setup api router
 require('./api/router.js')(app)
