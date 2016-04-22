@@ -182,6 +182,36 @@ module.exports = function(grunt) {
         },
         usemin: {
             html: ['dist/index.html']
+        },
+
+        dock: {
+            options: {
+                auth: {
+                    email: 'drichards@krux.com',
+                    username: 'dpricha189',
+                    password: 'L0stphrase'
+                }
+            },
+            images: {
+                'cloudsu': {
+                    dockerfile: 'Dockerfile',
+                    options: {}
+                }
+            }
+        },
+
+        docker_io: {
+            cloudsu: {
+                options: {
+                    dockerFileLocation: '.',
+                    buildName: 'cloudsu',
+                    tag: 'latest',
+                    pushLocation: 'https://hub.docker.io',
+                    username: 'drgrove',
+                    push: true,
+                    force: true
+                }
+            }
         }
 
 
@@ -202,6 +232,10 @@ module.exports = function(grunt) {
         'filerev',
         'usemin',
         'htmlmin'
+    ]);
+
+    grunt.registerTask('docker', [
+        'docker_io'
     ]);
 
     // Run build version of app

@@ -11,6 +11,6 @@ COPY utls/ /src/utls
 COPY package.json /src/package.json
 COPY server.js /src/server.js
 
-RUN npm install
+RUN npm install --production
 
 CMD node server.js

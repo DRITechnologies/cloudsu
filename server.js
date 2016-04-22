@@ -30,7 +30,6 @@ require('./api/router.js')(app)
 
 
 if (cluster.isMaster) {
-
     //init functions that only run on master
     //queue rida (looks for new server messages in sqs)
     require('./utls/queue_rida.js');
@@ -42,9 +41,7 @@ if (cluster.isMaster) {
     for (let i = 0; i < numCPUs; i++) {
         cluster.fork();
     }
-
 } else {
-
     // listen
     app.listen(listenPort, (err, response) => {
         if (err) {
@@ -53,5 +50,4 @@ if (cluster.isMaster) {
         };
         logger.info(`App listening on port ${listenPort}`);
     });
-
 }
