@@ -5,7 +5,6 @@ const Promise = require('bluebird');
 const _ = require('underscore');
 const generatePassword = require('password-generator');
 const crypto_client = require('../../utls/crypto_client.js');
-const config = require('../../config/config.js');
 const token_client = require('../../utls/token.js');
 const email_client = require('../../utls/email.js');
 const logger = require('../../utls/logger.js');
@@ -16,6 +15,8 @@ class AccountsClient {
     constructor() {}
 
     checkPassword(name, password) {
+        // add config client
+        const config = require('../../config/config.js');
 
         //validate email
         if (!name) {
@@ -41,6 +42,8 @@ class AccountsClient {
     }
 
     resetPassword(name, password) {
+        // add config client
+        const config = require('../../config/config.js');
 
         // change users password
         return config.getUser(name)
@@ -51,6 +54,9 @@ class AccountsClient {
     }
 
     create(user) {
+        // add config client
+        const config = require('../../config/config.js');
+
         //createUser
         if (user.user_type === 'Service') {
             return token_client.create(user)
@@ -74,11 +80,16 @@ class AccountsClient {
     }
 
     delete(name) {
+        // add config client
+        const config = require('../../config/config.js');
+
         // remove account name variable should be an email
         return config.deleteUser(name);
     }
 
     list() {
+        // add config client
+        const config = require('../../config/config.js');
         // list all users
         return config.listUsers();
     }
@@ -122,6 +133,9 @@ class AccountsClient {
     }
 
     getServiceToken(user) {
+
+        // add config client
+        const config = require('../../config/config.js');
 
         return new Promise(function(resolve, reject) {
             //check if token already exists and return
