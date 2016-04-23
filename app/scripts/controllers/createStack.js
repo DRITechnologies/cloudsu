@@ -170,16 +170,16 @@ angular
         $scope.next = function(tab) {
 
             if ($scope.activeTab === 'stack-tab') {
-                $scope.activeTab = 'launch-config-tab';
-            } else if ($scope.activeTab === 'launch-config-tab') {
                 $scope.activeTab = 'storage-tab';
             } else if ($scope.activeTab === 'storage-tab') {
                 if ($scope.stack.build_size === 'HA' && $scope.stack.create_elb) {
                     $scope.activeTab = 'elb-tab';
                 } else {
-                    $scope.activeTab = 'scripts-tab';
+                    $scope.activeTab = 'launch-config-tab';
                 }
             } else if ($scope.activeTab === 'elb-tab') {
+                $scope.activeTab = 'launch-config-tab';
+            } else if ($scope.activeTab === 'launch-config-tab') {
                 $scope.activeTab = 'scripts-tab';
             }
 
@@ -188,18 +188,18 @@ angular
         // previous decision matrix
         $scope.previous = function() {
 
-            if ($scope.activeTab === 'launch-config-tab') {
+            if ($scope.activeTab === 'storage-tab') {
                 $scope.activeTab = 'stack-tab';
-            } else if ($scope.activeTab === 'storage-tab') {
-                $scope.activeTab = 'launch-config-tab';
             } else if ($scope.activeTab === 'elb-tab') {
                 $scope.activeTab = 'storage-tab';
-            } else if ($scope.activeTab === 'scripts-tab') {
+            } else if ($scope.activeTab === 'launch-config-tab') {
                 if ($scope.stack.build_size === 'HA' && $scope.stack.create_elb) {
                     $scope.activeTab = 'elb-tab';
                 } else {
                     $scope.activeTab = 'storage-tab';
                 }
+            } else if ($scope.activeTab === 'scripts-tab') {
+                $scope.activeTab = 'launch-config-tab';
             }
             return;
         };

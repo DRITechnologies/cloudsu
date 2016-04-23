@@ -8,11 +8,6 @@
                             <i class="fa fa-server fa-2x"></i>
                         </a>
                     </li>
-                    <li ng-class="activeNavTab('launch-config-tab')">
-                        <a ng-click="setActiveTab('launch-config-tab')">
-                            <i class="fa fa-cubes fa-2x"></i>
-                        </a>
-                    </li>
                     <li ng-class="activeNavTab('storage-tab')">
                         <a ng-click="setActiveTab('storage-tab')">
                             <i class="fa fa-hdd-o fa-2x"></i>
@@ -21,6 +16,11 @@
                     <li ng-show="stack.create_elb" ng-class="activeNavTab('elb-tab')">
                         <a ng-click="setActiveTab('elb-tab')">
                             <i class="fa fa-sitemap fa-2x"></i>
+                        </a>
+                    </li>
+                    <li ng-class="activeNavTab('launch-config-tab')">
+                        <a ng-click="setActiveTab('launch-config-tab')">
+                            <i class="fa fa-cubes fa-2x"></i>
                         </a>
                     </li>
                     <li ng-class="activeNavTab('scripts-tab')">
@@ -78,39 +78,41 @@
                     <div ng-class="activeContentTab('storage-tab')">
                         <h3> Volume Configuration (Optional) </h3>
                         <br>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Volume Type</th>
-                                    <th>Size (GB)</th>
-                                    <th>
-                                        <a class="btn btn-primary btn-outline pull-right" ng-click="addVolume()">+ Add EBS Volume</a>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="volume in stack.volumes">
-                                    <td>
-                                        {{ volume.type }}
-                                    </td>
-                                    <td>
-                                        <input ng-value="volume.size" type="number" name="input" ng-model="stacks.volumes[$index].size" min="1" max="10000">
-                                    </td>
-                                    <td>
-                                        <a class="btn btn-default btn-circle pull-right" ng-click="removeVolume($index)">
-                                            <i class="fa fa-close"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="form-group">
+                            <table class="table table-bordered">
+                                <caption>EBS Volumes</caption>
+                                <thead>
+                                    <tr>
+                                        <th>Volume Type</th>
+                                        <th>Size (GB)</th>
+                                        <th>
+                                            <a class="btn btn-primary btn-outline pull-right" ng-click="addVolume()">+ Add EBS Volume</a>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="volume in stack.volumes">
+                                        <td>
+                                            {{ volume.type }}
+                                        </td>
+                                        <td>
+                                            <input ng-value="volume.size" type="number" name="input" ng-model="stacks.volumes[$index].size" min="1" max="10000">
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-default btn-circle pull-right" ng-click="removeVolume($index)">
+                                                <i class="fa fa-close"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
                         <div class="i-checks form-group">
                             <label>
                                 <input type="checkbox" ng-model="stack.instance_store" name="instance_store"> Instance Store?
                             </label>
                         </div>
-
                         <div class="i-checks form-group">
                             <label>
                                 <input type="checkbox" ng-model="stack.ebs_root_volume" name="ebs_volume"> Root EBS Volume?
@@ -176,45 +178,50 @@
                             </label>
                         </div>
 
-                        <table class="table">
-                            <thead>
-                                <tr class="vertical-align">
-                                    <th>Security Group ID</th>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>
-                                        <div class="btn-group">
-                                            <button type="button" data-toggle="dropdown" class="btn btn-primary btn-outline dropdown-toggle">+ Add Security Group</button>
-                                            <ul class="dropdown-menu scrollable-menu">
-                                                <li ng-repeat="group in security_groups">
-                                                    <a class="dropdown-item" ng-click=addSecurityGroup(group)>{{ group.GroupId }}
+                        <div class="form-group">
+                            <table class="table table-bordered">
+                                <caption>
+                                    <label>Instance Security Groups</label>
+                                </caption>
+                                <thead>
+                                    <tr class="vertical-align">
+                                        <th>Security Group ID</th>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>
+                                            <div class="btn-group pull-right">
+                                                <button type="button" data-toggle="dropdown" class="btn btn-primary btn-outline dropdown-toggle">+ Add Security Group</button>
+                                                <ul class="dropdown-menu scrollable-menu">
+                                                    <li ng-repeat="group in security_groups">
+                                                        <a class="dropdown-item" ng-click=addSecurityGroup(group)>{{ group.GroupId }}
                                                             |
                                                             {{ group.GroupName }}</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="group in sgs">
-                                    <td>
-                                        {{ group.GroupId }}
-                                    </td>
-                                    <td>
-                                        {{ group.GroupName }}
-                                    </td>
-                                    <td>
-                                        {{ group.Description}}
-                                    </td>
-                                    <td>
-                                        <a class="btn btn-default btn-circle pull-right" ng-click="removeSecurityGroup($index)">
-                                            <i class="fa fa-close"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="group in sgs">
+                                        <td>
+                                            {{ group.GroupId }}
+                                        </td>
+                                        <td>
+                                            {{ group.GroupName }}
+                                        </td>
+                                        <td>
+                                            {{ group.Description}}
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-default btn-circle pull-right" ng-click="removeSecurityGroup($index)">
+                                                <i class="fa fa-close"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
                     </div>
 
@@ -287,47 +294,49 @@
                             </select>
                         </div>
 
-                        <table class="table" ng-show="stack.build_size==='HA'">
-                            <thead>
-                                <tr class="vertical-align">
-                                    <th>Security Group ID</th>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>
-                                        <div class="btn-group ">
-                                            <button type="button" data-toggle="dropdown" class="btn btn-primary btn-outline dropdown-toggle">+ Add ELB Security Group</button>
-                                            <ul class="dropdown-menu scrollable-menu">
-                                                <li ng-repeat="group in security_groups">
-                                                    <a class="dropdown-item" ng-click="addElbSecurityGroup(group)">{{ group.GroupId }}
+                        <div class="form-group">
+                            <table class="table table-bordered" ng-show="stack.build_size==='HA'">
+                                <caption>ELB Security Groups</caption>
+                                <thead>
+                                    <tr class="vertical-align">
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>
+                                            <div class="btn-group pull-right">
+                                                <button type="button" data-toggle="dropdown" class="btn btn-primary btn-outline dropdown-toggle">+ Add ELB Security Group</button>
+                                                <ul class="dropdown-menu scrollable-menu">
+                                                    <li ng-repeat="group in security_groups">
+                                                        <a class="dropdown-item" ng-click="addElbSecurityGroup(group)">{{ group.GroupId }}
                                                                 |
                                                                 {{ group.GroupName }}</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="group in elb_sgs">
-                                    <td>
-                                        {{ group.GroupId }}
-                                    </td>
-                                    <td>
-                                        {{ group.GroupName }}
-                                    </td>
-                                    <td>
-                                        {{ group.Description}}
-                                    </td>
-                                    <td>
-                                        <a class="btn btn-default btn-circle pull-right" ng-click="removeElbSecurityGroup(group)">
-                                            <i class="fa fa-close"></i>
-                                        </a>
-                                    </td>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="group in elb_sgs">
+                                        <td>
+                                            {{ group.GroupId }}
+                                        </td>
+                                        <td>
+                                            {{ group.GroupName }}
+                                        </td>
+                                        <td>
+                                            {{ group.Description}}
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-default btn-circle pull-right" ng-click="removeElbSecurityGroup(group)">
+                                                <i class="fa fa-close"></i>
+                                            </a>
+                                        </td>
 
-                                </tr>
-                            </tbody>
-                        </table>
-
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <!-- end of elb options -->
 
