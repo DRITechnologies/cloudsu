@@ -14,7 +14,6 @@ class Upgrade {
         params.cms = req.cms;
         params.aws = req.aws;
 
-
         const upgrade_client = require('../clients/upgrade_client.js');
         upgrade_client.init(params);
 

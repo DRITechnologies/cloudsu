@@ -63,6 +63,7 @@ angular
                     if (!res.setup) {
                         $uibModal.open({
                             animation: true,
+                            backdrop: true,
                             templateUrl: 'views/setup.html',
                             controller: 'setup',
                             size: 'md',

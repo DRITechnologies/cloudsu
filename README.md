@@ -24,9 +24,10 @@
 ```
 
 #### Create Stack
-##### Post /api/v1/stacks/:stack_name
+##### POST /api/v1/stacks/:stack_name
 ```json
-{ "instance_store": false,
+{ 
+  "instance_store": false,
   "ebs_volume": false,
   "multi_az": true,
   "type": "create",
@@ -39,10 +40,11 @@
   "route_53": true,
   "hosted_zone": "cloudsu.io",
   "ebs_root_volume": true,
-  "elb":
-   { "ping_port": 443,
+  "elb":{
+     "ping_port": 443,
      "ping_protocol": "HTTPS",
-     "ping_path": "/api/v1/status"},
+     "ping_path": "/api/v1/status"
+  },
   "min_size": 1,
   "desired_size": 1,
   "max_size": 3,
@@ -54,6 +56,26 @@
   "domain": "cloudsu.io",
   "regions": ["us-west-2a", "us-west-2b", "us-west-2c"],
   "elb_security_groups": ["sg-adb4b6c8"],
-  "security_groups": ["sg-adb4b6c8"],
+  "security_groups": ["sg-adb4b6c8"]
  }
 ```
+
+#### Upgrade Stack
+##### PATCH /api/v1/upgrade
+```json
+{ 
+  "type": "upgrade",
+  "stack_name": "Testing",
+  "min_size": 1,
+  "desired_size": 1,
+  "max_size": 3,
+  "ami": "ami-c229c0a2",
+  "instance_size": "t2.nano",
+  "app_version": "prod13",
+  "cleanup_type": "Delete"
+}
+```
+
+#### Delete Stack
+##### DELETE /api/v1/stacks/:stack_name
+
