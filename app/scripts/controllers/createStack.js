@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('createStack', function($scope, $http, $state, $uibModalInstance, dataStore, _, toastr) {
+    .controller('createStack', function ($scope, $http, $state, $uibModalInstance, dataStore, _, toastr) {
 
         $scope.sgs = [];
         $scope.elb_sgs = [];
@@ -15,6 +15,8 @@ angular
         $scope.stack.recipes = [];
         $scope.activeTab = 'stack-tab';
         $scope.last_name;
+
+        //stub chef environment for visual purposes
         $scope.chef_preview = {
             description: 'Managed by cloudsu',
             json_class: 'Chef::Environment',
@@ -23,44 +25,50 @@ angular
             override_attributes: {}
         };
 
+        //get sample AMI images  
         $http.get('/api/v1/ec2/sample/images')
-            .success(function(response) {
+            .success(function (response) {
                 $scope.images = response;
             });
 
+        //get ec2 sizes
         $http.get('/api/v1/ec2/sizes')
-            .success(function(res) {
+            .success(function (res) {
                 $scope.instanceSizes = res.reverse();
             });
 
-
+        //get ssl certificates
         $http.get('/api/v1/iam/ssl')
-            .success(function(res) {
+            .success(function (res) {
                 $scope.ssls = res;
             });
 
+        //get all ec2 ssh keys for account
         $http.get('/api/v1/ec2/keys')
-            .success(function(res) {
+            .success(function (res) {
                 $scope.keys = res;
             });
 
+        //get iam roles to assign to machines
         $http.get('/api/v1/iam/roles')
-            .success(function(res) {
+            .success(function (res) {
                 $scope.roles = res;
             });
 
+        //get az region map
         $http.get('/api/v1/region_map')
-            .success(function(response) {
+            .success(function (response) {
                 $scope.regions = response;
             });
 
+        //get account security groups
         $http.get('/api/v1/ec2/security_groups')
-            .success(function(response) {
+            .success(function (response) {
                 $scope.security_groups = response;
             });
 
 
-        $scope.createStack = function() {
+        $scope.createStack = function () {
 
             $scope.showSpinner = true;
 
@@ -103,18 +111,18 @@ angular
 
             // create new stack
             $http.post(url, $scope.stack)
-                .success(function(res) {
+                .success(function (res) {
                     $scope.showSpinner = false;
                     $uibModalInstance.close(true);
                 })
-                .error(function(err) {
+                .error(function (err) {
                     $scope.showSpinner = false;
                     toastr.error(err, 'Error');
                 });
 
         };
 
-        $scope.envChange = function() {
+        $scope.envChange = function () {
             // remove last name
             // causes a name for each letter typed
             if ($scope.last_name) {
@@ -138,27 +146,27 @@ angular
             $scope.last_name = _.clone($scope.stack.app_name);
         };
 
-        $scope.setActiveTab = function(tab) {
+        $scope.setActiveTab = function (tab) {
             $scope.activeTab = tab;
         };
 
-        $scope.isFirst = function() {
+        $scope.isFirst = function () {
             return ($scope.activeTab === 'stack-tab');
         };
 
-        $scope.isLast = function() {
+        $scope.isLast = function () {
             return ($scope.activeTab === 'scripts-tab');
         };
 
         //logic for step wizard
-        $scope.activeNavTab = function(tab) {
+        $scope.activeNavTab = function (tab) {
             if ($scope.activeTab === tab) {
                 return 'active';
             }
             return;
         };
 
-        $scope.activeContentTab = function(tab) {
+        $scope.activeContentTab = function (tab) {
             if ($scope.activeTab === tab) {
                 return 'tab-pane active';
             }
@@ -167,7 +175,7 @@ angular
 
 
         // next decision matrix
-        $scope.next = function(tab) {
+        $scope.next = function (tab) {
 
             if ($scope.activeTab === 'stack-tab') {
                 $scope.activeTab = 'storage-tab';
@@ -186,7 +194,7 @@ angular
         };
 
         // previous decision matrix
-        $scope.previous = function() {
+        $scope.previous = function () {
 
             if ($scope.activeTab === 'storage-tab') {
                 $scope.activeTab = 'stack-tab';
@@ -205,12 +213,12 @@ angular
         };
 
         // close modal instance
-        $scope.cancel = function() {
+        $scope.cancel = function () {
             $uibModalInstance.dismiss('cancel');
         };
 
         // adds volume from the form
-        $scope.addVolume = function() {
+        $scope.addVolume = function () {
             $scope.stack.volumes.push({
                 type: 'gp2',
                 size: 30
@@ -218,27 +226,27 @@ angular
         };
 
         // removes a volume from the form
-        $scope.removeVolume = function(index) {
+        $scope.removeVolume = function (index) {
             $scope.stack.volumes.splice(index, 1);
         };
 
         // adds security group from the form
-        $scope.addSecurityGroup = function(group) {
+        $scope.addSecurityGroup = function (group) {
             $scope.sgs.push(group);
         };
 
         // removes a security group from the form
-        $scope.removeSecurityGroup = function(index) {
+        $scope.removeSecurityGroup = function (index) {
             $scope.sgs.splice(index, 1);
         };
 
         // adds elb security group from the form
-        $scope.addElbSecurityGroup = function(group) {
+        $scope.addElbSecurityGroup = function (group) {
             $scope.elb_sgs.push(group);
         };
 
         // removes an elb security group from the form
-        $scope.removeElbSecurityGroup = function(index) {
+        $scope.removeElbSecurityGroup = function (index) {
             $scope.elb_sgs.splice(index, 1);
         };
 

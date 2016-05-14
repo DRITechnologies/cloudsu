@@ -19,7 +19,13 @@ const listenPort = process.env.CLOUDSU_PORT || 3000;
 // setup frontend static assets
 app.use(express.static(`${__dirname}/dist`));
 // json body parser
-app.use(bodyParser.json());
+app.use(bodyParser.json({
+    type: 'application/*'
+}));
+// url encoding parser
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 // setup winston logger
 app.use(morgan('combined', {
     'stream': logger.stream
@@ -32,7 +38,7 @@ require('./api/router.js')(app)
 if (cluster.isMaster) {
     //init functions that only run on master
     //queue rida (looks for new server messages in sqs)
-    require('./utls/queue_rida.js');
+    require('./utls/queue_rider.js');
 
     //start cleanup tool (cleans up expired resources)
     require('./utls/cleanup_tool.js');

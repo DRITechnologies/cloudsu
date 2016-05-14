@@ -153,7 +153,6 @@ class Main {
                 return sns_client.addPermission(params);
             })
             .then(() => {
-                console.log('saving data', req.body);
                 return config.saveServiceAccount(req.body);
             })
             .then(response => {
@@ -226,7 +225,7 @@ class Main {
             return req.status(500).json('Request body is empty');
         }
 
-        fs.writeFile(path.resolve(__dirname, '../../secrets.json'), JSON.stringify(req.body), function(err) {
+        fs.writeFile(path.resolve(__dirname, '../../secrets.json'), JSON.stringify(req.body), function (err) {
             if (err) {
                 return req.status(500).json('Error writing config to disk');
             }

@@ -48,7 +48,7 @@ class Config {
         // save settings to global
         const obj = {};
         obj[key] = value;
-        logger.info(`Saving key to database: ${key}`);
+        logger.debug(`Saving key to database: ${key}`);
 
         return db.update({
             hash: 'SETTINGS',
@@ -62,7 +62,7 @@ class Config {
 
         const db = require('../utls/db.js');
 
-        logger.info(`Getting data from db for key: ${key}`);
+        logger.debug(`Getting data from db for key: ${key}`);
         return cache.get('GLOBAL')
             .then(global_config => {
 
@@ -86,9 +86,9 @@ class Config {
 
     getAll() {
 
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
 
-            logger.info('Getting all global settings');
+            logger.debug('Getting all global settings');
 
             const db = require('../utls/db.js');
             return cache.get('GLOBAL')
@@ -113,7 +113,7 @@ class Config {
     }
 
     query(params) {
-        logger.info(`Making db query: ${params.type} ${params.name}`);
+        logger.debug(`Making db query: ${params.type} ${params.name}`);
 
         const db = require('../utls/db.js');
         return cache.get(`${params.name}_${params.type}`)
@@ -139,7 +139,7 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        logger.info(`Saving service account: ${params.name}`);
+        logger.debug(`Saving service account: ${params.name}`);
 
         //determine what key to encrypt
         var key = 'key';
@@ -159,7 +159,7 @@ class Config {
 
     getServiceAccounts(type) {
 
-        logger.info(`Getting service accounts: ${type}`);
+        logger.debug(`Getting service accounts: ${type}`);
 
         const db = require('../utls/db.js');
 
@@ -180,7 +180,7 @@ class Config {
 
     getServiceAccount(params) {
 
-        logger.info(`Getting service account: ${params.type} ${params.name}`);
+        logger.debug(`Getting service account: ${params.type} ${params.name}`);
 
         const db = require('../utls/db.js');
         return cache.get(`${params.name}_${params.type}`)
@@ -231,7 +231,7 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        logger.info(`Deleting service account: ${params.type} ${params.name}`);
+        logger.debug(`Deleting service account: ${params.type} ${params.name}`);
 
         const db = require('../utls/db.js');
 
@@ -270,7 +270,7 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        logger.info(`Updating user account ${params.type} ${params.name}`);
+        logger.debug(`Updating user account ${params.type} ${params.name}`);
 
         const obj = _.omit(params, ['name', 'type']);
         const db = require('../utls/db.js');
@@ -287,7 +287,7 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        logger.info(`Created user account ${params.type} ${params.name}`);
+        logger.debug(`Created user account ${params.type} ${params.name}`);
         const db = require('../utls/db.js');
 
         return db.find({
@@ -306,7 +306,7 @@ class Config {
         //flush cache on updates
         cache.flush();
 
-        logger.info(`Deleting user account ${name}`);
+        logger.debug(`Deleting user account ${name}`);
         const db = require('../utls/db.js');
 
         return db.remove({

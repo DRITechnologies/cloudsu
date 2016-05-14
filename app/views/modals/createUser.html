@@ -6,7 +6,6 @@
                 <label>Email</label>
                 <input type="email" class="form-control" ng-model="user.name">
             </div>
-
             <div class="form-group">
                 <label>Type</label>
                 <select ng-model="user.user_type" class="form-control">
@@ -14,36 +13,30 @@
                     <option value="Service">Service Account</option>
                 </select>
             </div>
-
             <div ng-show="user.user_type === 'User'" class="i-checks form-group">
                 <label>
                     <i></i>
                     <input type="checkbox" ng-model="user.email_pass"> Email Temporary Password?
                 </label>
             </div>
-
             <div ng-show="user.user_type === 'User'" class="i-checks form-group">
                 <label>
                     <i></i>
                     <input type="checkbox" ng-model="user.admin"> Admin?
                 </label>
             </div>
-
             <div ng-show="!user.email_pass && user.user_type === 'User'" class="form-group">
                 <label>Password</label>
                 <input type="password" class="form-control" ng-model="user.password">
             </div>
-
             <div ng-show="!user.email_pass && user.user_type === 'User'" class="form-group">
                 <label>Confirm Password</label>
                 <input type="password" class="form-control" ng-model="user.confirm">
             </div>
-
             <div ng-show="token" class="form-group">
                 <label>Service API Token</label>
                 <pre><code>{{ token }}</code></pre>
             </div>
-
         </form>
         <br>
         <br>

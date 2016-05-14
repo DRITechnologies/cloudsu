@@ -16,7 +16,8 @@ const create_stack_keys = [
     'security_groups',
     'stack_name'
 ];
-const elb_verify_keys = ['ping_port',
+const elb_verify_keys = [
+    'ping_port',
     'ping_protocol'
 ];
 

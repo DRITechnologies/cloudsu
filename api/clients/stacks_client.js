@@ -91,6 +91,10 @@ class StacksClient {
         //init chef client
         const chef_client = require('./chef_client.js');
         chef_client.init(params.cms);
+
+        //make sure template is created correctly
+        params.type = 'create';
+
         //verify parameters to ensure they are valid
         return verify.verify_create_stack(params)
             .then(() => {
@@ -199,7 +203,7 @@ class StacksClient {
         timeout = timeout || 20;
         max_attempts = max_attempts || 500;
 
-        const check_status = function() {
+        const check_status = function () {
             count++;
             return self.cloudformation.describeStacksAsync({
                     StackName: stack_name

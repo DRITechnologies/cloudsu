@@ -11,7 +11,6 @@ const ec2_client = require('./ec2_client.js');
 const chef_client = require('./chef_client.js');
 const config_client = require('../../config/config.js');
 
-
 // templates
 const ASG = fs.readFileSync(path.resolve(__dirname, '../../templates/ASG/asgtemplate.json'), 'utf8');
 const ELB = fs.readFileSync(path.resolve(__dirname, '../../templates/ELB/elbtemplate.json'), 'utf8');
@@ -243,7 +242,7 @@ class ConstructTemplate {
 
                 //check if key is empty
                 if (!client_key.private_key) {
-                    throw new Error(`client key could not be created ${client_body.name}`);
+                    throw new Error(`chef client key could not be created ${client_body.name}`);
                 }
 
                 let bootstrap = _.template(BOOTSTRAP);

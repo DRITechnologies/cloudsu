@@ -7,9 +7,9 @@ const err_handler = require('../../utls/error_handler.js');
 class Upgrade {
     constructor() {}
 
-    run(req, res) {
+    full(req, res) {
 
-        const params = req.body;
+        let params = req.body;
         params.aws_account = req.aws_account;
         params.cms = req.cms;
         params.aws = req.aws;
@@ -17,9 +17,93 @@ class Upgrade {
         const upgrade_client = require('../clients/upgrade_client.js');
         upgrade_client.init(params);
 
-        return upgrade_client.run(params)
+        return upgrade_client.full(params)
             .then(response => {
-                res.status(200).json(response);
+                res.status(200).json({ status: 'ok', message: 'Successfully started upgrade' });
+            })
+            .catch(err => {
+                logger.error(err);
+                res.status(500).json(err_handler(err));
+            });
+
+    }
+
+    stage1(req, res) {
+
+        let params = req.body;
+        params.aws_account = req.aws_account;
+        params.cms = req.cms;
+        params.aws = req.aws;
+
+        const upgrade_client = require('../clients/upgrade_client.js');
+        upgrade_client.init(params);
+
+        return upgrade_client.stage1(params)
+            .then(response => {
+                res.status(200).json({ status: 'ok' });
+            })
+            .catch(err => {
+                logger.error(err);
+                res.status(500).json(err_handler(err));
+            });
+
+    }
+
+    stage2(req, res) {
+
+        let params = req.body;
+        params.aws_account = req.aws_account;
+        params.cms = req.cms;
+        params.aws = req.aws;
+
+        const upgrade_client = require('../clients/upgrade_client.js');
+        upgrade_client.init(params);
+
+        return upgrade_client.stage2(params)
+            .then(response => {
+                res.status(200).json({ status: 'ok' });
+            })
+            .catch(err => {
+                logger.error(err);
+                res.status(500).json(err_handler(err));
+            });
+
+    }
+
+    stage3(req, res) {
+
+        let params = req.body;
+        params.aws_account = req.aws_account;
+        params.cms = req.cms;
+        params.aws = req.aws;
+
+        const upgrade_client = require('../clients/upgrade_client.js');
+        upgrade_client.init(params);
+
+        return upgrade_client.stage3(params)
+            .then(response => {
+                res.status(200).json({ status: 'ok' });
+            })
+            .catch(err => {
+                logger.error(err);
+                res.status(500).json(err_handler(err));
+            });
+
+    }
+
+    stage4(req, res) {
+
+        let params = req.body;
+        params.aws_account = req.aws_account;
+        params.cms = req.cms;
+        params.aws = req.aws;
+
+        const upgrade_client = require('../clients/upgrade_client.js');
+        upgrade_client.init(params);
+
+        return upgrade_client.stage4(params)
+            .then(response => {
+                res.status(200).json({ status: 'ok' });
             })
             .catch(err => {
                 logger.error(err);

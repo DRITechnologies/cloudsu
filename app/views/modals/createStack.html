@@ -30,9 +30,7 @@
                     </li>
                 </ul>
                 <div class="tab-content">
-
                     <br>
-
                     <!-- stack tab content -->
                     <div ng-class="activeContentTab('stack-tab')">
                         <h3> Stack Configuration </h3>
@@ -41,7 +39,6 @@
                             <label>Stack Name</label>
                             <input type="text" class="form-control" ng-model="stack.stack_name" ng-change="envChange()">
                         </div>
-
                         <div class="form-group">
                             <label>Build Size
                                 <i class="fa fa-info-circle" data-hover="dropdown" data-toggle="dropdown" title="(HA) Created with Auto Scaling Group. (Single) Created with a single EC2 instance."></i>
@@ -51,46 +48,39 @@
                                 <option value="Single">Single</option>
                             </select>
                         </div>
-
                         <div class="i-checks form-group">
                             <label>
                                 <i></i>
                                 <input type="checkbox" ng-model="stack.route_53"> Create Route 53 DNS Record?
                             </label>
                         </div>
-
                         <div class="form-group" ng-show="stack.route_53">
                             <label>Hosted Zone</label>
                             <input type="text" class="form-control" ng-model="stack.hosted_zone" name="hosted_zone">
                         </div>
-
                         <div ng-show="stack.build_size === 'HA'" class="icheckbox form-group">
                             <label>
                                 <i></i>
                                 <input type="checkbox" ng-model="stack.create_elb"> Create ELB?
                             </label>
                         </div>
-
                     </div>
                     <!-- end of stack tab content -->
-
                     <!-- storage options -->
                     <div ng-class="activeContentTab('storage-tab')">
                         <h3> Volume Configuration (Optional) </h3>
                         <br>
                         <div class="form-group">
                             <table class="table table-bordered">
-                                <caption>EBS Volumes</caption>
-                                <thead>
+                                <caption><a class="btn btn-primary btn-outline" ng-click="addVolume()">+ Add EBS Volume</a></caption>
+                                <thead ng-show="stack.volumes.length">
                                     <tr>
                                         <th>Volume Type</th>
                                         <th>Size (GB)</th>
-                                        <th>
-                                            <a class="btn btn-primary btn-outline pull-right" ng-click="addVolume()">+ Add EBS Volume</a>
-                                        </th>
+                                        <th>Remove?</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody ng-show="stack.volumes.length">
                                     <tr ng-repeat="volume in stack.volumes">
                                         <td>
                                             {{ volume.type }}
@@ -107,7 +97,6 @@
                                 </tbody>
                             </table>
                         </div>
-
                         <div class="i-checks form-group">
                             <label>
                                 <input type="checkbox" ng-model="stack.instance_store" name="instance_store"> Instance Store?
@@ -122,10 +111,8 @@
                             <label>Root Volume Size (GBs)</label>
                             <input type="number" class="form-control" name="input" ng-model="stack.ebs_root_size" min="0" max="5000">
                         </div>
-
                     </div>
                     <!-- end of storage options -->
-
                     <!-- asg options -->
                     <div ng-class="activeContentTab('launch-config-tab')">
                         <h3> Instance Configuration </h3>
@@ -164,45 +151,38 @@
                             <label>AMI ID</label>
                             <input type="text" class="form-control" name="ami" ng-model="stack.ami">
                         </div>
-
                         <div class="form-group" ng-show="!stack.multi_az">
                             <label>Availability Zone</label>
                             <select ng-model="stack.region" class="form-control" id="select">
                                 <option ng-repeat="region in regions" ng-value="region">{{region}}</option>
                             </select>
                         </div>
-
                         <div class="i-checks form-group" ng-show="stack.build_size === 'HA'">
                             <label>
                                 <input type="checkbox" ng-model="stack.multi_az"> Multi Availability Zone?
                             </label>
                         </div>
-
                         <div class="form-group">
                             <table class="table table-bordered">
                                 <caption>
-                                    <label>Instance Security Groups</label>
+                                    <div class="btn-group">
+                                        <button type="button" data-toggle="dropdown" class="btn btn-primary btn-outline dropdown-toggle">+ Add Instance Security Group</button>
+                                        <ul class="dropdown-menu scrollable-menu">
+                                            <li ng-repeat="group in security_groups">
+                                                <a class="dropdown-item" ng-click=addSecurityGroup(group)>{{ group.GroupId }} | {{ group.GroupName }}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </caption>
-                                <thead>
+                                <thead ng-show="sgs.length">
                                     <tr class="vertical-align">
                                         <th>Security Group ID</th>
                                         <th>Name</th>
                                         <th>Description</th>
-                                        <th>
-                                            <div class="btn-group pull-right">
-                                                <button type="button" data-toggle="dropdown" class="btn btn-primary btn-outline dropdown-toggle">+ Add Security Group</button>
-                                                <ul class="dropdown-menu scrollable-menu">
-                                                    <li ng-repeat="group in security_groups">
-                                                        <a class="dropdown-item" ng-click=addSecurityGroup(group)>{{ group.GroupId }}
-                                                            |
-                                                            {{ group.GroupName }}</a>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </th>
+                                        <th>Remove?</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody ng-show="sgs.length">
                                     <tr ng-repeat="group in sgs">
                                         <td>
                                             {{ group.GroupId }}
@@ -222,11 +202,8 @@
                                 </tbody>
                             </table>
                         </div>
-
                     </div>
-
                     <!-- end ASG options -->
-
                     <!-- scripts options -->
                     <div ng-class="activeContentTab('scripts-tab')">
                         <h3> Chef Configuration </h3>
@@ -249,20 +226,16 @@
                             </label>
                             <input type="text" class="form-control" ng-model="stack.domain" ng-change="envChange()">
                         </div>
-
                         <div class=" form-group">
                             <label>Chef Recipes</label>
                             <textarea rows="3" class="form-control" ng-model="stack.recipes_string" placeholder="role[base], recipe[nginx]"></textarea>
                         </div>
-
                         <div class="form-group">
                             <label>Chef Environment Preview</label>
                             <pretty-json json="chef_preview"></pretty-json>
                         </div>
-
                     </div>
                     <!-- end of scripts options -->
-
                     <!-- elb options -->
                     <div ng-class="activeContentTab( 'elb-tab')">
                         <h3> ELB Configuration </h3>
@@ -271,7 +244,6 @@
                             <label>ELB Ping Port</label>
                             <input type="number" class="form-control" ng-model="stack.elb.ping_port">
                         </div>
-
                         <div class="form-group" ng-show="stack.build_size==='HA'">
                             <label>ELB Ping Protocol</label>
                             <select ng-model="stack.elb.ping_protocol" class="form-control">
@@ -281,42 +253,37 @@
                                 <option value="SSL">SSL</option>
                             </select>
                         </div>
-
                         <div class="form-group" ng-show="stack.elb.ping_protocol==='HTTP' || stack.elb.ping_protocol==='HTTPS'">
                             <label>ELB Ping Path</label>
                             <input type="text" class="form-control" placeholder="/api/v1/status" ng-model="stack.elb.ping_path">
                         </div>
-
                         <div class="form-group" ng-show="stack.build_size==='HA'">
                             <label>SSL Certificate (Optional)</label>
                             <select ng-model="stack.ssl_cert" class="form-control">
                                 <option ng-repeat="ssl in ssls" ng-value="ssl.Arn">{{ssl.ServerCertificateName}}</option>
                             </select>
                         </div>
-
                         <div class="form-group">
                             <table class="table table-bordered" ng-show="stack.build_size==='HA'">
-                                <caption>ELB Security Groups</caption>
-                                <thead>
+                                <caption>
+                                    <div class="btn-group">
+                                        <button type="button" data-toggle="dropdown" class="btn btn-primary btn-outline dropdown-toggle">+ Add ELB Security Group</button>
+                                        <ul class="dropdown-menu scrollable-menu">
+                                            <li ng-repeat="group in security_groups">
+                                                <a class="dropdown-item" ng-click="addElbSecurityGroup(group)">{{ group.GroupId }} | {{ group.GroupName }}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </caption>
+                                <thead ng-show="elb_sgs.length">
                                     <tr class="vertical-align">
                                         <th>ID</th>
                                         <th>Name</th>
                                         <th>Description</th>
-                                        <th>
-                                            <div class="btn-group pull-right">
-                                                <button type="button" data-toggle="dropdown" class="btn btn-primary btn-outline dropdown-toggle">+ Add ELB Security Group</button>
-                                                <ul class="dropdown-menu scrollable-menu">
-                                                    <li ng-repeat="group in security_groups">
-                                                        <a class="dropdown-item" ng-click="addElbSecurityGroup(group)">{{ group.GroupId }}
-                                                                |
-                                                                {{ group.GroupName }}</a>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </th>
+                                        <th>Remove?</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody ng-show="elb_sgs.length">
                                     <tr ng-repeat="group in elb_sgs">
                                         <td>
                                             {{ group.GroupId }}
@@ -332,17 +299,14 @@
                                                 <i class="fa fa-close"></i>
                                             </a>
                                         </td>
-
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     <!-- end of elb options -->
-
                     <br>
                     <br>
-
                     <!-- button group -->
                     <div class="form-group">
                         <div class="btn-toolbar pull-right">

@@ -20,7 +20,7 @@ const attach_cms_auth = require('../middleware/attach_cms_auth.js');
 const check_token = require('../middleware/check_token.js');
 
 
-module.exports = function(app) {
+module.exports = function (app) {
 
     //unauthenticated requests
     app.post('/api/v1/setup/:name', setup.run);
@@ -37,8 +37,8 @@ module.exports = function(app) {
     app.use(check_token.run);
     app.use(attach_aws_auth.run);
     app.use(attach_cms_auth.run);
-    //Everything below requires authentication
 
+    //Everything below requires authentication
 
     //accounts
     app.get('/api/v1/accounts/token', accounts.getServiceToken);
@@ -64,7 +64,11 @@ module.exports = function(app) {
     app.patch('/api/v1/adjust_size', stacks.adjustSize);
 
     //upgrade
-    app.patch('/api/v1/upgrade', upgrade.run);
+    app.patch('/api/v1/upgrade', upgrade.full);
+    app.patch('/api/v1/upgrade/stage1', upgrade.stage1);
+    app.patch('/api/v1/upgrade/stage2', upgrade.stage2);
+    app.patch('/api/v1/upgrade/stage3', upgrade.stage3);
+    app.patch('/api/v1/upgrade/stage4', upgrade.stage4);
     app.patch('/api/v1/upgrade/rollback', upgrade.rollback);
 
     //sqs

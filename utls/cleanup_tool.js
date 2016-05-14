@@ -84,7 +84,7 @@ function check_scale_groups() {
     const config_client = require('../config/config.js');
     let autoscaling;
 
-    logger.info('Polling for stale scale-groups');
+    logger.debug('Polling for stale scale-groups');
     return config_client.getDefaultAws()
         .then(response => {
             autoscaling = Promise.promisifyAll(new AWS.AutoScaling(response.aws));

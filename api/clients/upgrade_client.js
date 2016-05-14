@@ -26,7 +26,7 @@ class UpgradeClient {
 
     }
 
-    run(params) {
+    full(params) {
         //determine upgrade type
         return this.getBuildSize(params)
             .then(build_size => {
@@ -40,6 +40,126 @@ class UpgradeClient {
                 throw new Error('Cannot retrieve build size for environment');
             });
 
+    }
+
+    stage1(params) {
+
+        //params = {
+        //    "stack_name": "Testing",
+        //    "min_size": 1,
+        //    "desired_size": 1,
+        //    "max_size": 3,
+        //    "ami": "ami-c229c0a2",
+        //    "instance_size": "t2.nano",
+        //    "app_version": "prod13"
+        //}
+
+        const self = this;
+        let env;
+
+        return this.getBuildSize(params)
+            .then(build_size => {
+                if (build_size === 'HA') {
+                    logger.info('Upgrade stage 1 started');
+                    return this.checkEnv(params)
+                        .then(environment => {
+                            env = environment;
+                            return self.upgradeStartSetup(env, params);
+                        })
+                        .then(() => {
+                            return self.lockNodes(env, params);
+                        })
+                        .then(() => {
+                            return self.updateEnvVersion(env, params);
+                        })
+                        .then(() => {
+                            //extend chef env options to params
+                            params = _.extend(_.clone(env.default_attributes.cloudsu_params), params);
+                            return self.launchServers(env, params);
+                        })
+                        .then(() => {
+                            return self.updateEnvStatus('UPGRADING_STAGE_1', params);
+                        });
+
+                } else if (build_size === 'Single') {
+                    throw new Error('Stage upgrade is only available for HA environments');
+                }
+                throw new Error('Cannot retrieve build size for environment');
+            });
+    }
+
+    stage2(params) {
+
+        //params = {
+        //   stack_name: testing
+        //}
+
+        const self = this;
+        let env;
+
+        return chef_client.getEnvironment(params.stack_name)
+            .then(environment => {
+                env = environment;
+
+                //attach params from environment needed
+                params.app_name = env.default_attributes.cloudsu_params.app_name;
+                params.app_version = env.default_attributes.cloudsu_params.app_version;
+                return elb_client.connectElbs(params);
+            })
+            .then(() => {
+                return self.updateEnvStatus('UPGRADING_STAGE_2', params);
+            });
+    }
+
+    stage3(params) {
+
+        //params = {
+        //    stack_name: testing
+        //}
+
+        const self = this;
+        let env;
+
+        return chef_client.getEnvironment(params.stack_name)
+            .then(environment => {
+                env = environment;
+
+                //attach params from environment needed
+                params.app_name = env.default_attributes.cloudsu_params.app_name;
+                params.last_version = env.default_attributes.cloudsu_params.last_version;
+                return elb_client.disconnectElbs(params);
+            })
+            .then(() => {
+                return self.updateEnvStatus('UPGRADING_STAGE_3', params);
+            });
+    }
+
+    stage4(params) {
+
+        //params = {
+        //    stack_name: testing,    
+        //    cleanup_type: tag | delete,
+        //}
+
+        const self = this;
+        let env;
+
+        return chef_client.getEnvironment(params.stack_name)
+            .then(environment => {
+                env = environment;
+
+                //attach params from environment needed
+                params.app_name = env.default_attributes.cloudsu_params.app_name;
+                params.last_version = env.default_attributes.cloudsu_params.last_version;
+
+                //remove non-alphas from app_name and version
+                params = utls.remove_non_alpha(params);
+
+                return self.cleanup(params);
+            })
+            .then(() => {
+                return self.upgradeFinished(env, params);
+            });
     }
 
     rollback(params) {
@@ -83,6 +203,7 @@ class UpgradeClient {
     advancedUpgrade(params) {
 
         const self = this;
+        params.chef_status = 'UPGRADING';
         var env;
 
         function verifyStack() {
@@ -138,7 +259,7 @@ class UpgradeClient {
             .then(response => {
                 environment = response;
                 if (response.default_attributes.status !== 'READY' && !params.force_upgrade) {
-                    throw new Error('Environment is not in READY state');
+                    throw new Error('Chef environment is not in READY state');
                 }
                 return stacks_client.stackStatus(params.stack_name);
             })
@@ -154,7 +275,7 @@ class UpgradeClient {
                 params.last_version = _.clone(environment.default_attributes.cloudsu_params.app_version);
 
                 if (params.last_version === params.app_version) {
-                    throw new Error(`Upgrade version is already live: ${params.version}`);
+                    throw new Error(`Upgrade version is already live: ${params.app_version}`);
                 }
 
                 return environment;
@@ -174,9 +295,10 @@ class UpgradeClient {
             'force_upgrade'
         ]));
 
+        params.app_name = cloudsu_params.app_name;
         params.last_environment = _.clone(environment);
         environment.default_attributes.cloudsu_params = options;
-        environment.default_attributes.status = 'UPGRADING';
+        environment.default_attributes.status = params.chef_status;
 
         return chef_client.updateEnvironment(environment);
     }
@@ -221,7 +343,7 @@ class UpgradeClient {
 
         logger.info(`Running cleanup job: ${params.stack_name}`);
 
-        if (params.cleanup_type === 'Delete') {
+        if (params.cleanup_type === 'delete') {
             return this.removeOldServers(params);
         }
         return this.tagOldServers(params);
@@ -298,7 +420,7 @@ class UpgradeClient {
 
         logger.info(`Finished upgrade for stack: ${params.stack_name}`);
 
-        if (params.cleanup_type === 'Tag') {
+        if (params.cleanup_type === 'tag') {
             environment.default_attributes.rollback_available = true;
         }
 
@@ -306,6 +428,16 @@ class UpgradeClient {
         environment.default_attributes.status = 'READY';
 
         return chef_client.updateEnvironment(environment);
+    }
+
+    updateEnvStatus(status, params) {
+        //update chef environment status
+        logger.info(`Updating environment: ${params.stack_name} with status: ${status}`);
+        return chef_client.getEnvironment(params.stack_name)
+            .then(environment => {
+                environment.default_attributes.status = status;
+                return chef_client.updateEnvironment(environment);
+            });
     }
 
     updateEnvVersion(environment, params) {

@@ -1,6 +1,6 @@
 angular
     .module('stacks')
-    .controller('stackController', function($scope, $q, $interval, $stateParams, $http, $uibModal, SweetAlert, dataStore, _, toastr) {
+    .controller('stackController', function ($scope, $q, $interval, $stateParams, $http, $uibModal, SweetAlert, dataStore, _, toastr) {
 
         $scope.stack_name = $stateParams.stack_name;
 
@@ -10,8 +10,8 @@ angular
 
         //merge more data into the ec2 objects
         function mergeEc2Objects(group1, group2) {
-            return _.each(group1, function(y) {
-                var obj = _.find(group2, function(x) {
+            return _.each(group1, function (y) {
+                var obj = _.find(group2, function (x) {
                     return (x.InstanceId === y.InstanceId);
                 });
                 y.PrivateIpAddress = obj.PrivateIpAddress;
@@ -26,16 +26,16 @@ angular
 
         //get ec2 specific for autoscale groups
         function updateEc2() {
-            _.each($scope.scaleGroups, function(group, index) {
+            _.each($scope.scaleGroups, function (group, index) {
                 if (group.Instances.length < 1) {
                     return group;
                 }
                 var instances = _.pluck(group.Instances, 'InstanceId');
                 $http.get('/api/v1/ec2/' + instances)
-                    .success(function(data) {
+                    .success(function (data) {
                         $scope.scaleGroups[index].Instances = mergeEc2Objects(group.Instances, data);
                     })
-                    .error(function(err) {
+                    .error(function (err) {
                         toastr.error(err, 'AWS Error');
                     });
             });
@@ -45,10 +45,10 @@ angular
         function getEc2(instances) {
             var instance_ids = _.pluck(instances, 'PhysicalResourceId');
             $http.get('/api/v1/ec2/' + instance_ids)
-                .success(function(data) {
+                .success(function (data) {
                     $scope.instances = data;
                 })
-                .error(function(err) {
+                .error(function (err) {
                     toastr.error(err, 'AWS Error');
                 });
 
@@ -56,12 +56,12 @@ angular
 
         //get data from tags
         function addTags() {
-            _.each($scope.scaleGroups, function(group, index) {
-                $scope.scaleGroups[index].version = _.find(group.Tags, function(tag) {
+            _.each($scope.scaleGroups, function (group, index) {
+                $scope.scaleGroups[index].version = _.find(group.Tags, function (tag) {
                         return tag.Key === 'version';
                     })
                     .Value;
-                $scope.scaleGroups[index].app_name = _.find(group.Tags, function(tag) {
+                $scope.scaleGroups[index].app_name = _.find(group.Tags, function (tag) {
                         return tag.Key === 'app_name';
                     })
                     .Value;
@@ -70,15 +70,15 @@ angular
 
         //add more elb specific data
         function updateElb() {
-            _.each($scope.scaleGroups, function(group, index) {
+            _.each($scope.scaleGroups, function (group, index) {
                 if (group.LoadBalancerNames.length < 1) {
                     return group;
                 }
                 $http.get('/api/v1/elb/' + group.LoadBalancerNames)
-                    .success(function(data) {
+                    .success(function (data) {
                         $scope.scaleGroups[index].LoadBalancerNames = data.LoadBalancerDescriptions;
                     })
-                    .error(function(err) {
+                    .error(function (err) {
                         toastr.error(err, 'AWS Error');
                     });
             });
@@ -88,34 +88,34 @@ angular
         function updateScaleGroups(scaleGroups) {
             var groups = _.pluck(scaleGroups, 'PhysicalResourceId');
             $http.get('/api/v1/asg/describe/' + groups)
-                .success(function(response) {
+                .success(function (response) {
                     $scope.scaleGroups = response.AutoScalingGroups;
                     updateEc2();
                     updateElb();
                     addTags();
                 })
-                .error(function(err) {
+                .error(function (err) {
                     toastr.error(err, 'AWS Error');
                 });
         }
 
         function refresh() {
             $http.get('/api/v1/stacks/status/' + $scope.stack_name)
-                .success(function(response) {
+                .success(function (response) {
                     $scope.stack_status = response;
                 })
-                .error(function(err) {
+                .error(function (err) {
                     toastr.error(err, 'AWS Error');
                 });
 
 
             $http.get('/api/v1/stacks/' + $scope.stack_name)
-                .success(function(data) {
+                .success(function (data) {
                     $scope.resources = data.StackResources;
-                    var instances = _.filter(data.StackResources, function(x) {
+                    var instances = _.filter(data.StackResources, function (x) {
                         return x.ResourceType === 'AWS::EC2::Instance';
                     });
-                    var scaleGroups = _.filter(data.StackResources, function(x) {
+                    var scaleGroups = _.filter(data.StackResources, function (x) {
                         return x.ResourceType === 'AWS::AutoScaling::AutoScalingGroup';
                     });
 
@@ -125,20 +125,20 @@ angular
                         getEc2(instances);
                     }
                 })
-                .error(function(err) {
+                .error(function (err) {
                     toastr.error(err, 'AWS Error');
                 });
 
             $http.get('/api/v1/stacks/describeEvents/' + $scope.stack_name)
-                .success(function(response) {
+                .success(function (response) {
                     $scope.stack_logs = response;
                 })
-                .error(function(err) {
+                .error(function (err) {
                     toastr.error(err, 'AWS Error');
                 });
 
             $http.get('/api/v1/chef/environments/' + $scope.stack_name)
-                .success(function(response) {
+                .success(function (response) {
                     var defaults = response.default_attributes;
                     if (defaults) {
                         $scope.chef_status = defaults.status;
@@ -146,39 +146,39 @@ angular
                         $scope.chef = defaults.cloudsu_params;
                     }
                 })
-                .error(function(err) {
+                .error(function (err) {
                     toastr.error(err, 'Chef Error');
                 });
 
         }
 
         //adjust the size of autoscale group
-        $scope.adjustSize = function(app_name, version) {
+        $scope.adjustSize = function (app_name, version) {
             var modalInstance = $uibModal.open({
                 animation: true,
                 templateUrl: 'views/modals/groupResize.html',
                 controller: 'groupResize',
                 size: 'md',
                 resolve: {
-                    stack_name: function() {
+                    stack_name: function () {
                         return $scope.stack_name;
                     },
-                    app_name: function() {
+                    app_name: function () {
                         return app_name;
                     },
-                    version: function() {
+                    version: function () {
                         return version;
                     }
                 }
             });
 
-            modalInstance.result.then(function(selectedItem) {
+            modalInstance.result.then(function (selectedItem) {
                 //refresh service accounts
                 refresh();
             });
         };
 
-        $scope.detachElb = function(scale_group, elb_name) {
+        $scope.detachElb = function (scale_group, elb_name) {
             console.log(scale_group, elb_name);
             SweetAlert.swal({
                     title: '',
@@ -189,17 +189,17 @@ angular
                     confirmButtonText: 'Yes',
                     closeOnConfirm: false
                 },
-                function(isConfirm) {
+                function (isConfirm) {
                     if (isConfirm) {
                         $http.patch('/api/v1/elb/disconnect', {
                                 scale_group: scale_group,
                                 elb: elb_name
                             })
-                            .success(function(response) {
+                            .success(function (response) {
                                 refresh();
                                 SweetAlert.swal('Success', elb_name + ' has been detached from scale group ' + scale_group, 'success');
                             })
-                            .error(function(err) {
+                            .error(function (err) {
                                 toastr.error(err, 'AWS Error');
                             });
                     }
@@ -208,22 +208,22 @@ angular
 
 
         //remove one autoscale group
-        $scope.removeAsg = function(app_name, version) {
+        $scope.removeAsg = function (app_name, version) {
             var params = {
                 app_name: app_name,
                 version: version,
                 stack_name: $scope.stack_name
             };
             $http.patch('/api/v1/delete_asg', params)
-                .error(function(err) {
+                .error(function (err) {
                     toastr.error(err, 'AWS Error');
                 });
         };
 
-        $scope.availableElbs = function(scale_group) {
+        $scope.availableElbs = function (scale_group) {
             //get available ELBs
             $http.get('/api/v1/available_elbs/' + $scope.stack_name)
-                .success(function(response) {
+                .success(function (response) {
                     //open modal and give user a chance to connect ELB
                     var modalInstance = $uibModal.open({
                             animation: true,
@@ -231,19 +231,19 @@ angular
                             controller: 'connectElb',
                             size: 'md',
                             resolve: {
-                                elbs: function() {
+                                elbs: function () {
                                     return response;
                                 },
-                                scale_group: function() {
+                                scale_group: function () {
                                     return scale_group;
                                 }
                             }
                         })
-                        .error(function(err) {
+                        .error(function (err) {
                             toastr.error(err, 'AWS Error');
                         });
 
-                    modalInstance.result.then(function(selectedItem) {
+                    modalInstance.result.then(function (selectedItem) {
                         //refresh service accounts
                         refresh();
                     });
@@ -251,7 +251,7 @@ angular
         };
 
         //open upgrade form
-        $scope.openUpgradeForm = function() {
+        $scope.openUpgradeForm = function () {
             $scope.stack_name = dataStore.getStack();
             $uibModal.open({
                 animation: true,
@@ -259,10 +259,10 @@ angular
                 controller: 'upgradeStack',
                 size: 'md',
                 resolve: {
-                    stack_name: function() {
+                    stack_name: function () {
                         return $scope.stack_name;
                     },
-                    build_size: function() {
+                    build_size: function () {
                         return $scope.chef.build_size;
                     }
                 }
@@ -270,14 +270,31 @@ angular
         };
 
         //open rollback modal
-        $scope.rollback = function() {
+        $scope.rollback = function () {
             $uibModal.open({
                 animation: true,
                 templateUrl: 'views/modals/stackRollback.html',
                 controller: 'stackRollback',
                 size: 'md',
                 resolve: {
-                    stack_name: function() {
+                    stack_name: function () {
+                        return $scope.stack_name;
+                    }
+                }
+            });
+        };
+
+        $scope.openStackLogs = function () {
+            $uibModal.open({
+                animation: true,
+                templateUrl: 'views/modals/stackLogs.html',
+                controller: 'stackLogs',
+                size: 'md',
+                resolve: {
+                    stack_logs: function () {
+                        return $scope.stack_logs;
+                    },
+                    stack_name: function () {
                         return $scope.stack_name;
                     }
                 }
@@ -285,35 +302,35 @@ angular
         };
 
         //open check editor
-        $scope.openEnvEditor = function() {
+        $scope.openEnvEditor = function () {
 
             $http.get('/api/v1/chef/environments/' + $scope.stack_name)
-                .success(function(response) {
+                .success(function (response) {
                     $uibModal.open({
                         animation: true,
                         templateUrl: 'views/modals/editor.html',
                         controller: 'chefEditor',
                         size: 'lg',
                         resolve: {
-                            environment: function() {
+                            environment: function () {
                                 return response;
                             },
-                            stack_name: function() {
+                            stack_name: function () {
                                 return $scope.stack_name;
                             }
                         }
                     });
                 })
-                .error(function(err) {
+                .error(function (err) {
                     toastr.error(err, 'Chef Error');
                 });
         };
 
         //open
-        $scope.openStackEditor = function() {
+        $scope.openStackEditor = function () {
 
             $http.get('/api/v1/stacks/template/' + $scope.stack_name)
-                .success(function(response) {
+                .success(function (response) {
                     $scope.template = response;
                     $uibModal.open({
                         animation: true,
@@ -321,33 +338,21 @@ angular
                         controller: 'templateEditor',
                         size: 'lg',
                         resolve: {
-                            template: function() {
+                            template: function () {
                                 return $scope.template;
                             },
-                            stack_name: function() {
+                            stack_name: function () {
                                 return $scope.stack_name;
                             }
                         }
                     });
                 })
-                .error(function(err) {
+                .error(function (err) {
                     toastr.error(err, 'AWS Error');
                 });
         };
 
-        $scope.saveJSON = function() {
-            $scope.toJSON = '';
-            $scope.toJSON = angular.toJson($scope.stack_logs);
-            var blob = new Blob([$scope.toJSON], {
-                type: 'application/json;charset=utf-8;'
-            });
-            var downloadLink = angular.element('<a></a>');
-            downloadLink.attr('href', window.URL.createObjectURL(blob));
-            downloadLink.attr('download', $scope.stack_name + '-CF-LOGS.json');
-            downloadLink[0].click();
-        };
-
-        $scope.status_label = function(status) {
+        $scope.status_label = function (status) {
             if (status !== 'READY') {
                 return 'badge badge-warning';
             } else {
@@ -355,7 +360,7 @@ angular
             }
         };
 
-        $scope.status_fa_label = function(status) {
+        $scope.status_fa_label = function (status) {
             if (status !== 'READY') {
                 return 'fa fa-circle-o-notch fa-spin';
             } else {
@@ -363,14 +368,14 @@ angular
             }
         };
 
-        $scope.stack_status_label = function(status) {
+        $scope.stack_status_label = function (status) {
             if (status === 'UPDATE_COMPLETE' || status === 'CREATE_COMPLETE') {
                 return 'badge badge-primary';
             }
             return 'badge badge-warning';
         };
 
-        $scope.stack_status_fa_label = function(status) {
+        $scope.stack_status_fa_label = function (status) {
 
             if (status && status.includes('PROGRESS')) {
                 return 'fa fa-circle-o-notch fa-spin';
@@ -379,14 +384,14 @@ angular
 
         };
 
-        $scope.isHappy = function(status) {
+        $scope.isHappy = function (status) {
             if (status === 'Healthy') {
                 return 'fa fa-smile-o';
             }
             return 'fa fa-frown-o';
         };
 
-        $scope.inService = function(status) {
+        $scope.inService = function (status) {
             if (status === 'InService') {
                 return 'fa  fa-thumbs-up';
             }
@@ -394,13 +399,13 @@ angular
 
         };
 
-        $scope.logColor = function(status) {
+        $scope.logColor = function (status) {
             if (status.includes('FAILED')) {
                 return 'danger';
             }
         };
 
-        $scope.rowColor = function(health, state) {
+        $scope.rowColor = function (health, state) {
             if (health === 'Healthy' && state === 'InService') {
                 return;
             } else if (health === 'Unhealthy') {
@@ -414,13 +419,13 @@ angular
 
         function refresher() {
             // refresh every 10 seconds
-            intervalPromise = $interval(function() {
+            intervalPromise = $interval(function () {
                 refresh();
             }, 15000);
         }
 
         //stop refresher when the screen is changed
-        $scope.$on('$destroy', function() {
+        $scope.$on('$destroy', function () {
             $interval.cancel(intervalPromise);
         });
 

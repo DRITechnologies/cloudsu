@@ -38,7 +38,7 @@ class SnsClient {
     }
 
     addPermission(params) {
-        console.log(params);
+
         return this.sns.addPermissionAsync({
             AWSAccountId: [
                 params.AccountId,

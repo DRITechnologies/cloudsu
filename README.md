@@ -30,7 +30,6 @@
   "instance_store": false,
   "ebs_volume": false,
   "multi_az": true,
-  "type": "create",
   "ebs_root_size": 30,
   "volumes": [{ "type": "gp2", "size": 30 }],
   "recipes": ["recipe[nodejs]"],
@@ -60,11 +59,10 @@
  }
 ```
 
-#### Upgrade Stack
+#### Upgrade Stack All Stages
 ##### PATCH /api/v1/upgrade
 ```json
 { 
-  "type": "upgrade",
   "stack_name": "Testing",
   "min_size": 1,
   "desired_size": 1,
@@ -72,9 +70,45 @@
   "ami": "ami-c229c0a2",
   "instance_size": "t2.nano",
   "app_version": "prod13",
-  "cleanup_type": "Delete"
+  "cleanup_type": "delete"
 }
 ```
+
+#### Upgrade Stack Stage 1
+##### PATCH /api/v1/upgrade/stage1
+```json
+{ 
+  "stack_name": "Testing",
+  "min_size": 1,
+  "desired_size": 1,
+  "max_size": 3,
+  "ami": "ami-c229c0a2",
+  "instance_size": "t2.nano",
+  "app_version": "prod13"
+}
+```
+
+#### Upgrade Stack Stage 2
+##### PATCH /api/v1/upgrade/stage2
+```json
+{ 
+  "stack_name": "Testing"
+}
+
+#### Upgrade Stack Stage 3
+##### PATCH /api/v1/upgrade/stage3
+```json
+{ 
+  "stack_name": "Testing",
+}
+
+#### Upgrade Stack Stage 4
+##### PATCH /api/v1/upgrade/stage4
+```json
+{ 
+  "stack_name": "Testing",
+  "cleanup_type": "delete"
+}
 
 #### Delete Stack
 ##### DELETE /api/v1/stacks/:stack_name

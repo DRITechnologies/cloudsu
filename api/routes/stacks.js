@@ -88,6 +88,8 @@ class Stacks {
             stack_name: req.params.stack_name
         };
 
+        
+
         return stacks_client.deleteStack(params)
             .then(response => {
                 res.status(200).json(response);
