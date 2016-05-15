@@ -1,6 +1,11 @@
 
 # Advanced configurations
 
+### Run in Docker
+```
+docker run -d -p 3000:3000 dpricha189/cloudsu
+```
+
 ### Environment Variables:
 
 #### Redis cache (local cache will be used if REDIS_HOST is not set)  
