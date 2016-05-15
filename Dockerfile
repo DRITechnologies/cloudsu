@@ -3,9 +3,6 @@ from node:5.10.1
 # set working dir
 WORKDIR /src
 
-# setup volume for secrets file
-VOLUME /src/secure
-
 # copy files inside container
 COPY api/ /src/api
 COPY dist/ /src/dist

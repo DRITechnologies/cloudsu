@@ -4,6 +4,10 @@
 ### Docker Command:
 ```
 docker run -d -p 3000:3000 dpricha189/cloudsu
+
+# presist secrets file between container restarts
+docker run -d -p 3000:3000 -v $HOME:/src/secure/ dpricha189/cloudsu
+
 ```
 
 ### Environment Variables:
