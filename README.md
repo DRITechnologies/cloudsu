@@ -1,7 +1,7 @@
 
 # Advanced configurations
 
-### Run in Docker
+### Docker Command:
 ```
 docker run -d -p 3000:3000 dpricha189/cloudsu
 ```
