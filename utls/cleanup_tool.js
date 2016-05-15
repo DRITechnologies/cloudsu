@@ -76,7 +76,7 @@ function remove_scale_group(params) {
 
 function check_scale_groups() {
 
-    if (!fs.existsSync('secrets.json')) {
+    if (!fs.existsSync('secure/secrets.json')) {
         logger.debug('Initial setup has not been completed (secrets.json missing)');
         return;
     }

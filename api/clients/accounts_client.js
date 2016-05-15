@@ -96,9 +96,9 @@ class AccountsClient {
 
     checkToken(token) {
 
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
 
-            fs.readFile(path.resolve(__dirname, '../../secrets.json'), function read(err, data) {
+            fs.readFile(path.resolve(__dirname, '../../secure/secrets.json'), function read(err, data) {
 
                 if (err) {
                     return resolve({
@@ -137,7 +137,7 @@ class AccountsClient {
         // add config client
         const config = require('../../config/config.js');
 
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
             //check if token already exists and return
             if (user.service_token) {
                 return resolve(user.service_token);

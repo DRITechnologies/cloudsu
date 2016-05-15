@@ -1,7 +1,12 @@
 from node:5.10.1
 
+#Set working dir
 WORKDIR /src
 
+#Setup volume for secrets file
+VOLUME /src/secure
+
+#copy files
 COPY api/ /src/api
 COPY dist/ /src/dist
 COPY config/ /src/config

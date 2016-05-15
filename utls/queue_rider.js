@@ -72,7 +72,7 @@ function startup(message) {
 
 function parseMessages(messages, sqs_url) {
 
-    return Promise.map(messages, function(message_body) {
+    return Promise.map(messages, function (message_body) {
 
         const sqs_client = require('../api/clients/sqs_client.js');
         let handle = message_body.ReceiptHandle;
@@ -113,9 +113,9 @@ function parseMessages(messages, sqs_url) {
     });
 }
 
-var poll = function() {
+var poll = function () {
 
-    if (!fs.existsSync('secrets.json')) {
+    if (!fs.existsSync('secure/secrets.json')) {
         logger.debug('Initial setup has not been completed (secrets.json missing)');
         return;
     }

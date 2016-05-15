@@ -27,13 +27,13 @@
 ##### POST /api/v1/stacks/:stack_name
 ```json
 { 
+  "stack_name": "Testing",
   "instance_store": false,
   "ebs_volume": false,
   "multi_az": true,
   "ebs_root_size": 30,
   "volumes": [{ "type": "gp2", "size": 30 }],
   "recipes": ["recipe[nodejs]"],
-  "stack_name": "Testin13",
   "build_size": "HA",
   "create_elb": true,
   "route_53": true,
@@ -94,6 +94,7 @@
 { 
   "stack_name": "Testing"
 }
+```
 
 #### Upgrade Stack Stage 3
 ##### PATCH /api/v1/upgrade/stage3
@@ -101,6 +102,7 @@
 { 
   "stack_name": "Testing",
 }
+```
 
 #### Upgrade Stack Stage 4
 ##### PATCH /api/v1/upgrade/stage4
@@ -109,6 +111,7 @@
   "stack_name": "Testing",
   "cleanup_type": "delete"
 }
+```
 
 #### Delete Stack
 ##### DELETE /api/v1/stacks/:stack_name

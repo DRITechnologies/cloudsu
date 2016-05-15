@@ -1811,7 +1811,7 @@ angular
 
 angular
     .module('stacks')
-    .controller('system', function($scope, $http, $uibModal, dataStore, SweetAlert, toastr) {
+    .controller('system', function ($scope, $http, $uibModal, dataStore, SweetAlert, toastr) {
 
         //to make the ui render correctly
         $scope.admin = true;
@@ -1819,58 +1819,58 @@ angular
         // refresh aws accounts
         function refresh() {
             $http.get('/api/v1/services/get_accounts/AWS')
-                .success(function(response) {
+                .success(function (response) {
                     $scope.admin = true;
                     $scope.aws_accounts = response;
                 })
-                .error(function(err) {
+                .error(function (err) {
                     $scope.admin = false;
                 });
         }
 
         //open modal to edit chef
-        $scope.chefModal = function() {
+        $scope.chefModal = function () {
             $http.get('/api/v1/services/get_account/CMS/DEFAULT')
-                .success(function(response) {
+                .success(function (response) {
                     $uibModal.open({
                         animation: true,
                         templateUrl: 'views/modals/chef.html',
                         size: 'md',
                         controller: 'serviceAccount',
                         resolve: {
-                            account: function() {
+                            account: function () {
                                 return response;
                             },
-                            type: function() {
+                            type: function () {
                                 return 'CMS';
                             }
                         }
                     });
 
                 })
-                .error(function(err) {
+                .error(function (err) {
                     toastr.error(err, 'Error');
                 });
         };
 
         // open aws account modal
-        $scope.awsModal = function(account) {
+        $scope.awsModal = function (account) {
             var modalInstance = $uibModal.open({
                 animation: true,
                 templateUrl: 'views/modals/aws.html',
                 size: 'md',
                 controller: 'serviceAccount',
                 resolve: {
-                    account: function() {
+                    account: function () {
                         return account;
                     },
-                    type: function() {
+                    type: function () {
                         return 'AWS';
                     }
                 }
             });
 
-            modalInstance.result.then(function(selectedItem) {
+            modalInstance.result.then(function (selectedItem) {
                 //refresh stacks to show newly created stack
                 refresh();
                 // run refresh on parent controller
@@ -1879,7 +1879,7 @@ angular
         };
 
         // remove service account
-        $scope.removeAccount = function(account) {
+        $scope.removeAccount = function (account) {
             SweetAlert.swal({
                     title: 'Are you sure?',
                     text: 'Account will be removed: ' + account.name,
@@ -1889,10 +1889,10 @@ angular
                     confirmButtonText: 'Yes',
                     closeOnConfirm: false
                 },
-                function(isConfirm) {
+                function (isConfirm) {
                     if (isConfirm) {
                         $http.delete(['/api/v1/services', account.type, account.name].join('/'))
-                            .success(function(response) {
+                            .success(function (response) {
                                 SweetAlert.swal('Success', account.name + ' has been removed.', 'success');
                                 // refresh system accounts
                                 refresh();
@@ -1901,7 +1901,7 @@ angular
                                 // refresh parent controller
                                 $scope.startup();
                             })
-                            .error(function(err) {
+                            .error(function (err) {
                                 toastr.error(err, 'Error');
                             });
                     }
@@ -1909,11 +1909,11 @@ angular
         };
 
         //export system config (db config)
-        $scope.exportConfig = function() {
+        $scope.exportConfig = function () {
             $scope.toJSON = '';
             $scope.showSpinner = true;
             $http.get('/api/v1/system/export')
-                .success(function(config) {
+                .success(function (config) {
                     $scope.toJSON = angular.toJson(config);
                     var blob = new Blob([$scope.toJSON], {
                         type: 'application/json;charset=utf-8;'
@@ -1923,7 +1923,7 @@ angular
                     downloadLink.attr('download', 'secrets.json');
                     downloadLink[0].click();
                 })
-                .error(function(err) {
+                .error(function (err) {
                     toastr.error(err, 'Error');
                 });
         };
