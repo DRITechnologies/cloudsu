@@ -1,12 +1,12 @@
 from node:5.10.1
 
-#Set working dir
+# set working dir
 WORKDIR /src
 
-#Setup volume for secrets file
+# setup volume for secrets file
 VOLUME /src/secure
 
-#copy files
+# copy files inside container
 COPY api/ /src/api
 COPY dist/ /src/dist
 COPY config/ /src/config
@@ -16,6 +16,8 @@ COPY utls/ /src/utls
 COPY package.json /src/package.json
 COPY server.js /src/server.js
 
+# run npm install inside container
 RUN npm install --production
 
+# run command
 CMD node server.js
