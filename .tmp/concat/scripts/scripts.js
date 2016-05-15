@@ -147,13 +147,13 @@ angular
  */
 function pageTitle($rootScope, $timeout) {
     return {
-        link: function(scope, element) {
-            var listener = function(event, toState, toParams, fromState, fromParams) {
+        link: function (scope, element) {
+            var listener = function (event, toState, toParams, fromState, fromParams) {
                 // Default title - load on Dashboard 1
-                var title = 'su';
+                var title = 'Cloudsu';
                 // Create your own title pattern
 
-                $timeout(function() {
+                $timeout(function () {
                     element.text(title);
                 });
             };
@@ -168,9 +168,9 @@ function pageTitle($rootScope, $timeout) {
 function sideNavigation($timeout) {
     return {
         restrict: 'A',
-        link: function(scope, element) {
+        link: function (scope, element) {
             // Call the metsiMenu plugin and plug it to sidebar navigation
-            $timeout(function() {
+            $timeout(function () {
                 element.metisMenu();
             });
         }
@@ -185,9 +185,9 @@ function iboxTools($timeout) {
         restrict: 'A',
         scope: true,
         templateUrl: 'views/common/ibox_tools.html',
-        controller: function($scope, $element) {
+        controller: function ($scope, $element) {
             // Function for collapse ibox
-            $scope.showhide = function() {
+            $scope.showhide = function () {
                     var ibox = $element.closest('div.ibox');
                     var icon = $element.find('i:first');
                     var content = ibox.find('div.ibox-content');
@@ -197,14 +197,14 @@ function iboxTools($timeout) {
                         .toggleClass('fa-chevron-down');
                     ibox.toggleClass('')
                         .toggleClass('border-bottom');
-                    $timeout(function() {
+                    $timeout(function () {
                         ibox.resize();
                         ibox.find('[id^=map-]')
                             .resize();
                     }, 50);
                 },
                 // Function for close ibox
-                $scope.closebox = function() {
+                $scope.closebox = function () {
                     var ibox = $element.closest('div.ibox');
                     ibox.remove();
                 };
@@ -219,8 +219,8 @@ function minimalizaSidebar($timeout) {
     return {
         restrict: 'A',
         template: '<a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="" ng-click="minimalize()"><i class="fa fa-bars"></i></a>',
-        controller: function($scope, $element) {
-            $scope.minimalize = function() {
+        controller: function ($scope, $element) {
+            $scope.minimalize = function () {
                 $('body')
                     .toggleClass('mini-navbar');
                 if (!$('body')
@@ -231,7 +231,7 @@ function minimalizaSidebar($timeout) {
                         .hide();
                     // For smoothly turn on menu
                     setTimeout(
-                        function() {
+                        function () {
                             $('#side-menu')
                                 .fadeIn(400);
                         }, 200);
@@ -240,7 +240,7 @@ function minimalizaSidebar($timeout) {
                     $('#side-menu')
                         .hide();
                     setTimeout(
-                        function() {
+                        function () {
                             $('#side-menu')
                                 .fadeIn(400);
                         }, 100);
@@ -262,9 +262,9 @@ function iboxToolsFullScreen($timeout) {
         restrict: 'A',
         scope: true,
         templateUrl: 'views/common/ibox_tools_full_screen.html',
-        controller: function($scope, $element) {
+        controller: function ($scope, $element) {
             // Function for collapse ibox
-            $scope.showhide = function() {
+            $scope.showhide = function () {
                 var ibox = $element.closest('div.ibox');
                 var icon = $element.find('i:first');
                 var content = ibox.find('div.ibox-content');
@@ -274,19 +274,19 @@ function iboxToolsFullScreen($timeout) {
                     .toggleClass('fa-chevron-down');
                 ibox.toggleClass('')
                     .toggleClass('border-bottom');
-                $timeout(function() {
+                $timeout(function () {
                     ibox.resize();
                     ibox.find('[id^=map-]')
                         .resize();
                 }, 50);
             };
             // Function for close ibox
-            $scope.closebox = function() {
+            $scope.closebox = function () {
                 var ibox = $element.closest('div.ibox');
                 ibox.remove();
             };
             // Function for full screen
-            $scope.fullscreen = function() {
+            $scope.fullscreen = function () {
                 var ibox = $element.closest('div.ibox');
                 var button = $element.find('i.fa-expand');
                 $('body')
@@ -294,7 +294,7 @@ function iboxToolsFullScreen($timeout) {
                 button.toggleClass('fa-expand')
                     .toggleClass('fa-compress');
                 ibox.toggleClass('fullscreen');
-                setTimeout(function() {
+                setTimeout(function () {
                     $(window)
                         .trigger('resize');
                 }, 100);
