@@ -170,7 +170,8 @@ class StacksClient {
                 template.Resources[`ASG${cf_name}`].Properties.MinSize = params.min_size;
                 template.Resources[`ASG${cf_name}`].Properties.DesiredCapacity = params.desired;
                 template.Resources[`ASG${cf_name}`].Properties.MaxSize = params.max_size;
-                return self.updateStack(JSON.stringify(template), params.stack_name);
+                console.log(params.stack_name);
+                return self.updateStack(params.stack_name, JSON.stringify(template));
             });
     }
 
