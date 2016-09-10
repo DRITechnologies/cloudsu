@@ -1,12 +1,24 @@
 
 # Advanced configurations
 
-### Docker Command:
-```
-docker run -d -p 3000:3000 dpricha189/cloudsu
+### Docker Environment Setup:
+```bash
+
+docker build -t cloudsu .
+
+docker run -d -p 3000:3000 cloudsu
 
 # presist secrets file between container restarts
-docker run -d -p 3000:3000 -v $HOME:/src/secure/ dpricha189/cloudsu
+docker run -d -p 3000:3000 -v $HOME:/src/secure/ cloudsu
+
+```
+
+### Normal Setup:
+```bash
+
+$ npm install
+
+$ node server.js
 
 ```
 

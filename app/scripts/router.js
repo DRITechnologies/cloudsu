@@ -1,5 +1,5 @@
 function config($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.otherwise('/index/stacks');
+    $urlRouterProvider.otherwise('/login');
 
     $stateProvider
         .state('login', {

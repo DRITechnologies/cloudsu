@@ -13,7 +13,7 @@ class AttachAwsAuth {
         const token = req.headers.token || req.body.token;
 
         if (!token) {
-            return res.status(401).json('Missing token in request');
+            return res.redirect('/login');
         }
 
         return token_client.verify(token)

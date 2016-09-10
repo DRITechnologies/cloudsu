@@ -41,3 +41,6 @@ bower_components
 
 # artifacts
 artifacts
+
+# remove distro folder
+dist
