@@ -208,7 +208,7 @@ class Main {
     exportConfig(req, res) {
 
         logger.info('Exporting config');
-        const obj = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../secure/secrets.json'), 'utf8'));
+        const obj = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../secrets.json'), 'utf8'));
 
         if (obj) {
             return res.status(200).json(obj);
@@ -225,7 +225,7 @@ class Main {
             return req.status(500).json('Request body is empty');
         }
 
-        fs.writeFile(path.resolve(__dirname, '../../secure/secrets.json'), JSON.stringify(req.body), function (err) {
+        fs.writeFile(path.resolve(__dirname, '../../secrets.json'), JSON.stringify(req.body), function (err) {
             if (err) {
                 return req.status(500).json('Error writing config to disk');
             }

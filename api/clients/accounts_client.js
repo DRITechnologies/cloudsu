@@ -98,7 +98,7 @@ class AccountsClient {
 
         return new Promise(function (resolve, reject) {
 
-            fs.readFile(path.resolve(__dirname, '../../secure/secrets.json'), function read(err, data) {
+            fs.readFile(path.resolve(__dirname, '../../secrets.json'), function read(err, data) {
 
                 if (err) {
                     return resolve({

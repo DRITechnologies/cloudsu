@@ -3,7 +3,7 @@
 const Promise = require('bluebird');
 const jwt = require('jsonwebtoken');
 const logger = require('./logger.js');
-const key = 'gbXQ2y+8cpl63n&';
+const key = process.env.CLOUDSU_ENCYPTION_KEY || 'gbXQ2y+8cpl63n&';
 
 
 

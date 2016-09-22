@@ -5,7 +5,7 @@ const Promise = require('bluebird');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const algorithm = 'aes256';
-const key = 'gbXQ2y+8cpl63n&';
+const key = process.env.CLOUDSU_ENCYPTION_KEY || 'gbXQ2y+8cpl63n&';
 
 class crypto_client {
     constructor() {}

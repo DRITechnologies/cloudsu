@@ -115,7 +115,7 @@ function parseMessages(messages, sqs_url) {
 
 var poll = function () {
 
-    if (!fs.existsSync('secure/secrets.json')) {
+    if (!fs.existsSync('secrets.json')) {
         logger.debug('Initial setup has not been completed (secrets.json missing)');
         return;
     }
