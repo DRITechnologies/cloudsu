@@ -21,6 +21,7 @@ CloudSu uses CloudFormation to create all of its resources so cleanup is a breez
 
 ### How does CloudSu work
 When you click create a new stack a few things happen in this order
+
 1. A CloudFormation template is generated with all the options you chose in the form
 2. A custom bootstrap is inserted into the CloudFormation template metadata
 3. The CloudFormation template is sent to AWS to be created
