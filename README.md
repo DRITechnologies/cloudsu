@@ -6,8 +6,8 @@
 ###### Requirements:
 - Chef Server https://manage.chef.io/login
 - AWS Account https://aws.amazon.com/
-- Node: Tested 8.0.0
-- NPM: Tested 5.0.0
+- Node: Tested 4.0.0
+- NPM: Tested 2.14.2
 
 ### Why should I use CloudSu?
 CloudSu gets you started with chef in the AWS cloud in just a few minutes. Launching servers is as easy as filling out a form and all the chef tasks are automatically taken care of for you.
