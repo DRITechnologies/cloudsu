@@ -25,7 +25,7 @@ angular
             override_attributes: {}
         };
 
-        //get sample AMI images  
+        //get sample AMI images
         $http.get('/api/v1/ec2/sample/images')
             .success(function (response) {
                 $scope.images = response;
@@ -126,7 +126,7 @@ angular
             // remove last name
             // causes a name for each letter typed
             if ($scope.last_name) {
-                const new_defaults = _.omit($scope.chef_preview.default_attributes, [$scope.last_name]);
+                var new_defaults = _.omit($scope.chef_preview.default_attributes, [$scope.last_name]);
                 $scope.chef_preview.default_attributes = new_defaults;
             }
 

@@ -6,6 +6,8 @@
 ###### Requirements:
 - Chef Server https://manage.chef.io/login
 - AWS Account https://aws.amazon.com/
+- Node: Tested 8.0.0
+- NPM: Tested 5.0.0
 
 ### Why should I use CloudSu?
 CloudSu gets you started with chef in the AWS cloud in just a few minutes. Launching servers is as easy as filling out a form and all the chef tasks are automatically taken care of for you.
@@ -28,7 +30,7 @@ When you click create a new stack a few things happen in this order
 4. A Chef environment is created with the same name as the CloudFormation stack with the options your chose in the form
 5. CloudSU polls the SQS queue for new SNS events and finds the launch event for your new server(s)
 6. A Chef client key is created for the launch event and placed in the DynamoDB Servers Table
-7. The server(s) boot up script looks in the DynamoDB Servers Table with its InstanceId and copies the key to local disk 
+7. The server(s) boot up script looks in the DynamoDB Servers Table with its InstanceId and copies the key to local disk
 8. Chef is then installed on the server and a chef-client is initiated with the supplied run list in the stack form  
 
 ### What happens when I upgrade
@@ -37,7 +39,7 @@ CloudSu was designed to create new servers for each software release. The upgrad
 Stage1:
 - Creates the new server(s)
 - Locks the previous software version at the chef node level for the old servers
-- Updates the chef environment to the new software version 
+- Updates the chef environment to the new software version
 - Waits for the CloudFormation to return an UPDATE_COMPLETE status
 
 Stage2: Connects the new server(s) to the load balancer
@@ -81,7 +83,7 @@ $ node server.js
 #### Create Stack
 ##### POST /api/v1/stacks/:stack_name
 ```json
-{ 
+{
   "stack_name": "Testing",
   "instance_store": false,
   "ebs_volume": false,
@@ -117,7 +119,7 @@ $ node server.js
 #### Upgrade Stack All Stages
 ##### PATCH /api/v1/upgrade
 ```json
-{ 
+{
   "stack_name": "Testing",
   "min_size": 1,
   "desired_size": 1,
@@ -132,7 +134,7 @@ $ node server.js
 #### Upgrade Stack Stage 1
 ##### PATCH /api/v1/upgrade/stage1
 ```json
-{ 
+{
   "stack_name": "Testing",
   "min_size": 1,
   "desired_size": 1,
@@ -146,7 +148,7 @@ $ node server.js
 #### Upgrade Stack Stage 2
 ##### PATCH /api/v1/upgrade/stage2
 ```json
-{ 
+{
   "stack_name": "Testing"
 }
 ```
@@ -154,7 +156,7 @@ $ node server.js
 #### Upgrade Stack Stage 3
 ##### PATCH /api/v1/upgrade/stage3
 ```json
-{ 
+{
   "stack_name": "Testing",
 }
 ```
@@ -162,7 +164,7 @@ $ node server.js
 #### Upgrade Stack Stage 4
 ##### PATCH /api/v1/upgrade/stage4
 ```json
-{ 
+{
   "stack_name": "Testing",
   "cleanup_type": "delete"
 }
@@ -170,4 +172,3 @@ $ node server.js
 
 #### Delete Stack
 ##### DELETE /api/v1/stacks/:stack_name
-
