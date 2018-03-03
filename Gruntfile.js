@@ -185,13 +185,6 @@ module.exports = function(grunt) {
         },
 
         dock: {
-            options: {
-                auth: {
-                    email: 'drichards@krux.com',
-                    username: 'dpricha189',
-                    password: 'L0stphrase'
-                }
-            },
             images: {
                 'cloudsu': {
                     dockerfile: 'Dockerfile',
