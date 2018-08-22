@@ -2,6 +2,12 @@
 # CloudSu
 
 ###### Designed to simplify the process of deploying highly available applications.
+![first](https://github.com/dpricha89/cloudsu/blob/master/images/Screen%20Shot%202018-02-08%20at%2012.01.08%20PM.png?raw=true)
+![second](https://github.com/dpricha89/cloudsu/blob/master/images/Screen%20Shot%202018-02-08%20at%2012.01.23%20PM.png?raw=true)
+![third](https://github.com/dpricha89/cloudsu/blob/master/images/Screen%20Shot%202018-02-08%20at%2012.02.09%20PM.png?raw=true)
+![forth](https://github.com/dpricha89/cloudsu/blob/master/images/Screen%20Shot%202018-02-08%20at%2012.12.38%20PM.png?raw=true)
+
+
 #
 ###### Requirements:
 - Chef Server https://manage.chef.io/login
